@@ -1,22 +1,25 @@
-/* Pengaturan desain untuk menu navigasi */
+/* 1. Kondisi BELUM AKTIF (Default) */
 .nav-item {
-    color: white;
-    padding: 8px 20px;
-    border-radius: 12px;
-    font-weight: 500;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    background-color: transparent;
+    color: #ffffff !important;
+    padding: 8px 20px !important;
+    border-radius: 12px !important; /* Menyiapkan bentuk container melengkung */
+    font-weight: 400 !important; /* Ketebalan tulisan biasa */
+    text-decoration: none !important;
+    transition: all 0.3s ease !important;
+    background-color: transparent !important; /* Tidak ada warna container */
+    opacity: 0.7 !important; /* Opacity hanya 70% */
 }
 
-/* Animasi saat kursor mendekati tulisan menu */
+/* 2. Kondisi saat kursor MENYENTUH (Hover) */
 .nav-item:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-    color: white;
+    background-color: rgba(255, 255, 255, 0.1) !important; /* Container tipis muncul */
+    opacity: 0.85 !important; /* Sedikit lebih terang */
 }
 
-/* Keadaan aktif saat menu sedang ditekan atau sedang berada di halaman tersebut */
+/* 3. Kondisi saat AKTIF (Halaman sedang dibuka) */
 .nav-item.active {
-    background-color: rgba(255, 255, 255, 0.3);
-    color: white;
+    background-color: rgba(255, 255, 255, 0.25) !important; /* Muncul container keputihan seperti di foto */
+    color: #ffffff !important;
+    opacity: 85% !important; /* Opacity kembali 100% penuh */
+    font-weight: 700 !important; /* Di-bold sedikit (Semi-bold) agar lebih jelas */
 }

@@ -1,11 +1,11 @@
-/* Animasi pengganti Framer Motion: opacity 0, y: 40 ke opacity 1, y: 0 */
+/* Animasi wadah tulisan utama bergerak ke atas secara perlahan */
 .hero-content {
     opacity: 0;
     transform: translateY(40px);
     animation: motionFadeInUp 0.8s ease-out forwards;
 }
 
-/* Animasi pengganti Framer Motion: opacity 0, x: -20 ke opacity 1, x: 0 dengan delay 0.2s */
+/* Animasi label wisata bergerak ke kanan */
 .badge-wisata {
     opacity: 0;
     transform: translateX(-20px);
@@ -36,7 +36,7 @@
     }
 }
 
-/* Animasi pengganti Framer Motion: y: [0, 10, 0] untuk Scroll Indicator */
+/* Animasi panah bergulir naik turun terus menerus */
 .scroll-indicator {
     animation: motionBounce 1.5s infinite;
 }

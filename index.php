@@ -7,15 +7,13 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="style/navbar.css">
     <link rel="stylesheet" href="style/home.css">
     
     <style>
-        /* Mengatur jenis tulisan untuk seluruh halaman */
+        /* Menggunakan font bawaan perangkat (System Native Fonts) sesuai arahanmu */
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #1a3326;

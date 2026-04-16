@@ -1,15 +1,22 @@
-// Proses untuk mendeteksi menu mana yang sedang aktif
 document.addEventListener('DOMContentLoaded', function() {
     const navLinks = document.querySelectorAll('.nav-item');
-    const currentPath = window.location.pathname.split("/").pop();
+    
+    // Ambil nama file dari URL saat ini
+    let currentPath = window.location.pathname.split("/").pop();
+    
+    // Jika path kosong (artinya user buka localhost/folder-project/ saja), anggap itu index.php
+    if (currentPath === '') {
+        currentPath = 'index.php';
+    }
 
+    // Periksa semua menu navigasi
     navLinks.forEach(link => {
-        // Mengecek apakah nama file sama dengan halaman yang dibuka
-        if (link.getAttribute('href') === currentPath || (currentPath === '' && link.getAttribute('href') === 'index.php')) {
+        // Jika link tujuan sama dengan file yang sedang dibuka, jadikan aktif
+        if (link.getAttribute('href') === currentPath) {
             link.classList.add('active');
         }
 
-        // Efek klik untuk pindah halaman
+        // Efek transisi aktif saat diklik
         link.addEventListener('click', function() {
             navLinks.forEach(l => l.classList.remove('active'));
             this.classList.add('active');
