@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="style/home.css">
     
     <style>
-        /* Mengatur jenis tulisan untuk seluruh halaman */
         body {
             font-family: 'Poppins', sans-serif;
             margin: 0;
@@ -28,6 +27,8 @@
     <?php include 'components/navbar.php'; ?>
 
     <?php include 'pages/home.php'; ?>
+
+    <?php include 'components/footer.php'; ?>
 
     <script src="js/navbar.js"></script>
     <script src="js/home.js"></script>

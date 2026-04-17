@@ -3,8 +3,9 @@
     color: white;
     padding: 8px 20px;
     border-radius: 12px;
-    font-weight: 500;
+    font-weight: 200;
     text-decoration: none;
+    opacity: 70%;
     transition: all 0.3s ease;
     background-color: transparent;
 }
@@ -19,4 +20,6 @@
 .nav-item.active {
     background-color: rgba(255, 255, 255, 0.3);
     color: white;
+    opacity: 100% !important;
+    font-weight: 600;
 }
