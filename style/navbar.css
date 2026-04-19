@@ -1,9 +1,9 @@
 /* Pengaturan desain untuk menu navigasi */
 .nav-item {
-    color: white;
+    color: #9ca3af; /* Warna dasar abu-abu */
     padding: 8px 20px;
     border-radius: 12px;
-    font-weight: 500;
+    font-weight: 400; /* Sedikit ditebalkan agar abu-abunya tetap terbaca jelas */
     text-decoration: none;
     transition: all 0.3s ease;
     background-color: transparent;
@@ -12,11 +12,12 @@
 /* Animasi saat kursor mendekati tulisan menu */
 .nav-item:hover {
     background-color: rgba(255, 255, 255, 0.15);
-    color: white;
+    color: white; /* Berubah putih terang saat di-hover */
 }
 
 /* Keadaan aktif saat menu sedang ditekan atau sedang berada di halaman tersebut */
 .nav-item.active {
     background-color: rgba(255, 255, 255, 0.3);
-    color: white;
+    color: white; /* Warna putih terang saat aktif */
+    font-weight: 600;
 }
