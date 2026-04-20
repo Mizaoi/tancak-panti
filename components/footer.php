@@ -32,9 +32,10 @@
                     Menu Utama
                 </h4>
                 <ul class="space-y-4 text-sm text-white/60">
-                    <li><a href="index.php" class="hover:text-white transition-colors flex items-center"><span class="mr-2">•</span> Home</a></li>
+                    <li><a href="home.php" class="hover:text-white transition-colors flex items-center"><span class="mr-2">•</span> Home</a></li>
                     <li><a href="profile.php" class="hover:text-white transition-colors flex items-center"><span class="mr-2">•</span> Profile</a></li>
-                    <li><a href="beli-tiket.php" class="hover:text-white transition-colors flex items-center"><span class="mr-2">•</span> Buy Ticket</a></li>
+                    <li><a href="buy-ticket.php" class="hover:text-white transition-colors flex items-center"><span class="mr-2">•</span> Buy Ticket</a></li>
+                    <li><a href="facility.php" class="hover:text-white transition-colors flex items-center"><span class="mr-2">•</span> Facility</a></li>
                     <li><a href="contact.php" class="hover:text-white transition-colors flex items-center"><span class="mr-2">•</span> Contact</a></li>
                     <li><a href="rating.php" class="hover:text-white transition-colors flex items-center"><span class="mr-2">•</span> Rating</a></li>
                 </ul>
@@ -86,7 +87,7 @@
                     <div class="pt-2">
                         <p class="text-[11px] uppercase tracking-widest text-white/40 mb-2">Jam Operasional</p>
                         <p class="font-bold text-white">Setiap Hari</p>
-                        <p class="text-white/60">07:00 - 17:00 WIB</p>
+                        <p class="text-white/60">06:00 - 17:00 WIB</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-4 mt-8">
