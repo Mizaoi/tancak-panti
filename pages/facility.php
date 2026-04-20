@@ -43,11 +43,11 @@
                         <div class="space-y-4">
                             <div class="flex items-center space-x-4 bg-white/5 p-4 rounded-2xl">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#a8d5a2" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                <div><p class="text-xs text-white/50">Jarak Tempuh</p><p class="font-bold">± 1.5 KM</p></div>
+                                <div><p class="text-xs text-white/50">Jarak Tempuh</p><p class="font-bold">± 3 KM</p></div>
                             </div>
                             <div class="flex items-center space-x-4 bg-white/5 p-4 rounded-2xl">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#a8d5a2" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                                <div><p class="text-xs text-white/50">Estimasi Waktu</p><p class="font-bold">45 - 60 Menit</p></div>
+                                <div><p class="text-xs text-white/50">Estimasi Waktu</p><p class="font-bold">60 - 120 Menit</p></div>
                             </div>
                         </div>
                     </div>

@@ -29,48 +29,53 @@
 
         </div>
 
-        <section class="max-w-7xl mx-auto px-6 lg:px-8 mb-10">
-            <div class="relative w-full h-[400px] md:h-[480px] rounded-[32px] overflow-hidden shadow-xl reveal-up group" style="transition-delay: 0.1s;">
+       <section class="max-w-7xl mx-auto px-6 lg:px-8 mt-6 mb-12">
+            <div class="relative w-full h-[400px] md:h-[500px] rounded-[32px] overflow-hidden group">
                 
-                <div id="slider" class="relative w-full h-full">
+                <div class="carousel-track relative w-full h-full bg-[#1a3326]">
                     
-                    <div class="slide absolute inset-0 transition-transform duration-700 ease-in-out translate-x-0">
-                        <img src="../assets/images/air-terjun-samping.png" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                    <div class="carousel-slide absolute inset-0 w-full h-full">
+                        <img src="https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1200&auto=format&fit=crop" class="w-full h-full object-cover" alt="Air Terjun Tancak">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
+                            <h2 class="text-white text-3xl md:text-4xl font-bold mb-2">Air Terjun Tancak</h2>
+                            <p class="text-white/80 flex items-center text-sm md:text-base">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> 
+                                Desa Suci, Kecamatan Panti, Jember
+                            </p>
+                        </div>
                     </div>
                     
-                    <div class="slide absolute inset-0 transition-transform duration-700 ease-in-out translate-x-full">
-                        <img src="../assets/images/air-terjun-depan.png" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                    <div class="carousel-slide absolute inset-0 w-full h-full">
+                        <img src="https://images.unsplash.com/photo-1542318882-749e77242d59?q=80&w=1200&auto=format&fit=crop" class="w-full h-full object-cover" alt="Suasana Tancak">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
+                            <h2 class="text-white text-3xl md:text-4xl font-bold mb-2">Keindahan Alam Alami</h2>
+                            <p class="text-white/80 text-sm md:text-base">Udara sejuk di kaki Gunung Argopuro</p>
+                        </div>
                     </div>
-                    
-                    <div class="slide absolute inset-0 transition-transform duration-700 ease-in-out translate-x-full">
-                        <img src="../assets/images/air.png" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+
+                    <div class="carousel-slide absolute inset-0 w-full h-full">
+                        <img src="https://images.unsplash.com/photo-1433086966358-54859d0ed716?q=80&w=1200&auto=format&fit=crop" class="w-full h-full object-cover" alt="Air Jernih Tancak">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
+                            <h2 class="text-white text-3xl md:text-4xl font-bold mb-2">Mata Air Pegunungan</h2>
+                            <p class="text-white/80 text-sm md:text-base">Kesegaran air murni yang menenangkan jiwa</p>
+                        </div>
                     </div>
 
                 </div>
 
-                <div class="absolute bottom-10 left-8 md:left-12 z-10 text-white pointer-events-none">
-                    <h1 class="text-3xl md:text-[40px] font-bold mb-2 tracking-tight">Air Terjun Tancak</h1>
-                    <p class="flex items-center text-sm md:text-[15px] text-white/80">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                        Desa Suci, Kecamatan Panti, Jember
-                    </p>
-                </div>
-
-                <button id="prevBtn" class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/20 hover:bg-black/50 text-white rounded-full flex items-center justify-center backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                <button class="carousel-prev absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                 </button>
-                <button id="nextBtn" class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/20 hover:bg-black/50 text-white rounded-full flex items-center justify-center backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                <button class="carousel-next absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                 </button>
 
-                <div class="absolute bottom-10 right-8 md:right-12 flex space-x-2 z-20" id="dots-container">
-                    <div class="dot w-6 h-2 bg-white rounded-full transition-all duration-300"></div>
-                    <div class="dot w-2 h-2 bg-white/50 rounded-full transition-all duration-300"></div>
-                    <div class="dot w-2 h-2 bg-white/50 rounded-full transition-all duration-300"></div>
+                <div class="absolute bottom-6 right-10 flex space-x-2 z-20">
+                    <button class="carousel-dot w-6 h-2 rounded-full bg-white transition-all"></button>
+                    <button class="carousel-dot w-2 h-2 rounded-full bg-white/50 transition-all"></button>
+                    <button class="carousel-dot w-2 h-2 rounded-full bg-white/50 transition-all"></button>
                 </div>
+
             </div>
         </section>
 
@@ -108,22 +113,22 @@
             </div>
         </section>
 
-        <section class="max-w-7xl mx-auto px-6 lg:px-8 mb-12">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 overflow-hidden pt-10 -mt-10 pb-10 -mb-10">
+       <section class="max-w-7xl mx-auto px-6 lg:px-8 mb-12 reveal-up">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
-                <div class="bg-[#1e3a29] rounded-[32px] p-10 flex flex-col items-center justify-center text-white text-center shadow-lg reveal-up" style="transition-delay: 0.1s;">
+                <div class="bg-[#1e3a29] rounded-[32px] p-10 flex flex-col items-center justify-center text-white text-center shadow-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mb-5 opacity-90"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     <h3 class="text-[26px] font-bold mb-2">24/Hours</h3>
                     <p class="text-[14px] text-white/70">Buka Setiap Hari</p>
                 </div>
 
-                <div class="bg-[#1e3a29] rounded-[32px] p-10 flex flex-col items-center justify-center text-white text-center shadow-lg reveal-down" style="transition-delay: 0.1s;">
+                <div class="bg-[#1e3a29] rounded-[32px] p-10 flex flex-col items-center justify-center text-white text-center shadow-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2" class="mb-5"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
-                    <h3 class="text-[26px] font-bold mb-2">Rp 6.500</h3>
+                    <h3 class="text-[26px] font-bold mb-2">Rp 7.500</h3>
                     <p class="text-[14px] text-white/70">Tiket Masuk / Orang</p>
                 </div>
 
-                <div class="bg-[#1e3a29] rounded-[32px] p-8 flex flex-col justify-center text-white shadow-lg reveal-up" style="transition-delay: 0.1s;">
+                <div class="bg-[#1e3a29] rounded-[32px] p-8 flex flex-col justify-center text-white shadow-lg">
                     <h3 class="text-center font-bold text-[15px] mb-6">Tarif Parkir</h3>
                     <div class="space-y-3">
                         <div class="bg-white/10 hover:bg-white/20 transition-colors rounded-[16px] py-4 px-5 flex justify-between items-center">
@@ -144,12 +149,12 @@
                 </div>
 
             </div>
-        </section>
 
-        <section class="max-w-7xl mx-auto px-6 lg:px-8 text-center reveal-up" style="transition-delay: 0.6s;">
-            <a href="beli-tiket.php" class="inline-block bg-[#2d6a4f] hover:bg-[#1a3326] text-white font-semibold py-4 px-10 rounded-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                Pesan Tiket Sekarang
-            </a>
+            <div class="mt-10 flex justify-center">
+                <a href="beli-tiket.php" class="bg-[#2d6a4f] hover:bg-[#1a3326] text-white font-bold py-3.5 px-10 rounded-full transition-colors shadow-md hover:shadow-lg">
+                    Pesan Tiket Sekarang
+                </a>
+            </div>
         </section>
 
     </div>
