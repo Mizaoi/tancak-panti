@@ -1,0 +1,25 @@
+/* ==========================================
+   ANIMASI SCROLL REVEAL (PROFIL KHUSUS)
+========================================== */
+
+/* Bergerak dari bawah ke atas */
+.reveal-up {
+    opacity: 0;
+    transform: translateY(60px);
+    transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.reveal-up.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Bergerak dari atas ke bawah (Untuk Card Tengah) */
+.reveal-down {
+    opacity: 0;
+    transform: translateY(-60px);
+    transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.reveal-down.active {
+    opacity: 1;
+    transform: translateY(0);
+}
