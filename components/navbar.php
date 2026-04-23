@@ -17,6 +17,5 @@
         <a href="facility.php" class="nav-item">Facility</a>
         <a href="contact.php" class="nav-item">Contact</a>
         <a href="rating.php" class="nav-item">Rating</a>
-        <a href="login.php" class="nav-item">Login</a>
     </div>
 </nav>

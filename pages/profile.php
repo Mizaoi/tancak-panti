@@ -113,45 +113,45 @@
             </div>
         </section>
 
-       <section class="max-w-7xl mx-auto px-6 lg:px-8 mb-12 reveal-up">
+<section class="max-w-7xl mx-auto px-6 lg:px-8 mb-12 reveal-up">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
-                <div class="bg-[#1e3a29] rounded-[32px] p-10 flex flex-col items-center justify-center text-white text-center shadow-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mb-5 opacity-90"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    <h3 class="text-[26px] font-bold mb-2">24/Hours</h3>
-                    <p class="text-[14px] text-white/70">Buka Setiap Hari</p>
+                <div class="bg-[#1e3a29] rounded-[24px] p-6 py-8 flex flex-col items-center justify-center text-white text-center shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mb-4 opacity-90"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <h3 class="text-[22px] font-bold mb-1.5">24/Hours</h3>
+                    <p class="text-[13px] text-white/70">Buka Setiap Hari</p>
                 </div>
 
-                <div class="bg-[#1e3a29] rounded-[32px] p-10 flex flex-col items-center justify-center text-white text-center shadow-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2" class="mb-5"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
-                    <h3 class="text-[26px] font-bold mb-2">Rp 7.500</h3>
-                    <p class="text-[14px] text-white/70">Tiket Masuk / Orang</p>
+                <div class="bg-[#1e3a29] rounded-[24px] p-6 py-8 flex flex-col items-center justify-center text-white text-center shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2" class="mb-4"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
+                    <h3 class="text-[22px] font-bold mb-1.5">Rp 6.500</h3>
+                    <p class="text-[13px] text-white/70">Tiket Masuk / Orang</p>
                 </div>
 
-                <div class="bg-[#1e3a29] rounded-[32px] p-8 flex flex-col justify-center text-white shadow-lg">
-                    <h3 class="text-center font-bold text-[15px] mb-6">Tarif Parkir</h3>
+                <div class="bg-[#1e3a29] rounded-[24px] p-6 py-8 flex flex-col justify-center text-white shadow-lg">
+                    <h3 class="text-center font-bold text-[14px] mb-4">Tarif Parkir</h3>
                     <div class="space-y-3">
-                        <div class="bg-white/10 hover:bg-white/20 transition-colors rounded-[16px] py-4 px-5 flex justify-between items-center">
-                            <span class="flex items-center text-[14px] text-white/90">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-3 opacity-80"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+                        <div class="bg-white/10 hover:bg-white/20 transition-colors rounded-[14px] py-3 px-4 flex justify-between items-center">
+                            <span class="flex items-center text-[13px] text-white/90">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2.5 opacity-80"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
                                 Mobil
                             </span>
-                            <span class="font-bold text-[15px]">Rp 10.000</span>
+                            <span class="font-bold text-[14px]">Rp 10.000</span>
                         </div>
-                        <div class="bg-white/10 hover:bg-white/20 transition-colors rounded-[16px] py-4 px-5 flex justify-between items-center">
-                            <span class="flex items-center text-[14px] text-white/90">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-3 opacity-80"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6a3.5 3.5 0 1 0-7 0"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></svg>
+                        <div class="bg-white/10 hover:bg-white/20 transition-colors rounded-[14px] py-3 px-4 flex justify-between items-center">
+                            <span class="flex items-center text-[13px] text-white/90">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2.5 opacity-80"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6a3.5 3.5 0 1 0-7 0"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></svg>
                                 Motor
                             </span>
-                            <span class="font-bold text-[15px]">Rp 5.000</span>
+                            <span class="font-bold text-[14px]">Rp 5.000</span>
                         </div>
                     </div>
                 </div>
 
             </div>
 
-            <div class="mt-10 flex justify-center">
-                <a href="beli-tiket.php" class="bg-[#2d6a4f] hover:bg-[#1a3326] text-white font-bold py-3.5 px-10 rounded-full transition-colors shadow-md hover:shadow-lg">
+            <div class="mt-8 flex justify-center">
+                <a href="beli-tiket.php" class="bg-[#2d6a4f] hover:bg-[#1a3326] text-white font-bold py-3 px-8 text-[14px] rounded-full transition-colors shadow-md hover:shadow-lg">
                     Pesan Tiket Sekarang
                 </a>
             </div>
