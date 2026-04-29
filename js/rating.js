@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 4. PREVIEW FOTO SAAT UPLOAD (VERSI FIXED)
+    // 4. PREVIEW FOTO SAAT UPLOAD
     const fotoInput = document.getElementById('foto-input');
     const uploadPreview = document.getElementById('upload-preview');
     const uploadPlaceholder = document.getElementById('upload-placeholder');

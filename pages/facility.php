@@ -181,7 +181,7 @@
                 <p class="text-white/80 text-[15px] mb-8 max-w-xl mx-auto">
                     Nikmati seluruh fasilitas di atas hanya dengan membeli tiket masuk resmi melalui sistem online kami.
                 </p>
-                <a href="beli-tiket.php" class="inline-block bg-white hover:bg-gray-100 text-[#1a3326] font-bold py-4 px-10 rounded-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                <a href="tiket.php" class="inline-block bg-white hover:bg-gray-100 text-[#1a3326] font-bold py-4 px-10 rounded-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                     Pesan Tiket Sekarang
                 </a>
             </div>

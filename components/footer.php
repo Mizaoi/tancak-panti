@@ -37,7 +37,7 @@
                 </h4>
                 <ul class="space-y-3 text-[14px] text-white/60">
                     <li><a href="home.php" class="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Beranda</a></li>
-                    <li><a href="beli-tiket.php" class="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Pesan Tiket</a></li>
+                    <li><a href="tiket.php" class="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Pesan Tiket</a></li>
                     <li><a href="profile.php" class="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Profil</a></li>
                     <li><a href="facility.php" class="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Fasilitas</a></li>
                     <li><a href="contact.php" class="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Narahubung</a></li>

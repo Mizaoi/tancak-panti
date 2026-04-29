@@ -2,30 +2,24 @@
 session_start();
 include '../config/koneksi.php';
 
-// ========================================================
-// PROSES CEK LOGIN KE DATABASE
-// ========================================================
+// PROSES LOGIN
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
-    
     $username = mysqli_real_escape_string($koneksi, $_POST['username']);
-    $password = md5($_POST['password']); // Enkripsi MD5 sesuai query-mu
+    $password = md5($_POST['password']); 
 
-    $query = mysqli_query($koneksi, "SELECT * FROM tb_admin WHERE username='$username' AND password='$password'");
+    $query = mysqli_query($koneksi, "SELECT * FROM tb_admin WHERE username = '$username'");
+    $data = mysqli_fetch_assoc($query);
 
-    if (mysqli_num_rows($query) > 0) {
-        $data = mysqli_fetch_assoc($query);
-        
-        // Simpan sesi admin
-        $_SESSION['admin_logged_in'] = true;
-        $_SESSION['username'] = $data['username'];
-        
-        // Redirect ke dashboard admin
+    // Langsung gabung! Jika data ketemu DAN passwordnya cocok
+    if ($data && $password == $data['password']) {
+        $_SESSION['admin'] = $data['username'];
         header("Location: ../admin/dashboard.php"); 
         exit;
     } else {
-        $_SESSION['alert'] = ['type' => 'error', 'msg' => 'Username atau Password salah Cak!'];
+        // Jika salah satu salah, pesan errornya sama persis!
+        $_SESSION['alert'] = ['type' => 'error', 'msg' => '⚠️ Username atau password salah, coba lagi ya!'];
         header("Location: login.php");
-        exit;
+        exit; 
     }
 }
 ?>
@@ -48,6 +42,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
     </style>
 </head>
 <body class="flex flex-col min-h-screen relative bg-gray-900">
+    <!-- POP-UP LOGIN GAGAL -->
+    <?php if(isset($_SESSION['error_login'])): ?>
+        <div id="popup-error" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity duration-300">
+            <div class="bg-white rounded-[24px] p-8 shadow-2xl transform scale-100 transition-transform duration-300 flex flex-col items-center text-center max-w-[320px] mx-4 animate-pop">
+                <div class="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-5">
+                    <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </div>
+                <h3 class="text-[20px] font-bold text-[#1a3326] mb-2">Login Gagal!</h3>
+                <p class="text-[13px] text-gray-500 font-medium leading-relaxed"><?php echo $_SESSION['error_login']; ?></p>
+            </div>
+        </div>
+        <?php unset($_SESSION['error_login']); ?>
+
+        <style>
+            @keyframes pop {
+                0% { transform: scale(0.8); opacity: 0; }
+                100% { transform: scale(1); opacity: 1; }
+            }
+            .animate-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        </style>
+
+        <script>
+            // Hilang otomatis dalam 3 detik (3000 ms)
+            setTimeout(() => {
+                const popup = document.getElementById('popup-error');
+                if(popup) {
+                    popup.style.opacity = '0'; // Hilang pelan-pelan
+                    popup.children[0].style.transform = 'scale(0.9)'; // Mengecil
+                    setTimeout(() => popup.remove(), 300); // Hapus dari HTML
+                }
+            }, 3000);
+        </script>
+    <?php endif; ?>
 
     <div class="absolute inset-0 z-0">
         <img src="../assets/images/air-terjun-depan.png" alt="Background" class="w-full h-full object-cover">
@@ -91,6 +118,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
                 <form action="" method="POST">
                     
                     <div class="mb-5">
+                    
+                    <div class="mb-5">
                         <label class="block text-[#1a3326] text-[13px] font-bold mb-2 text-center">Username</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -108,8 +137,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
                             </div>
                             <input type="password" name="password" id="password-input" required placeholder="Password" class="w-full bg-[#f8faf9] border border-gray-200 rounded-[12px] pl-11 pr-12 py-3.5 text-[14px] text-gray-700 outline-none focus:border-[#2d6a4f] transition-colors">
                             
-                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer" id="toggle-password">
-                                <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hover:text-[#2d6a4f] transition-colors"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center cursor-pointer z-10" id="toggle-password">
+                                <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hover:text-[#2d6a4f] transition-colors">
+                                    <!-- Default: Mata Disilang -->
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                                </svg>
                             </div>
                         </div>
                     </div>
@@ -126,6 +159,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
 
     <script src="../js/navbar.js"></script>
     <script src="../js/login.js"></script>
+    <!-- TOAST ALERT MELAYANG (OVAL) -->
+     
+    <?php if(isset($_SESSION['alert'])): ?>
+        <div id="custom-alert" class="fixed top-24 left-1/2 transform -translate-x-1/2 z-[100] px-6 py-3 rounded-full shadow-2xl text-white text-[14px] font-semibold transition-all duration-500 <?php echo ($_SESSION['alert']['type'] == 'success') ? 'bg-[#2d6a4f]' : 'bg-red-500'; ?> flex items-center gap-2">
+            <?php echo $_SESSION['alert']['msg']; ?>
+        </div>
+        <script>
+            // Hilang otomatis dalam 3 detik
+            setTimeout(() => {
+                const alertBox = document.getElementById('custom-alert');
+                if(alertBox) {
+                    alertBox.style.opacity = '0';
+                    alertBox.style.transform = 'translate(-50%, -20px)';
+                    setTimeout(() => alertBox.remove(), 500);
+                }
+            }, 3000);
+        </script>
+        <?php unset($_SESSION['alert']); ?>
+    <?php endif; ?>
     
 </body>
 </html>

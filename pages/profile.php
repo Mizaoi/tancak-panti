@@ -151,7 +151,7 @@
             </div>
 
             <div class="mt-8 flex justify-center">
-                <a href="beli-tiket.php" class="bg-[#2d6a4f] hover:bg-[#1a3326] text-white font-bold py-3 px-8 text-[14px] rounded-full transition-colors shadow-md hover:shadow-lg">
+                <a href="tiket.php" class="bg-[#2d6a4f] hover:bg-[#1a3326] text-white font-bold py-3 px-8 text-[14px] rounded-full transition-colors shadow-md hover:shadow-lg">
                     Pesan Tiket Sekarang
                 </a>
             </div>

@@ -1,5 +1,5 @@
 <?php
-session_start(); // Wajib untuk custom alert
+session_start();
 include '../config/koneksi.php';
 
 // ========================================================
@@ -32,7 +32,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
         
         if (in_array($file_ext, $allowed_ext) && $file_size <= 2097152) { // Max 2MB
             $nama_foto = uniqid('tancak_') . '.' . $file_ext; 
-            $folder_tujuan = '../uploads/reviews/' . $nama_foto;
+            
+            // Cek dan buat folder jika belum ada
+            $dir = '../uploads/reviews/';
+            if (!is_dir($dir)) {
+                mkdir($dir, 0777, true);
+            }
+            $folder_tujuan = $dir . $nama_foto;
 
             if (function_exists('imagecreatefromjpeg') && function_exists('imagecreatefrompng')) {
                 if ($file_ext == 'png') {
@@ -59,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
     }
 
     if ($upload_sukses) {
-        $query_insert = "INSERT INTO tb_ulasan (nama, rating, isi, foto) VALUES ('$nama', '$rating', '$isi', '$nama_foto')";
+        $query_insert = "INSERT INTO tb_ulasan (nama, rating, isi, foto, status) VALUES ('$nama', '$rating', '$isi', '$nama_foto', 'disetujui')";
         if(mysqli_query($koneksi, $query_insert)) {
             $_SESSION['alert'] = ['type' => 'success', 'msg' => 'Terima kasih! ✨ Ulasan Anda akan tampil setelah disetujui admin. 👩‍💻'];
         } else {
@@ -80,6 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style/navbar.css">
+    <!-- PANGGIL FILE CSS DI SINI -->
     <link rel="stylesheet" href="../style/rating.css"> 
     <style>body { font-family: 'Poppins', sans-serif; background-color: #eff3f0; overflow-x: hidden; }</style>
 </head>
@@ -91,7 +98,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
         <div id="custom-alert" class="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-full shadow-lg text-white text-[14px] font-semibold transition-all duration-500 <?php echo ($_SESSION['alert']['type'] == 'success') ? 'bg-[#2d6a4f]' : 'bg-red-500'; ?>">
             <?php echo $_SESSION['alert']['msg']; ?>
         </div>
-        <?php unset($_SESSION['alert']); ?>
         <script>
             setTimeout(() => {
                 const alertBox = document.getElementById('custom-alert');
@@ -102,13 +108,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
                 }
             }, 3000);
         </script>
+        <?php unset($_SESSION['alert']); ?>
     <?php endif; ?>
 
     <main class="flex-1 pt-28 pb-12">
         <div class="max-w-7xl mx-auto px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 
-                <div class="lg:col-span-5 bg-white rounded-[16px] p-8 shadow-sm reveal-zoom" style="transition-delay: 0.1s;">
+                <div class="lg:col-span-5 bg-white rounded-[16px] p-8 shadow-sm">
                     <h2 class="text-[#1a3326] text-[20px] font-bold mb-1">Tulis Ulasan Anda</h2>
                     <p class="text-gray-400 text-[13px] mb-6">Ulasan akan ditampilkan setelah disetujui admin.</p>
 
@@ -164,7 +171,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
                     </form>
                 </div>
 
-                <div class="lg:col-span-7 pr-2 pb-8 custom-scrollbar overflow-y-auto relative reveal-up" style="transition-delay: 0.2s; max-height: 600px;">
+                <div class="lg:col-span-7 pr-2 pb-8 custom-scrollbar overflow-y-auto relative" style="max-height: 600px;">
                     <div class="flex flex-col gap-4" id="review-container">
                         
                         <?php
@@ -247,6 +254,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
 
     <?php include '../components/footer.php'; ?>
 
+    <!-- PANGGIL FILE JS DI SINI -->
     <script src="../js/navbar.js"></script>
     <script src="../js/rating.js"></script>
 

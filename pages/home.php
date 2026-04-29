@@ -44,7 +44,7 @@
                     <span class="text-[#a8d5a2] font-semibold">Rp 7.500</span>.
                 </p>
                 <div class="flex flex-wrap gap-4">
-                    <a href="beli-tiket.php" class="bg-[#2d6a4f] hover:bg-[#245a40] text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-green-900/40 hover:-translate-y-0.5 active:translate-y-0">
+                    <a href="tiket.php" class="bg-[#2d6a4f] hover:bg-[#245a40] text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-green-900/40 hover:-translate-y-0.5 active:translate-y-0">
                         Pesan Sekarang
                     </a>
                     <a href="profile.php" class="bg-white/20 hover:bg-white/30 text-white border border-white/50 px-8 py-3 rounded-full font-semibold backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5">
@@ -130,7 +130,7 @@
                 Pesan tiket sekarang dan nikmati keindahan Air Terjun Tancak bersama orang-orang tersayang
             </p>
             <div class="flex flex-wrap justify-center gap-4">
-                <a href="beli-tiket.php" class="bg-white text-[#1a3326] hover:bg-gray-100 px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
+                <a href="tiket.php" class="bg-white text-[#1a3326] hover:bg-gray-100 px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
                     Beli Tiket Sekarang
                 </a>
                 <a href="rating.php" class="bg-transparent text-white border border-white/70 hover:bg-white/10 px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:-translate-y-0.5">
