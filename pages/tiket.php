@@ -2,69 +2,51 @@
 session_start();
 include '../config/koneksi.php';
 
-// ========================================================
-// LOGIKA BACKEND: PROSES SIMPAN (MERGING & DB FIX)
-// ========================================================
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_tiket'])) {
     
     $nama = mysqli_real_escape_string($koneksi, $_POST['nama']);
-    $email = mysqli_real_escape_string($koneksi, $_POST['email']);
     $alamat = mysqli_real_escape_string($koneksi, $_POST['alamat']);
     $jumlah_orang = (int)$_POST['jumlah_orang'];
     $no_telp = mysqli_real_escape_string($koneksi, $_POST['no_telp']);
     $no_darurat = mysqli_real_escape_string($koneksi, $_POST['no_darurat']);
     
     $nama_foto = null;
-
     if (isset($_FILES['bukti_transfer']) && $_FILES['bukti_transfer']['error'] === 0) {
         $file_ext = strtolower(pathinfo($_FILES['bukti_transfer']['name'], PATHINFO_EXTENSION));
         $nama_foto = "bukti_" . uniqid() . "." . $file_ext;
-        
         $dir = '../uploads/bukti/';
-        // Cek kalau folder belum ada, maka otomatis dibikin
-        if (!is_dir($dir)) {
-            mkdir($dir, 0777, true);
-        }
-        
-        $target = $dir . $nama_foto;
-        move_uploaded_file($_FILES['bukti_transfer']['tmp_name'], $target);
+        if (!is_dir($dir)) { mkdir($dir, 0777, true); }
+        move_uploaded_file($_FILES['bukti_transfer']['tmp_name'], $dir . $nama_foto);
     }
 
     $karakter = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $kode_unik = 'TCK-' . substr(str_shuffle($karakter), 0, 6);
 
-    // --- INSERT DENGAN TAMBAHAN KODE TIKET ---
-    $sql = "INSERT INTO tb_tiket (kode_tiket, nama, email, alamat, jumlah_orang, no_telp, no_darurat, bukti_transfer, tanggal_kunjungan, status, denda) 
-            VALUES ('$kode_unik', '$nama', '$email', '$alamat', $jumlah_orang, '$no_telp', '$no_darurat', '$nama_foto', CURRENT_DATE, 0, 0)";
+    // MATCH DB ERD: tiket (orang, telepon_1, telepon_2). Kolom email & denda dihapus dari query.
+    $sql = "INSERT INTO tiket (kode_tiket, nama, alamat, orang, tanggal_kunjungan, telepon_1, telepon_2, bukti_transfer, status) 
+            VALUES ('$kode_unik', '$nama', '$alamat', $jumlah_orang, CURRENT_DATE, '$no_telp', '$no_darurat', '$nama_foto', 'pending')";
     
     if (mysqli_query($koneksi, $sql)) {
         $id_baru = mysqli_insert_id($koneksi);
         
-        // Merging Sampah (Anti Redudansi)
         if (isset($_POST['nama_sampah'])) {
             $sampah_final = [];
             foreach ($_POST['nama_sampah'] as $i => $nm) {
                 $qty = (int)$_POST['jumlah_sampah'][$i];
-                if ($qty > 0) {
-                    $sampah_final[$nm] = ($sampah_final[$nm] ?? 0) + $qty;
-                }
+                if ($qty > 0) $sampah_final[$nm] = ($sampah_final[$nm] ?? 0) + $qty;
             }
             foreach ($sampah_final as $item => $total) {
                 $item_c = mysqli_real_escape_string($koneksi, $item);
-                mysqli_query($koneksi, "INSERT INTO tb_sampah_bawaan (id_tiket, nama_item, jumlah) VALUES ($id_baru, '$item_c', $total)");
+                // MATCH DB ERD: tb_sampah_bawaan -> sampah
+                mysqli_query($koneksi, "INSERT INTO sampah (id_tiket, nama_sampah, jumlah) VALUES ($id_baru, '$item_c', $total)");
             }
         }
-
-        // SET SESSION UNTUK E-TIKET & REFRESH
         $_SESSION['tiket_sukses_id'] = $id_baru;
         header("Location: tiket.php");
         exit;
     }
 }
 
-// ========================================================
-// LOGIKA TAMPIL E-TIKET (JIKA ADA SESSION SUKSES)
-// ========================================================
 $show_ticket = false;
 $data_tiket = null;
 $data_sampah = [];
@@ -74,16 +56,21 @@ if (isset($_SESSION['tiket_sukses_id'])) {
     $show_ticket = true;
     $id_tk = $_SESSION['tiket_sukses_id'];
     
-    $q_tiket = mysqli_query($koneksi, "SELECT * FROM tb_tiket WHERE id_tiket = $id_tk");
+    // MATCH DB ERD: tb_tiket -> tiket
+    $q_tiket = mysqli_query($koneksi, "SELECT * FROM tiket WHERE id_tiket = $id_tk");
     $data_tiket = mysqli_fetch_assoc($q_tiket);
     
-    $q_sampah = mysqli_query($koneksi, "SELECT * FROM tb_sampah_bawaan WHERE id_tiket = $id_tk");
+    // SUNTIKAN FRONTEND BIAR HTML AMAN
+    $data_tiket['jumlah_orang'] = $data_tiket['orang'];
+    $data_tiket['denda'] = 0; // Pembelian baru belum ada denda
+
+    // MATCH DB ERD: tb_sampah_bawaan -> sampah
+    $q_sampah = mysqli_query($koneksi, "SELECT * FROM sampah WHERE id_tiket = $id_tk");
     while($row = mysqli_fetch_assoc($q_sampah)) {
+        $row['nama_item'] = $row['nama_sampah']; // Suntikan Frontend
         $data_sampah[] = $row;
         $total_item_sampah += $row['jumlah'];
     }
-    
-    // Hapus session agar tidak terus-terusan muncul jika direfresh manual
     unset($_SESSION['tiket_sukses_id']);
 }
 ?>
@@ -256,7 +243,7 @@ if (isset($_SESSION['tiket_sukses_id'])) {
                     <div class="space-y-5 mb-10">
                         <div class="grid grid-cols-3 items-center gap-4">
                             <label class="font-bold text-[#1a3326] text-[14px]">Nama</label>
-                            <input type="text" name="nama" required placeholder="Nama Anda" class="col-span-2 bg-[#f8faf9] border border-gray-200 rounded-[12px] px-4 py-3 text-[14px] outline-none focus:border-[#2d6a4f] transition-all">
+                            <input type="text" name="nama" required placeholder="Nama Panggilan" class="col-span-2 bg-[#f8faf9] border border-gray-200 rounded-[12px] px-4 py-3 text-[14px] outline-none focus:border-[#2d6a4f] transition-all">
                         </div>
                         <div class="grid grid-cols-3 items-center gap-4">
                             <label class="font-bold text-[#1a3326] text-[14px]">Email</label>

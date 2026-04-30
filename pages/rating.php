@@ -2,16 +2,12 @@
 session_start();
 include '../config/koneksi.php';
 
-// ========================================================
-// PROSES SIMPAN DATA KE DATABASE (JIKA FORM DI-SUBMIT)
-// ========================================================
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
     
     $nama   = trim(mysqli_real_escape_string($koneksi, $_POST['nama']));
     $rating = (int)$_POST['rating'];
     $isi    = trim(mysqli_real_escape_string($koneksi, $_POST['isi']));
     
-    // Validasi: Cegah input kosong
     if (empty($nama) || empty($isi)) {
         $_SESSION['alert'] = ['type' => 'error', 'msg' => 'Nama dan Ulasan tidak boleh kosong!'];
         header("Location: rating.php");
@@ -21,23 +17,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
     $nama_foto = null;
     $upload_sukses = true; 
 
-    // Proses Upload Foto Lokal (Folder: uploads/reviews/)
     if (isset($_FILES['foto_ulasan']) && $_FILES['foto_ulasan']['error'] === 0) {
         $file_tmp  = $_FILES['foto_ulasan']['tmp_name'];
         $file_name = $_FILES['foto_ulasan']['name'];
         $file_size = $_FILES['foto_ulasan']['size'];
         $file_ext  = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-        
         $allowed_ext = ['jpg', 'jpeg', 'png'];
         
-        if (in_array($file_ext, $allowed_ext) && $file_size <= 2097152) { // Max 2MB
+        if (in_array($file_ext, $allowed_ext) && $file_size <= 2097152) { 
             $nama_foto = uniqid('tancak_') . '.' . $file_ext; 
-            
-            // Cek dan buat folder jika belum ada
             $dir = '../uploads/reviews/';
-            if (!is_dir($dir)) {
-                mkdir($dir, 0777, true);
-            }
+            if (!is_dir($dir)) { mkdir($dir, 0777, true); }
             $folder_tujuan = $dir . $nama_foto;
 
             if (function_exists('imagecreatefromjpeg') && function_exists('imagecreatefrompng')) {
@@ -65,7 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
     }
 
     if ($upload_sukses) {
-        $query_insert = "INSERT INTO tb_ulasan (nama, rating, isi, foto, status) VALUES ('$nama', '$rating', '$isi', '$nama_foto', 'disetujui')";
+        // MATCH DB ERD: tb_ulasan -> ulasan, isi -> teks, foto -> gambar
+        $query_insert = "INSERT INTO ulasan (nama, rating, teks, gambar) VALUES ('$nama', '$rating', '$isi', '$nama_foto')";
         if(mysqli_query($koneksi, $query_insert)) {
             $_SESSION['alert'] = ['type' => 'success', 'msg' => 'Terima kasih! ✨ Ulasan Anda akan tampil setelah disetujui admin. 👩‍💻'];
         } else {
@@ -174,12 +165,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
                 <div class="lg:col-span-7 pr-2 pb-8 custom-scrollbar overflow-y-auto relative" style="max-height: 600px;">
                     <div class="flex flex-col gap-4" id="review-container">
                         
-                        <?php
-                        // Filter agar data kosong tidak ikut dirender
-                        $query_db = mysqli_query($koneksi, "SELECT * FROM tb_ulasan WHERE status='disetujui' AND nama != '' AND isi != '' ORDER BY is_pinned DESC, tanggal DESC");
+                       <?php
+                        // MATCH DB ERD: tb_ulasan -> ulasan, isi -> teks
+                        $query_db = mysqli_query($koneksi, "SELECT * FROM ulasan WHERE nama != '' AND teks != '' ORDER BY id_ulasan DESC");
                         
                         $count = 0;
                         while($row = mysqli_fetch_assoc($query_db)) {
+                            
+                            // --- SUNTIKAN FRONTEND BIAR HTML AMAN ---
+                            $row['isi'] = $row['teks'];
+                            $row['foto'] = $row['gambar'];
+                            $row['is_pinned'] = isset($row['is_pinned']) ? $row['is_pinned'] : 0; // Bypass error jika belum ada
+                            $row['tanggal'] = isset($row['tanggal']) ? $row['tanggal'] : date('Y-m-d H:i:s'); // Bypass error
+                            // ----------------------------------------
+                            
                             $inisial = strtoupper(substr($row['nama'], 0, 1));
                             $tanggal = date('d M Y', strtotime($row['tanggal']));
                             $bintang = $row['rating'];

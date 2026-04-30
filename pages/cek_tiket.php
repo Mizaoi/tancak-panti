@@ -8,36 +8,37 @@ $data_sampah = [];
 $total_item_sampah = 0;
 $error_msg = "";
 
-// ========================================================
-// LOGIKA PENCARIAN TIKET (SMART SEARCH)
-// ========================================================
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cari_tiket'])) {
-    
     $mode = $_POST['search_mode'];
 
     if ($mode == 'wa_id') {
-        // MODE 1: Cari pakai No WA atau ID Tiket
         $kunci = mysqli_real_escape_string($koneksi, trim($_POST['kunci_utama']));
-        
-       $q_tiket = mysqli_query($koneksi, "SELECT * FROM tb_tiket WHERE no_telp = '$kunci' OR kode_tiket = '$kunci' ORDER BY id_tiket DESC LIMIT 1");
-        
+        // MATCH DB ERD: tb_tiket -> tiket, no_telp -> telepon_1
+        $q_tiket = mysqli_query($koneksi, "SELECT * FROM tiket WHERE telepon_1 = '$kunci' OR kode_tiket = '$kunci' ORDER BY id_tiket DESC LIMIT 1");
     } else if ($mode == 'nama_alamat') {
-        // MODE 2: Cari pakai Kombinasi Nama & Alamat
         $nama = mysqli_real_escape_string($koneksi, trim($_POST['nama_wisatawan']));
         $alamat = mysqli_real_escape_string($koneksi, trim($_POST['alamat_wisatawan']));
-        
-        $q_tiket = mysqli_query($koneksi, "SELECT * FROM tb_tiket WHERE nama LIKE '%$nama%' AND alamat LIKE '%$alamat%' ORDER BY id_tiket DESC LIMIT 1");
+        $q_tiket = mysqli_query($koneksi, "SELECT * FROM tiket WHERE nama LIKE '%$nama%' AND alamat LIKE '%$alamat%' ORDER BY id_tiket DESC LIMIT 1");
     }
 
-    // Cek apakah data ditemukan
     if (isset($q_tiket) && mysqli_num_rows($q_tiket) > 0) {
         $tiket_found = true;
         $data_tiket = mysqli_fetch_assoc($q_tiket);
         $id_tk = $data_tiket['id_tiket'];
-        
-        // Ambil data sampah
-        $q_sampah = mysqli_query($koneksi, "SELECT * FROM tb_sampah_bawaan WHERE id_tiket = $id_tk");
+
+        // --- SUNTIKAN FRONTEND BIAR HTML AMAN ---
+        $data_tiket['no_telp'] = $data_tiket['telepon_1'];
+        $data_tiket['jumlah_orang'] = $data_tiket['orang'];
+
+        // MATCH DB ERD: Ambil denda dari tabel 'denda' (karena sudah pisah tabel)
+        $q_denda = mysqli_query($koneksi, "SELECT SUM(total_denda) AS denda_total FROM denda WHERE id_tiket = $id_tk");
+        $res_denda = mysqli_fetch_assoc($q_denda);
+        $data_tiket['denda'] = $res_denda['denda_total'] ?? 0;
+
+        // MATCH DB ERD: tb_sampah_bawaan -> sampah
+        $q_sampah = mysqli_query($koneksi, "SELECT * FROM sampah WHERE id_tiket = $id_tk");
         while($row = mysqli_fetch_assoc($q_sampah)) {
+            $row['nama_item'] = $row['nama_sampah']; // Suntikan frontend
             $data_sampah[] = $row;
             $total_item_sampah += $row['jumlah'];
         }
