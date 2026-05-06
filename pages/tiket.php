@@ -301,19 +301,19 @@ if (isset($_SESSION['beli_sukses_trigger'])) {
                 <form action="" method="POST" enctype="multipart/form-data">
                     <div class="space-y-5 mb-10">
                         <div class="grid grid-cols-3 items-center gap-4">
-                            <label class="font-bold text-[#1a3326] text-[14px]">Nama</label>
+                            <label class="font-bold text-[#1a3326] text-[14px]">Nama <span class="text-red-500 font-bold">*</span></label>
                             <input type="text" name="nama" required placeholder="Nama Panggilan" class="col-span-2 bg-[#f8faf9] border border-gray-200 rounded-[12px] px-4 py-3 text-[14px] outline-none focus:border-[#2d6a4f] transition-all">
                         </div>
                         <div class="grid grid-cols-3 items-center gap-4">
-                            <label class="font-bold text-[#1a3326] text-[14px]">Email</label>
+                            <label class="font-bold text-[#1a3326] text-[14px]">Email <span class="text-red-500 font-bold">*</span></label>
                             <input type="email" name="email" required placeholder="Email Aktif" class="col-span-2 bg-[#f8faf9] border border-gray-200 rounded-[12px] px-4 py-3 text-[14px] outline-none focus:border-[#2d6a4f] transition-all">
                         </div>
                         <div class="grid grid-cols-3 items-center gap-4">
-                            <label class="font-bold text-[#1a3326] text-[14px]">Alamat</label>
+                            <label class="font-bold text-[#1a3326] text-[14px]">Alamat <span class="text-red-500 font-bold">*</span></label>
                             <input type="text" name="alamat" required placeholder="Kecamatan / Desa" class="col-span-2 bg-[#f8faf9] border border-gray-200 rounded-[12px] px-4 py-3 text-[14px] outline-none focus:border-[#2d6a4f] transition-all">
                         </div>
                         <div class="grid grid-cols-3 items-start gap-4">
-                            <label class="font-bold text-[#1a3326] text-[14px] mt-3">Orang</label>
+                            <label class="font-bold text-[#1a3326] text-[14px] mt-3">Orang <span class="text-red-500 font-bold">*</span></label>
                             <div class="col-span-2">
                                 <input type="number" id="input-orang" name="jumlah_orang" min="1" required placeholder="Berapa Orang" class="w-full bg-[#f8faf9] border border-gray-200 rounded-[12px] px-4 py-3 text-[14px] outline-none focus:border-[#2d6a4f]">
                                 <div class="flex justify-between items-center mt-2 px-1">
@@ -323,14 +323,14 @@ if (isset($_SESSION['beli_sukses_trigger'])) {
                             </div>
                         </div>
                         <div class="grid grid-cols-3 items-start gap-4">
-                            <label class="font-bold text-[#1a3326] text-[14px] mt-3">No. Telepon</label>
+                            <label class="font-bold text-[#1a3326] text-[14px] mt-3">No. Telepon <span class="text-red-500 font-bold">*</span></label>
                             <div class="col-span-2 relative">
                                 <input type="text" id="input-telp1" name="no_telp" required placeholder="No. WA Aktif (min. 11 digit)" class="w-full bg-[#f8faf9] border border-gray-200 rounded-[12px] px-4 py-3 text-[14px] outline-none pr-14 transition-all">
                                 <span id="counter-telp1" class="absolute right-4 top-4 text-[11px] text-gray-400 font-bold transition-colors">0/11</span>
                             </div>
                         </div>
                         <div class="grid grid-cols-3 items-start gap-4">
-                            <label class="font-bold text-[#1a3326] text-[14px] mt-3">No. Darurat</label>
+                            <label class="font-bold text-[#1a3326] text-[14px] mt-3">No. Darurat <span class="text-red-500 font-bold">*</span>  </label>
                             <div class="col-span-2 relative">
                                 <input type="text" id="input-telp2" name="no_darurat" required placeholder="No. Orang Terdekat" class="w-full bg-[#f8faf9] border border-gray-200 rounded-[12px] px-4 py-3 text-[14px] outline-none pr-14 transition-all">
                                 <span id="counter-telp2" class="absolute right-4 top-4 text-[11px] text-gray-400 font-bold transition-colors">0/11</span>

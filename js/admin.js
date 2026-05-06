@@ -571,3 +571,149 @@ fetch('/tancak-panti/api/notif_list.php')
     document.getElementById('btn-detail-keluar').addEventListener('click', closeNotifDetail);
     document.getElementById('close-notif-detail').addEventListener('click', closeNotifDetail);
 });
+
+// Tunggu sampai semua elemen HTML selesai dimuat
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // ==========================================
+    // LOGIKA PINDAH TABS DASHBOARD
+    // ==========================================
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    if(tabButtons.length > 0) {
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+
+                // 1. Hapus class 'active' dari semua tombol
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                
+                // 2. Sembunyikan semua isi tab
+                tabContents.forEach(content => content.classList.remove('active'));
+
+                // 3. Tambahkan class 'active' ke tombol yang ditekan
+                this.classList.add('active');
+
+                // 4. Tampilkan isi tab yang sesuai dengan tombol
+                const targetContent = document.getElementById(targetId);
+                if(targetContent) {
+                    targetContent.classList.add('active');
+                }
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+    
+    // ==========================================
+    // 1. RENDER DIAGRAM BATANG (STATUS WISATAWAN)
+    // ==========================================
+    const canvasStatus = document.getElementById('chartStatusWisatawan');
+    if(canvasStatus) {
+        const ctxStatus = canvasStatus.getContext('2d');
+        new Chart(ctxStatus, {
+            type: 'bar',
+            data: {
+                labels: ['Belum Check-in', 'Masih di Wisata', 'Sudah Pulang'],
+                datasets: [{
+                label: 'Jumlah Tiket',
+                
+                // GANTI ANGKA DUMMY DENGAN VARIABEL INI:
+                data: [dataStatusBelum, dataStatusMasih, dataStatusPulang], 
+                
+                backgroundColor: [
+                    'rgba(239, 68, 68, 0.85)', // Merah
+                    'rgba(234, 179, 8, 0.85)',  // Kuning
+                    'rgba(34, 197, 94, 0.85)'   // Hijau
+                ],
+                borderRadius: 8,
+                barThickness: 35
+            }]
+            },
+            options: {
+                indexAxis: 'y', // KUNCI: Ini yang mengubah grafik tegak jadi menyamping (kiri ke kanan)
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false } // Sembunyikan tulisan legend karena sudah jelas
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: { borderDash: [5, 5], color: '#f1f5f9' },
+                        ticks: { stepSize: 1 } // Biar angkanya bulat (1, 2, 3 tiket)
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { font: { weight: 'bold' } }
+                    }
+                }
+            }
+        });
+    }
+
+    // ==========================================
+    // 2. RENDER DIAGRAM GARIS (TREN SAMPAH)
+    // ==========================================
+    const canvasSampah = document.getElementById('chartTrenSampah');
+    if(canvasSampah) {
+        const ctxSampah = canvasSampah.getContext('2d');
+        
+        // Bikin tanggal 1 sampai 31 secara otomatis (bisa diganti PHP)
+        const labelTanggal = Array.from({length: 31}, (_, i) => i + 1);
+        
+        // Data jumlah item sampah per tanggal (Data Dummy)
+        const dataSampah = [0, 2, 0, 0, 5, 1, 0, 0, 3, 0, 0, 0, 4, 2, 0, 0, 1, 0, 0, 0, 0, 6, 0, 0, 0, 0, 2, 0, 0, 0, 1];
+
+        new Chart(ctxSampah, {
+            type: 'line',
+            data: {
+                labels: labelTanggal,
+                datasets: [{
+                    label: 'Item Hilang',
+                    data: dataSampah,
+                    borderColor: '#ef4444', // Garis warna merah
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)', // Transparan merah untuk area bawah
+                    borderWidth: 2.5,
+                    pointBackgroundColor: '#ef4444',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    fill: true, // KUNCI: Mewarnai area di bawah garis
+                    tension: 0.4 // KUNCI: Membuat garisnya melengkung halus (smooth), tidak kaku/patah-patah
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                return 'Tanggal ' + context[0].label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        title: { display: true, text: 'Tanggal di Bulan Ini', font: { size: 11, color: '#94a3b8' } }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { borderDash: [5, 5], color: '#f1f5f9' },
+                        ticks: { stepSize: 1 },
+                        title: { display: true, text: 'Kuantitas (Item)', font: { size: 11, color: '#94a3b8' } }
+                    }
+                }
+            }
+        });
+    }
+
+});
+
+});
