@@ -24,6 +24,38 @@
 <body class="flex flex-col min-h-screen">
 
     <?php include '../components/navbar.php'; ?>
+    <!-- Kode Navbar Kamu Berakhir di Sini -->
+    </nav> 
+
+    <?php
+        // Cek Status Darurat dari file JSON
+        $notif_file = 'config/status_darurat.json'; // Sesuaikan path folder config-nya jika file index ini ada di luar
+        $darurat_aktif = false;
+        $pesan_darurat = '';
+        
+        if (file_exists($notif_file)) {
+            $data_json = json_decode(file_get_contents($notif_file), true);
+            if (isset($data_json['aktif']) && $data_json['aktif'] === true) {
+                $darurat_aktif = true;
+                $pesan_darurat = $data_json['pesan'];
+            }
+        }
+    ?>
+
+    <!-- BANNER DARURAT PUBLIK (Hanya muncul jika $darurat_aktif = true) -->
+    <?php if ($darurat_aktif): ?>
+    <div class="bg-[#ef4444] text-white w-full px-6 py-3 shadow-md z-40 relative">
+        <div class="max-w-[1440px] mx-auto flex flex-col md:flex-row items-center justify-center gap-3 text-center md:text-left">
+            <div class="flex items-center gap-2 font-extrabold text-[13px] md:text-[14px] tracking-wide shrink-0">
+                <span class="w-3 h-3 rounded-full bg-red-200 animate-pulse"></span>
+                ⚠️ PERINGATAN DARURAT: 
+            </div>
+            <div class="text-[13px] md:text-[13.5px] font-medium leading-snug">
+                <?= htmlspecialchars($pesan_darurat); ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <div class="bg-[#eff3f0] min-h-screen flex-col pt-[30px] pb-15">
         <div class="flex-1 flex flex-col justify-center w-full">
@@ -70,7 +102,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
                         </div>
                         <h3 class="text-[#1a3326] text-[17px] font-bold mb-1">Instagram</h3>
-                        <p class="font-semibold text-gray-800 text-[14px] mb-1">@airterjuntancak</p>
+                        <p class="font-semibold text-gray-800 text-[14px] mb-1">@tancakpanti</p>
                         <p class="text-gray-400 text-[12px] mb-5">Ikuti untuk info terbaru</p>
                         <a href="https://www.instagram.com/tancakpanti/" target="_blank" class="mt-auto text-[#2d6a4f] hover:text-[#1a3326] font-semibold text-[13px] flex items-center transition-colors">
                             Buka Instagram <span class="ml-1.5">→</span>
@@ -84,7 +116,7 @@
                         <h3 class="text-[#1a3326] text-[17px] font-bold mb-1">Alamat</h3>
                         <p class="font-semibold text-gray-800 text-[14px] mb-1">Desa Suci, Kec. Panti</p>
                         <p class="text-gray-400 text-[12px] mb-5">Kabupaten Jember, Jawa Timur</p>
-                        <a href="https://www.google.com/maps/place/Air+Terjun+Tancak,+Suci,+Kec.+Panti,+Kabupaten+Jember" target="_blank" class="mt-auto text-[#2d6a4f] hover:text-[#1a3326] font-semibold text-[13px] flex items-center transition-colors">
+                        <a href="https://maps.app.goo.gl/ED73PufCfxLeTvAVA" target="_blank" class="mt-auto text-[#2d6a4f] hover:text-[#1a3326] font-semibold text-[13px] flex items-center transition-colors">
                             Lihat di Maps <span class="ml-1.5">→</span>
                         </a>
                     </div>

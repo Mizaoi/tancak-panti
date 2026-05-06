@@ -61,6 +61,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cari_tiket'])) {
 <body class="bg-[#eff3f0] font-[Poppins] flex flex-col min-h-screen">
 
     <?php include '../components/navbar.php'; ?>
+    <!-- Kode Navbar Kamu Berakhir di Sini -->
+    </nav> 
+
+    <?php
+        // Cek Status Darurat dari file JSON
+        $notif_file = 'config/status_darurat.json'; // Sesuaikan path folder config-nya jika file index ini ada di luar
+        $darurat_aktif = false;
+        $pesan_darurat = '';
+        
+        if (file_exists($notif_file)) {
+            $data_json = json_decode(file_get_contents($notif_file), true);
+            if (isset($data_json['aktif']) && $data_json['aktif'] === true) {
+                $darurat_aktif = true;
+                $pesan_darurat = $data_json['pesan'];
+            }
+        }
+    ?>
+
+    <!-- BANNER DARURAT PUBLIK (Hanya muncul jika $darurat_aktif = true) -->
+    <?php if ($darurat_aktif): ?>
+    <div class="bg-[#ef4444] text-white w-full px-6 py-3 shadow-md z-40 relative">
+        <div class="max-w-[1440px] mx-auto flex flex-col md:flex-row items-center justify-center gap-3 text-center md:text-left">
+            <div class="flex items-center gap-2 font-extrabold text-[13px] md:text-[14px] tracking-wide shrink-0">
+                <span class="w-3 h-3 rounded-full bg-red-200 animate-pulse"></span>
+                ⚠️ PERINGATAN DARURAT: 
+            </div>
+            <div class="text-[13px] md:text-[13.5px] font-medium leading-snug">
+                <?= htmlspecialchars($pesan_darurat); ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <main class="flex-1 pt-24 pb-16 px-4">
         <div id="tiket-card" class="max-w-[620px] mx-auto bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden">
@@ -185,12 +217,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cari_tiket'])) {
                                 <p class="text-[14px] font-extrabold text-[#1a3326]">Rp <?= number_format($data_tiket['jumlah_orang'] * 6500, 0, ',', '.') ?></p>
                             </div>
                         </div>
-
-                        <!-- Gambar Bukti -->
+                        
                         <div class="mb-8">
                             <p class="text-[12px] text-gray-400 font-medium mb-2">Bukti Pembayaran</p>
                             <div class="border border-gray-200 rounded-[12px] p-2 bg-gray-50 flex justify-center w-full">
-                                <img src="../uploads/bukti/<?= $data_tiket['bukti_transfer'] ?>" class="w-full max-h-[200px] object-contain rounded-lg shadow-sm" onerror="this.src='https://via.placeholder.com/400x200?text=Gambar+Tidak+Ditemukan'">
+                                <?php if(!empty($data_tiket['bukti_transfer']) && strpos($data_tiket['bukti_transfer'], 'http') === 0): 
+                                    // JURUS ANTI BLOKIR PROVIDER
+                                    $link_bersih = str_replace('https://', '', $data_tiket['bukti_transfer']);
+                                    $link_proxy = 'https://wsrv.nl/?url=' . $link_bersih;
+                                ?>
+                                    <img src="<?= htmlspecialchars($link_proxy) ?>" class="w-full max-h-[200px] object-contain rounded-lg shadow-sm">
+                                <?php else: ?>
+                                    <span class="text-xs text-red-500 font-bold p-4">Gambar gagal dimuat atau belum tersedia.</span>
+                                <?php endif; ?>
                             </div>
                         </div>
 

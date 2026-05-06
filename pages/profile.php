@@ -22,6 +22,38 @@
 <body>
 
     <?php include '../components/navbar.php'; ?>
+    <!-- Kode Navbar Kamu Berakhir di Sini -->
+    </nav> 
+
+    <?php
+        // Cek Status Darurat dari file JSON
+        $notif_file = 'config/status_darurat.json'; // Sesuaikan path folder config-nya jika file index ini ada di luar
+        $darurat_aktif = false;
+        $pesan_darurat = '';
+        
+        if (file_exists($notif_file)) {
+            $data_json = json_decode(file_get_contents($notif_file), true);
+            if (isset($data_json['aktif']) && $data_json['aktif'] === true) {
+                $darurat_aktif = true;
+                $pesan_darurat = $data_json['pesan'];
+            }
+        }
+    ?>
+
+    <!-- BANNER DARURAT PUBLIK (Hanya muncul jika $darurat_aktif = true) -->
+    <?php if ($darurat_aktif): ?>
+    <div class="bg-[#ef4444] text-white w-full px-6 py-3 shadow-md z-40 relative">
+        <div class="max-w-[1440px] mx-auto flex flex-col md:flex-row items-center justify-center gap-3 text-center md:text-left">
+            <div class="flex items-center gap-2 font-extrabold text-[13px] md:text-[14px] tracking-wide shrink-0">
+                <span class="w-3 h-3 rounded-full bg-red-200 animate-pulse"></span>
+                ⚠️ PERINGATAN DARURAT: 
+            </div>
+            <div class="text-[13px] md:text-[13.5px] font-medium leading-snug">
+                <?= htmlspecialchars($pesan_darurat); ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <div class="bg-[#eff3f0] min-h-screen pb-20">
         
@@ -35,7 +67,7 @@
                 <div class="carousel-track relative w-full h-full bg-[#1a3326]">
                     
                     <div class="carousel-slide absolute inset-0 w-full h-full">
-                        <img src="https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1200&auto=format&fit=crop" class="w-full h-full object-cover" alt="Air Terjun Tancak">
+                        <img src="../assets/images/slide1.jpeg" class="w-full h-full object-cover" alt="Air Terjun Tancak">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
                             <h2 class="text-white text-3xl md:text-4xl font-bold mb-2">Air Terjun Tancak</h2>
                             <p class="text-white/80 flex items-center text-sm md:text-base">
@@ -46,7 +78,7 @@
                     </div>
                     
                     <div class="carousel-slide absolute inset-0 w-full h-full">
-                        <img src="https://images.unsplash.com/photo-1542318882-749e77242d59?q=80&w=1200&auto=format&fit=crop" class="w-full h-full object-cover" alt="Suasana Tancak">
+                        <img src="../assets/images/panorama2.jpeg" class="w-full h-full object-cover" alt="Suasana Tancak">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
                             <h2 class="text-white text-3xl md:text-4xl font-bold mb-2">Keindahan Alam Alami</h2>
                             <p class="text-white/80 text-sm md:text-base">Udara sejuk di kaki Gunung Argopuro</p>
@@ -54,7 +86,7 @@
                     </div>
 
                     <div class="carousel-slide absolute inset-0 w-full h-full">
-                        <img src="https://images.unsplash.com/photo-1433086966358-54859d0ed716?q=80&w=1200&auto=format&fit=crop" class="w-full h-full object-cover" alt="Air Jernih Tancak">
+                        <img src="../assets/images/slide3.jpeg" class="w-full h-full object-cover" alt="Air Jernih Tancak">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
                             <h2 class="text-white text-3xl md:text-4xl font-bold mb-2">Mata Air Pegunungan</h2>
                             <p class="text-white/80 text-sm md:text-base">Kesegaran air murni yang menenangkan jiwa</p>

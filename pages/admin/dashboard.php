@@ -35,6 +35,25 @@ $count_2 = $query_count_2 ? mysqli_fetch_assoc($query_count_2)['total'] : 0;
 
 // Ambil semua data tiket
 $query = mysqli_query($koneksi, "SELECT * FROM tiket ORDER BY id_tiket DESC");
+
+// ==========================================
+// [FITUR BARU] CEK INGATAN NOTIF DARURAT
+// ==========================================
+$notif_file = '../../config/status_darurat.json';
+$darurat_aktif = false;
+$pesan_darurat = '';
+$waktu_darurat = '00.00';
+$dikirim_ke = 0;
+
+if (file_exists($notif_file)) {
+    $data_json = json_decode(file_get_contents($notif_file), true);
+    if (isset($data_json['aktif']) && $data_json['aktif'] === true) {
+        $darurat_aktif = true;
+        $pesan_darurat = $data_json['pesan'];
+        $waktu_darurat = $data_json['waktu'];
+        $dikirim_ke = isset($data_json['dikirim_ke']) ? $data_json['dikirim_ke'] : 0;
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -47,6 +66,20 @@ $query = mysqli_query($koneksi, "SELECT * FROM tiket ORDER BY id_tiket DESC");
 </head>
 <body class="flex flex-col min-h-screen text-gray-800">
 
+    <!-- TOP BANNER NOTIF DARURAT -->
+    <div id="top-banner-notif" class="<?= $darurat_aktif ? '' : 'hidden' ?> bg-[#ef4444] text-white px-6 py-3 shadow-md relative z-50">
+        <div class="max-w-[1440px] mx-auto flex flex-col justify-center">
+            <div class="text-[12px] font-bold flex items-center gap-2 mb-1 tracking-wide">
+                <span class="w-2.5 h-2.5 rounded-full bg-red-200 animate-pulse"></span>
+                NOTIF AKTIF - <span id="banner-time"><?= $waktu_darurat ?></span> - <span id="banner-count"><?= $dikirim_ke ?></span> WISATAWAN DI AREA - 
+                <button id="btn-baca-selengkapnya" class="underline hover:text-red-200 transition-colors uppercase cursor-pointer">TEKAN UNTUK BACA SELENGKAPNYA</button>
+            </div>
+            <div class="text-[13.5px] font-medium truncate w-full" id="banner-text">
+                <?= $darurat_aktif ? htmlspecialchars($pesan_darurat) : '⚠️ PEMBERITAHUAN DARURAT: Memuat pesan...' ?>
+            </div>
+        </div>
+    </div>
+
     <main class="flex-1 pt-8 pb-12 px-4 lg:px-6 max-w-[1440px] mx-auto w-full">
         
         <!-- HEADER -->
@@ -56,16 +89,25 @@ $query = mysqli_query($koneksi, "SELECT * FROM tiket ORDER BY id_tiket DESC");
                 <p class="text-gray-400 text-[14px] font-medium mt-0.5">Wisata Air Terjun Tancak Panti</p>
             </div>
             <div class="flex items-center gap-3">
-                <button type="button" class="flex items-center gap-2 px-5 py-2.5 border border-orange-200 text-orange-500 rounded-[14px] text-[13px] font-bold hover:bg-orange-50 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-3.14 8.167-7.221.054-.405.083-.812.083-1.221v0a4 4 0 01-4 4h-2a2 2 0 00-2 2v6a2 2 0 002 2h2a4 4 0 014 4v0c0-.41-.029-.816-.083-1.22-.542-4.08-4.067-7.22-8.167-7.22H7a4.001 4.001 0 01-1.564-.317z"/></svg>
-                    Notif Darurat
+                <!-- Logika Tombol Notif -->
+                <?php if($darurat_aktif): ?>
+                <button type="button" id="btn-notif-header" class="flex items-center gap-2 px-5 py-2.5 bg-[#ef4444] text-white rounded-[14px] text-[13px] font-bold shadow-md hover:bg-[#dc2626] transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" /></svg>
+                    <span id="text-notif-header">Notif Aktif</span>
                 </button>
+                <?php else: ?>
+                <button type="button" id="btn-notif-header" class="flex items-center gap-2 px-5 py-2.5 border border-orange-200 text-orange-500 rounded-[14px] text-[13px] font-bold hover:bg-orange-50 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" /></svg>
+                    <span id="text-notif-header">Notif Darurat</span>
+                </button>
+                <?php endif; ?>
+                
                 <a href="logout.php" class="flex items-center gap-2 px-5 py-2.5 border border-gray-200 text-gray-500 rounded-[14px] text-[13px] font-bold hover:bg-gray-50 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                     Keluar
                 </a>
             </div>
-        </div>
+        </div> <!-- INI PENUTUP HEADER YANG TADI HILANG -->
 
         <!-- TAB NAVIGASI -->
         <div class="flex items-center gap-3 mb-6 overflow-x-auto no-scrollbar pb-2">
@@ -132,19 +174,19 @@ $query = mysqli_query($koneksi, "SELECT * FROM tiket ORDER BY id_tiket DESC");
         <!-- TABEL DATA COMPACT -->
         <div class="bg-white rounded-[16px] shadow-sm overflow-hidden border border-gray-50">
             <table class="table-fixed-layout text-left border-collapse w-full">
-                <thead class="bg-gray-50 text-gray-500 border-b border-gray-200">
+                <thead class="bg-[#1a3326] text-white border-b border-[#1a3326]">
                     <tr>
-                        <th class="w-[80px] px-3 py-3.5 text-[10px] font-bold uppercase tracking-wider text-center">Tgl</th>
-                        <th class="w-[90px] px-3 py-3.5 text-[10px] font-bold uppercase tracking-wider">Tiket</th>
-                        <th class="w-[130px] px-3 py-3.5 text-[10px] font-bold uppercase tracking-wider">Nama</th>
-                        <th class="w-[120px] px-3 py-3.5 text-[10px] font-bold uppercase tracking-wider">Alamat</th>
-                        <th class="w-[50px] px-2 py-3.5 text-[10px] font-bold uppercase tracking-wider text-center">Org</th>
-                        <th class="w-[100px] px-3 py-3.5 text-[10px] font-bold uppercase tracking-wider">Telp 1</th>
-                        <th class="w-[100px] px-3 py-3.5 text-[10px] font-bold uppercase tracking-wider">Telp 2</th>
-                        <th class="w-[60px] px-2 py-3.5 text-[10px] font-bold uppercase tracking-wider text-center">TF</th>
-                        <th class="w-[85px] px-2 py-3.5 text-[10px] font-bold uppercase tracking-wider text-center">Sampah</th>
-                        <th class="w-[85px] px-2 py-3.5 text-[10px] font-bold uppercase tracking-wider text-center">Denda</th>
-                        <th class="w-[120px] px-3 py-3.5 text-[10px] font-bold uppercase tracking-wider text-center">Status</th>
+                        <th class="w-[120px] px-3 py-4 text-[12.5px] font-semibold tracking-wide text-center">Tanggal</th>
+                        <th class="w-[100px] px-3 py-4 text-[12.5px] font-semibold tracking-wide">ID Tiket</th>
+                        <th class="w-[140px] px-3 py-4 text-[12.5px] font-semibold tracking-wide">Nama</th>
+                        <th class="w-[130px] px-3 py-4 text-[12.5px] font-semibold tracking-wide">Alamat</th>
+                        <th class="w-[60px] px-2 py-4 text-[12.5px] font-semibold tracking-wide text-center">Orang</th>
+                        <th class="w-[110px] px-3 py-4 text-[12.5px] font-semibold tracking-wide">Telepon 1</th>
+                        <th class="w-[110px] px-3 py-4 text-[12.5px] font-semibold tracking-wide">Telepon 2</th>
+                        <th class="w-[100px] px-2 py-4 text-[12.5px] font-semibold tracking-wide text-center">Bukti Transfer</th>
+                        <th class="w-[85px] px-2 py-4 text-[12.5px] font-semibold tracking-wide text-center">Sampah</th>
+                        <th class="w-[115px] px-2 py-4 text-[12.5px] font-semibold tracking-wide text-center">Denda</th>
+                        <th class="w-[120px] px-3 py-4 text-[12.5px] font-semibold tracking-wide text-center">Status</th>
                     </tr>
                 </thead>
                 <tbody id="wisatawan-tbody">
@@ -203,11 +245,15 @@ $query = mysqli_query($koneksi, "SELECT * FROM tiket ORDER BY id_tiket DESC");
                                     <span class="text-gray-400">-</span>
                                 <?php endif; ?>
                             </td>
-                            
+
                             <!-- BUKTI TF -->
                             <td class="px-2 py-3 text-center">
-                                <?php if($bukti): ?>
-                                    <img src="../../uploads/bukti/<?= $bukti; ?>" class="w-8 h-8 object-cover rounded-[6px] mx-auto cursor-pointer border border-gray-200 hover:opacity-80 transition-opacity btn-zoom-bukti" data-src="../../uploads/bukti/<?= $bukti; ?>">
+                                <?php if($bukti && strpos($bukti, 'http') === 0): 
+                                    // JURUS ANTI BLOKIR PROVIDER
+                                    $link_bersih_bukti = str_replace('https://', '', $bukti);
+                                    $link_proxy_bukti = 'https://wsrv.nl/?url=' . $link_bersih_bukti;
+                                ?>
+                                    <img src="<?= htmlspecialchars($link_proxy_bukti); ?>" class="w-8 h-8 object-cover rounded-[6px] mx-auto cursor-pointer border border-gray-200 hover:opacity-80 transition-opacity btn-zoom-bukti" data-src="<?= htmlspecialchars($link_proxy_bukti); ?>">
                                 <?php else: ?>
                                     <span class="text-[10px] text-gray-400 font-medium">Kosong</span>
                                 <?php endif; ?>
@@ -222,7 +268,17 @@ $query = mysqli_query($koneksi, "SELECT * FROM tiket ORDER BY id_tiket DESC");
 
                             <!-- TOMBOL DENDA -->
                             <td class="px-2 py-3 text-center">
-                                <button class="btn-kelola-denda bg-gray-50 text-gray-600 hover:bg-gray-200 border border-gray-200 px-2 py-1 rounded-md font-bold text-[10px] transition-colors whitespace-nowrap" data-id="<?= $id_tk; ?>" data-kode="<?= $kode_tampil; ?>" data-nama="<?= $row['nama']; ?>">
+                                <?php
+                                    $q_denda_tiket = mysqli_query($koneksi, "SELECT SUM(total_denda) as grand_total FROM denda WHERE id_tiket = $id_tk");
+                                    $total_denda_rp = ($q_denda_tiket && mysqli_num_rows($q_denda_tiket) > 0) ? (int)mysqli_fetch_assoc($q_denda_tiket)['grand_total'] : 0;
+                                    
+                                    if ($total_denda_rp > 0) {
+                                        $btn_denda_class = "bg-red-100 text-red-600 hover:bg-red-200 border-red-200";
+                                    } else {
+                                        $btn_denda_class = "bg-gray-50 text-gray-600 hover:bg-gray-200 border-gray-200";
+                                    }
+                                ?>
+                                <button class="btn-kelola-denda <?= $btn_denda_class ?> border px-3 py-1.5 rounded-md font-bold text-[10.5px] transition-colors whitespace-nowrap w-full max-w-[100px] overflow-hidden text-ellipsis block mx-auto" data-id="<?= $id_tk; ?>" data-kode="<?= $kode_tampil; ?>" data-nama="<?= $row['nama']; ?>">
                                     + Denda
                                 </button>
                             </td>
@@ -253,7 +309,7 @@ $query = mysqli_query($koneksi, "SELECT * FROM tiket ORDER BY id_tiket DESC");
         </div>
     </div>
 
-    <!-- MODAL SAMPAH BARU -->
+    <!-- MODAL SAMPAH -->
     <div id="modal-trash" class="overlay-modal">
         <div class="modal-card bg-white rounded-[24px] w-full max-w-[500px] shadow-2xl overflow-hidden">
             <div class="bg-[#1a3326] p-6 text-white relative">
@@ -281,17 +337,103 @@ $query = mysqli_query($koneksi, "SELECT * FROM tiket ORDER BY id_tiket DESC");
         </div>
     </div>
 
-    <!-- MODAL DENDA (Persiapan) -->
+    <!-- MODAL DENDA -->
     <div id="modal-denda" class="overlay-modal">
-        <div class="modal-card bg-white rounded-[24px] w-full max-w-[450px] shadow-2xl overflow-hidden">
-            <div class="bg-gray-800 p-6 text-white relative">
-                <h3 class="font-extrabold text-[18px] flex items-center gap-2">⚠️ Kelola Tagihan Denda</h3>
-                <p id="d-visitor-info" class="text-[13px] text-gray-300 font-medium mt-1">Nama Wisatawan • #KODE</p>
-                <button id="close-modal-denda" class="absolute top-6 right-6 font-bold text-gray-400 hover:text-white transition-colors">✕</button>
+        <div class="modal-card bg-white rounded-[24px] w-full max-w-[500px] shadow-2xl overflow-hidden">
+            <div class="bg-[#dc2626] p-6 text-white relative">
+                <h3 class="font-extrabold text-[18px] flex items-center gap-2">💸 Kelola Denda Sampah</h3>
+                <p id="d-visitor-info" class="text-[13px] text-red-100 font-medium mt-1">Nama Wisatawan • #KODE</p>
+                <button id="close-modal-denda" class="absolute top-6 right-6 font-bold text-red-200 hover:text-white transition-colors">✕</button>
             </div>
             <div class="p-7">
-                <p class="text-[13px] text-gray-600 mb-4 text-center">Fitur input denda segera hadir di sini...</p>
-                <button id="d-btn-batal" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3.5 rounded-[14px] font-bold transition-colors">Tutup Sementara</button>
+                <p class="text-[12.5px] text-gray-500 mb-5 leading-relaxed">
+                    Atur <strong>jumlah sampah yang HILANG</strong> (tidak dikembalikan) dengan tombol <span class="font-bold">+</span> dan <span class="font-bold">−</span>. Setiap 1 item yang hilang dikenakan denda <strong>Rp 10.000</strong>.
+                </p>
+                <div id="d-trash-list" class="space-y-3 mb-5 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
+                    <div class="text-center py-4 text-gray-400 text-[12px]">Memuat data sampah...</div>
+                </div>
+                <div class="bg-red-50 border border-red-200 rounded-[16px] p-5 mb-8 flex justify-between items-center shadow-sm">
+                    <div>
+                        <p class="text-gray-500 text-[12px] font-medium mb-1">Estimasi denda</p>
+                        <p id="d-total-rp" class="text-red-600 text-[24px] font-extrabold">Rp 0</p>
+                    </div>
+                    <div class="text-right">
+                        <p id="d-total-hilang" class="text-gray-500 text-[12px] font-medium">0 item hilang</p>
+                        <p id="d-total-calc" class="text-gray-400 text-[12px] font-medium">0 × Rp 10.000</p>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button id="d-btn-batal" class="flex-1 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 py-3.5 rounded-[14px] text-[14px] font-bold transition-all">Batal</button>
+                    <button id="d-btn-save" class="flex-1 bg-[#dc2626] hover:bg-[#b91c1c] text-white py-3.5 rounded-[14px] text-[14px] font-bold shadow-md transition-all flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                        Simpan Denda
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SETUP NOTIF -->
+    <div id="modal-notif-setup" class="overlay-modal">
+        <div class="modal-card bg-white rounded-[24px] w-full max-w-[550px] shadow-2xl overflow-hidden">
+            <div class="bg-[#ea580c] p-5 text-white relative flex justify-between items-center">
+                <h3 class="font-extrabold text-[16px] flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-3.14 8.167-7.221.054-.405.083-.812.083-1.221v0a4 4 0 01-4 4h-2a2 2 0 00-2 2v6a2 2 0 002 2h2a4 4 0 014 4v0c0-.41-.029-.816-.083-1.22-.542-4.08-4.067-7.22-8.167-7.22H7a4.001 4.001 0 01-1.564-.317z"/></svg>
+                    Notifikasi Darurat Wisatawan
+                </h3>
+                <button id="close-notif-setup" class="font-bold text-orange-200 hover:text-white transition-colors">✕</button>
+            </div>
+            <div class="p-6">
+                <div class="bg-yellow-50 border border-yellow-200 rounded-[16px] p-4 mb-5">
+                    <p class="text-yellow-700 text-[12px] font-bold mb-3 flex items-center gap-1.5">
+                        ⚠️ <span id="notif-target-count">0</span> wisatawan di area — pesan WA darurat akan dikirim ke Telepon 1 mereka:
+                    </p>
+                    <div id="notif-target-list" class="max-h-[100px] overflow-y-auto custom-scrollbar space-y-2">
+                        <!-- Data load JS -->
+                    </div>
+                </div>
+
+                <p class="text-[12px] font-bold text-gray-600 mb-2">Jenis Peringatan</p>
+                <div class="grid grid-cols-2 gap-3 mb-5">
+                    <button class="btn-jenis-notif border-red-300 text-red-600 bg-red-50 border rounded-[12px] py-2.5 text-[13px] font-bold transition-all flex justify-center items-center gap-2" data-type="hujan">🌧️ Hujan Lebat</button>
+                    <button class="btn-jenis-notif border-gray-200 text-gray-600 bg-white hover:bg-gray-50 border rounded-[12px] py-2.5 text-[13px] font-bold transition-all flex justify-center items-center gap-2" data-type="badai">⛈️ Badai</button>
+                    <button class="btn-jenis-notif border-gray-200 text-gray-600 bg-white hover:bg-gray-50 border rounded-[12px] py-2.5 text-[13px] font-bold transition-all flex justify-center items-center gap-2" data-type="banjir">🌊 Banjir/Longsor</button>
+                    <button class="btn-jenis-notif border-gray-200 text-gray-600 bg-white hover:bg-gray-50 border rounded-[12px] py-2.5 text-[13px] font-bold transition-all flex justify-center items-center gap-2" data-type="kustom">✏️ Pesan Kustom</button>
+                </div>
+
+                <p class="text-[12px] font-bold text-gray-600 mb-2">Isi Pesan</p>
+                <textarea id="notif-pesan-teks" class="w-full bg-[#fff5f5] border border-red-100 text-[#dc2626] rounded-[16px] p-4 text-[13px] font-medium leading-relaxed outline-none resize-none h-[110px]" readonly>⚠️ PEMBERITAHUAN DARURAT: Akan terjadi hujan lebat di area wisata. Seluruh wisatawan yang masih berada di area Air Terjun Tancak dimohon untuk segera turun menuju pintu keluar dengan tertib. Jangan panik, ikuti arahan petugas.</textarea>
+
+                <div class="flex gap-3 mt-6">
+                    <button id="btn-notif-batal" class="flex-1 bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 py-3.5 rounded-[14px] text-[14px] font-bold transition-all">Batal</button>
+                <button id="btn-notif-aktifkan" class="flex-1 bg-[#e11d48] hover:bg-[#be123c] text-white py-3.5 rounded-[14px] text-[14px] font-bold shadow-md transition-all flex items-center justify-center gap-2" disabled style="opacity: 0.5; cursor: not-allowed;">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" /></svg>
+                    <span id="text-notif-header">Notif Aktif</span>
+                </button>                
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL BACA SELENGKAPNYA -->
+    <div id="modal-notif-detail" class="overlay-modal">
+        <div class="modal-card bg-white rounded-[24px] w-full max-w-[450px] shadow-2xl overflow-hidden">
+            <div class="bg-[#ef4444] p-6 text-white relative">
+                <h3 class="font-extrabold text-[16px] flex items-center gap-2 tracking-wide uppercase">
+                    ⚠️ NOTIFIKASI DARURAT AKTIF
+                </h3>
+                <p class="text-[12.5px] text-red-100 font-medium mt-1">
+                    Aktif sejak pukul <span id="detail-time"><?= $waktu_darurat ?></span> · <span id="detail-count"><?= $dikirim_ke ?></span> wisatawan di area
+                </p>
+                <button id="close-notif-detail" class="absolute top-6 right-6 font-bold text-red-200 hover:text-white transition-colors">✕</button>
+            </div>
+            <div class="p-7">
+                <div class="bg-[#fff5f5] border border-red-100 text-[#dc2626] rounded-[16px] p-5 text-[13.5px] font-medium leading-relaxed shadow-sm mb-6" id="detail-pesan-teks">
+                    <?= $darurat_aktif ? htmlspecialchars($pesan_darurat) : '' ?>
+                </div>
+                <button id="btn-detail-keluar" class="w-full bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 py-3.5 rounded-[14px] text-[14px] font-bold shadow-sm transition-all">
+                    Keluar
+                </button>
             </div>
         </div>
     </div>

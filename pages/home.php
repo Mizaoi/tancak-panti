@@ -24,11 +24,43 @@
 <body>
 
     <?php include '../components/navbar.php'; ?>
+    <!-- Kode Navbar Kamu Berakhir di Sini -->
+    </nav> 
+
+    <?php
+        // Cek Status Darurat dari file JSON
+        $notif_file = 'config/status_darurat.json'; // Sesuaikan path folder config-nya jika file index ini ada di luar
+        $darurat_aktif = false;
+        $pesan_darurat = '';
+        
+        if (file_exists($notif_file)) {
+            $data_json = json_decode(file_get_contents($notif_file), true);
+            if (isset($data_json['aktif']) && $data_json['aktif'] === true) {
+                $darurat_aktif = true;
+                $pesan_darurat = $data_json['pesan'];
+            }
+        }
+    ?>
+
+    <!-- BANNER DARURAT PUBLIK (Hanya muncul jika $darurat_aktif = true) -->
+    <?php if ($darurat_aktif): ?>
+    <div class="bg-[#ef4444] text-white w-full px-6 py-3 shadow-md z-40 relative">
+        <div class="max-w-[1440px] mx-auto flex flex-col md:flex-row items-center justify-center gap-3 text-center md:text-left">
+            <div class="flex items-center gap-2 font-extrabold text-[13px] md:text-[14px] tracking-wide shrink-0">
+                <span class="w-3 h-3 rounded-full bg-red-200 animate-pulse"></span>
+                ⚠️ PERINGATAN DARURAT: 
+            </div>
+            <div class="text-[13px] md:text-[13.5px] font-medium leading-snug">
+                <?= htmlspecialchars($pesan_darurat); ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <section class="relative h-[91vh] min-h-[560px] flex items-center overflow-hidden">
-        <img src="https://images.unsplash.com/photo-1700474449167-aa7171e64af7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3YXRlcmZhbGwlMjByb2NreSUyMHN0cmVhbSUyMG5hdHVyZXxlbnwxfHx8fDE3NzE2MzE3NTV8MA&ixlib=rb-4.1.0&q=80&w=1080" alt="Air Terjun Tancak" class="absolute inset-0 w-full h-full object-cover">
-        <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent z-10"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-10"></div>
+        <img src="../assets/images/home.jpeg" alt="Air Terjun Tancak" class="absolute inset-0 w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent z-10"></div>
 
         <div class="relative z-20 max-w-7xl mx-auto px-6 lg:px-8 w-full">
             <div class="hero-content max-w-2xl">
@@ -39,7 +71,7 @@
                     Air Terjun<br />
                     <span class="text-[#a8d5a2]">Tancak</span>
                 </h1>
-                <p class="text-white text-base md:text-[16px] tracking-wide mb-6 max-w-lg leading-relaxed [-webkit-text-stroke:0.5px_black]">
+                <p class="text-white text-base md:text-[16px] tracking-wide mb-6 max-w-lg leading-relaxed [-webkit-text-stroke:0.2px_black]">
                     Lepas penatmu di air terjun tertinggi Jember. Nikmati kesegaran alam lereng Argopuro dan hamparan kebun kopi hanya dengan 
                     <span class="text-[#a8d5a2] font-semibold">Rp 7.500</span>.
                 </p>
@@ -108,15 +140,15 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
                 <div class="relative rounded-[24px] overflow-hidden reveal-zoom group cursor-pointer" style="transition-delay: 0.1s;">
-                    <img src="../assets/images/air-terjun-samping.png" alt="Galeri 1 - Air Terjun Tancak" class="w-full h-[350px] object-cover transition-transform duration-700 group-hover:scale-110">
+                    <img src="../assets/images/panorama1.jpeg" alt="Galeri 1 - Air Terjun Tancak" class="w-full h-[350px] object-cover transition-transform duration-700 group-hover:scale-110">
                     <div class="absolute inset-0 bg-black/40 group-hover:bg-black/0 transition-colors duration-500"></div>
                 </div>
                 <div class="relative rounded-[24px] overflow-hidden reveal-zoom group cursor-pointer" style="transition-delay: 0.2s;">
-                    <img src="../assets/images/air-terjun-depan.png" alt="Galeri 2" class="w-full h-[350px] object-cover transition-transform duration-700 group-hover:scale-110">
+                    <img src="../assets/images/panorama2.jpeg" alt="Galeri 2" class="w-full h-[350px] object-cover transition-transform duration-700 group-hover:scale-110">
                     <div class="absolute inset-0 bg-black/40 group-hover:bg-black/0 transition-colors duration-500"></div>
                 </div>
                 <div class="relative rounded-[24px] overflow-hidden reveal-zoom group cursor-pointer" style="transition-delay: 0.3s;">
-                    <img src="../assets/images/air.png" alt="Galeri 3" class="w-full h-[350px] object-cover transition-transform duration-700 group-hover:scale-110">
+                    <img src="../assets/images/panorama3.jpeg" alt="Galeri 3" class="w-full h-[350px] object-cover transition-transform duration-700 group-hover:scale-110">
                     <div class="absolute inset-0 bg-black/40 group-hover:bg-black/0 transition-colors duration-500"></div>
                 </div>
             </div>

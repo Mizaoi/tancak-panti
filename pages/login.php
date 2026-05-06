@@ -42,12 +42,44 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
 <body class="flex flex-col min-h-screen relative bg-gray-900">
 
     <div class="absolute inset-0 z-0">
-        <img src="../assets/images/air-terjun-depan.png" alt="Background" class="w-full h-full object-cover">
+        <img src="../assets/images/login.jpeg" alt="Background" class="w-full h-full object-cover">
         <div class="absolute inset-0 bg-black/60"></div>
     </div>
 
     <div class="relative z-20">
         <?php include '../components/navbar.php'; ?>
+        <!-- Kode Navbar Kamu Berakhir di Sini -->
+    </nav> 
+
+    <?php
+        // Cek Status Darurat dari file JSON
+        $notif_file = 'config/status_darurat.json'; // Sesuaikan path folder config-nya jika file index ini ada di luar
+        $darurat_aktif = false;
+        $pesan_darurat = '';
+        
+        if (file_exists($notif_file)) {
+            $data_json = json_decode(file_get_contents($notif_file), true);
+            if (isset($data_json['aktif']) && $data_json['aktif'] === true) {
+                $darurat_aktif = true;
+                $pesan_darurat = $data_json['pesan'];
+            }
+        }
+    ?>
+
+    <!-- BANNER DARURAT PUBLIK (Hanya muncul jika $darurat_aktif = true) -->
+    <?php if ($darurat_aktif): ?>
+    <div class="bg-[#ef4444] text-white w-full px-6 py-3 shadow-md z-40 relative">
+        <div class="max-w-[1440px] mx-auto flex flex-col md:flex-row items-center justify-center gap-3 text-center md:text-left">
+            <div class="flex items-center gap-2 font-extrabold text-[13px] md:text-[14px] tracking-wide shrink-0">
+                <span class="w-3 h-3 rounded-full bg-red-200 animate-pulse"></span>
+                ⚠️ PERINGATAN DARURAT: 
+            </div>
+            <div class="text-[13px] md:text-[13.5px] font-medium leading-snug">
+                <?= htmlspecialchars($pesan_darurat); ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
     </div>
 
     <!-- TOAST ALERT MELAYANG (OVAL) -->

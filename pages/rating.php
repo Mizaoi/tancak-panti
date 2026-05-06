@@ -1,75 +1,39 @@
 <?php
 session_start();
-include '../config/koneksi.php';
+include '../config/koneksi.php'; 
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
     
+    // FITUR ANTI-SPAM / ANTI-LAG (COOLDOWN 10 DETIK)
+    if (isset($_SESSION['last_submit']) && (time() - $_SESSION['last_submit'] < 10)) {
+        header("Location: rating.php"); 
+        exit;
+    }
+    $_SESSION['last_submit'] = time(); 
+
     $nama   = trim(mysqli_real_escape_string($koneksi, $_POST['nama']));
     $rating = (int)$_POST['rating'];
     $isi    = trim(mysqli_real_escape_string($koneksi, $_POST['isi']));
     
-    if (empty($nama) || empty($isi)) {
-        $_SESSION['alert'] = ['type' => 'error', 'msg' => 'Nama dan Ulasan tidak boleh kosong!'];
-        header("Location: rating.php");
-        exit;
-    }
+    $link_gambar = ""; 
 
-    $nama_foto = null;
-    $upload_sukses = true; 
-
+    // Tembak ke ImgBB dengan label 'ULASAN'
     if (isset($_FILES['foto_ulasan']) && $_FILES['foto_ulasan']['error'] === 0) {
         $file_tmp  = $_FILES['foto_ulasan']['tmp_name'];
-        $file_name = $_FILES['foto_ulasan']['name'];
-        $file_size = $_FILES['foto_ulasan']['size'];
-        $file_ext  = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-        $allowed_ext = ['jpg', 'jpeg', 'png'];
-        
-        if (in_array($file_ext, $allowed_ext) && $file_size <= 2097152) { 
-            $nama_foto = uniqid('tancak_') . '.' . $file_ext; 
-            $dir = '../uploads/reviews/';
-            if (!is_dir($dir)) { mkdir($dir, 0777, true); }
-            $folder_tujuan = $dir . $nama_foto;
-
-            if (function_exists('imagecreatefromjpeg') && function_exists('imagecreatefrompng')) {
-                if ($file_ext == 'png') {
-                    $image = imagecreatefrompng($file_tmp);
-                    $bg = imagecreatetruecolor(imagesx($image), imagesy($image));
-                    imagefill($bg, 0, 0, imagecolorallocate($bg, 255, 255, 255));
-                    imagealphablending($bg, TRUE);
-                    imagecopy($bg, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
-                    $image = $bg;
-                } else {
-                    $image = imagecreatefromjpeg($file_tmp);
-                }
-                imagejpeg($image, $folder_tujuan, 60); 
-                imagedestroy($image);
-            } else {
-                move_uploaded_file($file_tmp, $folder_tujuan);
-            }
-        } else {
-            $upload_sukses = false;
-            $_SESSION['alert'] = ['type' => 'error', 'msg' => 'Gagal! Foto harus JPG/PNG & maksimal 2MB.'];
-            header("Location: rating.php");
-            exit;
-        }
+        $link_gambar = uploadKeImgBB($file_tmp, 'ULASAN');
     }
 
-    if ($upload_sukses) {
-        // MATCH DB ERD: tb_ulasan -> ulasan, isi -> teks, foto -> gambar
-        $query_insert = "INSERT INTO ulasan (nama, rating, teks, gambar) VALUES ('$nama', '$rating', '$isi', '$nama_foto')";
-        if(mysqli_query($koneksi, $query_insert)) {
-            $_SESSION['alert'] = ['type' => 'success', 'msg' => 'Terima kasih! ✨ Ulasan Anda akan tampil setelah disetujui admin. 👩‍💻'];
-        } else {
-            $_SESSION['alert'] = ['type' => 'error', 'msg' => 'Terjadi kesalahan sistem database.'];
-        }
-        header("Location: rating.php");
-        exit;
-    }
+    $query_insert = "INSERT INTO ulasan (nama, rating, teks, gambar) VALUES ('$nama', '$rating', '$isi', '$link_gambar')";
+    mysqli_query($koneksi, $query_insert);
+    
+    $_SESSION['alert'] = ['type' => 'success', 'msg' => 'Proses selesai! Silakan cek ulasan Anda.'];
+    header("Location: rating.php");
+    exit;
 }
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -77,13 +41,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../style/navbar.css">
-    <!-- PANGGIL FILE CSS DI SINI -->
     <link rel="stylesheet" href="../style/rating.css"> 
     <style>body { font-family: 'Poppins', sans-serif; background-color: #eff3f0; overflow-x: hidden; }</style>
 </head>
 <body class="flex flex-col min-h-screen relative">
 
     <?php include '../components/navbar.php'; ?>
+    </nav> 
+
+    <?php
+        $notif_file = 'config/status_darurat.json'; 
+        $darurat_aktif = false;
+        $pesan_darurat = '';
+        
+        if (file_exists($notif_file)) {
+            $data_json = json_decode(file_get_contents($notif_file), true);
+            if (isset($data_json['aktif']) && $data_json['aktif'] === true) {
+                $darurat_aktif = true;
+                $pesan_darurat = $data_json['pesan'];
+            }
+        }
+    ?>
+
+    <?php if ($darurat_aktif): ?>
+    <div class="bg-[#ef4444] text-white w-full px-6 py-3 shadow-md z-40 relative">
+        <div class="max-w-[1440px] mx-auto flex flex-col md:flex-row items-center justify-center gap-3 text-center md:text-left">
+            <div class="flex items-center gap-2 font-extrabold text-[13px] md:text-[14px] tracking-wide shrink-0">
+                <span class="w-3 h-3 rounded-full bg-red-200 animate-pulse"></span>
+                ⚠️ PERINGATAN DARURAT: 
+            </div>
+            <div class="text-[13px] md:text-[13.5px] font-medium leading-snug">
+                <?= htmlspecialchars($pesan_darurat); ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <?php if(isset($_SESSION['alert'])): ?>
         <div id="custom-alert" class="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-full shadow-lg text-white text-[14px] font-semibold transition-all duration-500 <?php echo ($_SESSION['alert']['type'] == 'success') ? 'bg-[#2d6a4f]' : 'bg-red-500'; ?>">
@@ -108,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
                 
                 <div class="lg:col-span-5 bg-white rounded-[16px] p-8 shadow-sm">
                     <h2 class="text-[#1a3326] text-[20px] font-bold mb-1">Tulis Ulasan Anda</h2>
-                    <p class="text-gray-400 text-[13px] mb-6">Ulasan akan ditampilkan setelah disetujui admin.</p>
+                    <p class="text-gray-400 text-[13px] mb-6">Ulasan Anda akan membantu pengunjung lainnya.</p>
 
                     <form action="" method="POST" enctype="multipart/form-data">
                         
@@ -116,17 +108,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
                             <input type="text" name="nama" required placeholder="Nama Anda" class="w-full bg-[#f8faf9] border border-gray-100 rounded-[12px] px-4 py-3.5 text-[14px] text-gray-700 outline-none focus:border-[#2d6a4f] transition-colors">
                         </div>
 
-                        <div class="mb-4">
-                            <p class="text-gray-500 text-[13px] mb-2">Rating Anda</p>
-                            <input type="hidden" name="rating" id="rating-val" value="5">
-                            <div class="flex gap-1 cursor-pointer">
-                                <svg class="w-7 h-7 text-yellow-400 star-input" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                <svg class="w-7 h-7 text-yellow-400 star-input" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                <svg class="w-7 h-7 text-yellow-400 star-input" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                <svg class="w-7 h-7 text-yellow-400 star-input" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                <svg class="w-7 h-7 text-yellow-400 star-input" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                            </div>
-                        </div>
+<div class="mb-4">
+    <p class="text-gray-500 text-[13px] mb-2">Rating Anda</p>
+    <!-- Hidden input untuk nyimpen nilai ke database -->
+    <input type="hidden" name="rating" id="rating-val" value="5">
+    
+    <div class="flex gap-1">
+        <!-- Bintang 1 -->
+        <svg onclick="ubahBintang(1)" id="bintang-1" class="w-7 h-7 text-yellow-400 cursor-pointer transition-colors duration-200" fill="currentColor" viewBox="0 0 20 20"><path pointer-events="none" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+        <!-- Bintang 2 -->
+        <svg onclick="ubahBintang(2)" id="bintang-2" class="w-7 h-7 text-yellow-400 cursor-pointer transition-colors duration-200" fill="currentColor" viewBox="0 0 20 20"><path pointer-events="none" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+        <!-- Bintang 3 -->
+        <svg onclick="ubahBintang(3)" id="bintang-3" class="w-7 h-7 text-yellow-400 cursor-pointer transition-colors duration-200" fill="currentColor" viewBox="0 0 20 20"><path pointer-events="none" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+        <!-- Bintang 4 -->
+        <svg onclick="ubahBintang(4)" id="bintang-4" class="w-7 h-7 text-yellow-400 cursor-pointer transition-colors duration-200" fill="currentColor" viewBox="0 0 20 20"><path pointer-events="none" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+        <!-- Bintang 5 -->
+        <svg onclick="ubahBintang(5)" id="bintang-5" class="w-7 h-7 text-yellow-400 cursor-pointer transition-colors duration-200" fill="currentColor" viewBox="0 0 20 20"><path pointer-events="none" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+    </div>
+</div>
+
+
 
                         <div class="mb-4">
                             <textarea name="isi" required rows="4" placeholder="Bagikan pengalaman Anda di Air Terjun Tancak..." class="w-full bg-[#f8faf9] border border-gray-100 rounded-[12px] px-4 py-3.5 text-[14px] text-gray-700 outline-none focus:border-[#2d6a4f] transition-colors resize-none"></textarea>
@@ -166,18 +167,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
                     <div class="flex flex-col gap-4" id="review-container">
                         
                        <?php
-                        // MATCH DB ERD: tb_ulasan -> ulasan, isi -> teks
-                        $query_db = mysqli_query($koneksi, "SELECT * FROM ulasan WHERE nama != '' AND teks != '' ORDER BY id_ulasan DESC");
+                        // Menarik Gabungan Teks Lokal + Link ImgBB 
+                        $query_db = mysqli_query($koneksi, "SELECT * FROM ulasan WHERE nama != '' AND teks != '' AND status = 'setuju' ORDER BY id_ulasan DESC");
                         
                         $count = 0;
                         while($row = mysqli_fetch_assoc($query_db)) {
                             
-                            // --- SUNTIKAN FRONTEND BIAR HTML AMAN ---
                             $row['isi'] = $row['teks'];
                             $row['foto'] = $row['gambar'];
-                            $row['is_pinned'] = isset($row['is_pinned']) ? $row['is_pinned'] : 0; // Bypass error jika belum ada
-                            $row['tanggal'] = isset($row['tanggal']) ? $row['tanggal'] : date('Y-m-d H:i:s'); // Bypass error
-                            // ----------------------------------------
+                            $row['is_pinned'] = isset($row['is_pinned']) ? $row['is_pinned'] : 0; 
+                            $row['tanggal'] = isset($row['tanggal']) ? $row['tanggal'] : date('Y-m-d H:i:s'); 
                             
                             $inisial = strtoupper(substr($row['nama'], 0, 1));
                             $tanggal = date('d M Y', strtotime($row['tanggal']));
@@ -219,15 +218,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
                                 ?>
                             </div>
                             
-                            <p class="text-gray-600 text-[13px] leading-relaxed <?php echo (!empty($row['foto'])) ? 'mb-3' : ''; ?>">
+                            <p class="text-gray-600 text-[13px] leading-relaxed <?php echo (!empty($row['foto']) && strpos($row['foto'], 'http') === 0) ? 'mb-3' : ''; ?>">
                                 <?php echo htmlspecialchars($row['isi']); ?>
                             </p>
                             
-                            <?php if(!empty($row['foto'])): ?>
+                            <?php if(!empty($row['foto']) && strpos($row['foto'], 'http') === 0): 
+                                // JURUS ANTI BLOKIR KOMINFO & PROVIDER
+                                $link_bersih = str_replace('https://', '', $row['foto']);
+                                $link_proxy = 'https://wsrv.nl/?url=' . $link_bersih;
+                            ?>
                             <div class="mt-2">
-                                <img src="../uploads/reviews/<?php echo $row['foto']; ?>" alt="Foto Ulasan" class="h-20 w-32 object-cover rounded-[8px] cursor-pointer hover:opacity-80 transition-opacity border border-gray-200">
+                                <img src="<?php echo htmlspecialchars($link_proxy); ?>" alt="Foto Ulasan" class="h-20 w-32 object-cover rounded-[8px] cursor-pointer hover:opacity-80 transition-opacity border border-gray-200">
                             </div>
                             <?php endif; ?>
+
                         </div>
                         
                         <?php $count++; } ?>
@@ -252,10 +256,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
     </main>
 
     <?php include '../components/footer.php'; ?>
-
-    <!-- PANGGIL FILE JS DI SINI -->
+    
     <script src="../js/navbar.js"></script>
     <script src="../js/rating.js"></script>
-
+    <script>
+    const formTiket = document.querySelector('form');
+    
+    if (formTiket) {
+        formTiket.addEventListener('submit', function(e) {
+            const btnSubmit = this.querySelector('button[type="submit"]');
+            if (btnSubmit) {
+                btnSubmit.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memproses...`;
+                btnSubmit.style.pointerEvents = 'none'; 
+                btnSubmit.style.opacity = '0.7';
+            }
+        });
+    }
+    </script>
 </body>
 </html>

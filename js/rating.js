@@ -98,4 +98,51 @@ document.addEventListener('DOMContentLoaded', function() {
             uploadPlaceholder.classList.remove('hidden');
         });
     }
+
+    const stars = document.querySelectorAll('.star-input');
+    const ratingInput = document.getElementById('rating-val');
+
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            // Ambil nilai dari bintang yang diklik (misal klik bintang 3)
+            const ratingValue = parseInt(this.getAttribute('data-val'));
+            
+            // Masukkan nilainya ke hidden input untuk dikirim ke database
+            ratingInput.value = ratingValue;
+
+            // Warnai ulang semua bintang
+            stars.forEach(s => {
+                const val = parseInt(s.getAttribute('data-val'));
+                
+                if (val <= ratingValue) {
+                    // Jadikan kuning untuk bintang yang <= nilai klik
+                    s.classList.remove('text-gray-300');
+                    s.classList.add('text-yellow-400');
+                } else {
+                    // Jadikan abu-abu untuk sisanya
+                    s.classList.remove('text-yellow-400');
+                    s.classList.add('text-gray-300');
+                }
+            });
+        });
+    });
 });
+
+function ubahBintang(nilai) {
+    // 1. Simpan angka ke input tersembunyi
+    document.getElementById('rating-val').value = nilai;
+    
+    // 2. Ubah warna bintang 1 sampai 5
+    for (let i = 1; i <= 5; i++) {
+        let bintang = document.getElementById('bintang-' + i);
+        if (i <= nilai) {
+            // Nyalakan Kuning
+            bintang.classList.remove('text-gray-300');
+            bintang.classList.add('text-yellow-400');
+        } else {
+            // Matikan jadi Abu-abu
+            bintang.classList.remove('text-yellow-400');
+            bintang.classList.add('text-gray-300');
+        }
+    }
+}
