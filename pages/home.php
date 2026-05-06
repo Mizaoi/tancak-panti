@@ -57,7 +57,7 @@
     </div>
     <?php endif; ?>
 
-    <section class="relative h-[91vh] min-h-[560px] flex items-center overflow-hidden">
+    <section class="relative h-[93vh] min-h-[560px] flex items-center overflow-hidden">
         <img src="../assets/images/home.jpeg" alt="Air Terjun Tancak" class="absolute inset-0 w-full h-full object-cover">
         <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent z-10"></div>
