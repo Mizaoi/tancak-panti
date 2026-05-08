@@ -1,12 +1,67 @@
 <?php
-session_start();
-include '../../config/koneksi.php';
-
+include 'config/koneksi.php';
 // Proteksi Halaman Admin
 if (!isset($_SESSION['admin'])) {
-    header("Location: ../login.php");
+    header("Location: /tancak-panti/admin/login");
     exit;
 }
+
+// --- [LOGIKA GRAFIK SAMPAH BULANAN - VERSI FIX] ---
+$selected_month = isset($_GET['bulan']) ? $_GET['bulan'] : date('Y-m');
+$tahun_pilih = date('Y', strtotime($selected_month . "-01"));
+$bulan_pilih = date('m', strtotime($selected_month . "-01"));
+$jumlah_hari = cal_days_in_month(CAL_GREGORIAN, $bulan_pilih, $tahun_pilih);
+
+// Ambil data bawa dari tabel sampah & data hilang dari tabel denda
+$query_tren = mysqli_query($koneksi, "
+    SELECT 
+        t.tanggal_kunjungan,
+        (SELECT IFNULL(SUM(jumlah), 0) FROM sampah s WHERE s.id_tiket IN (SELECT id_tiket FROM tiket WHERE tanggal_kunjungan = t.tanggal_kunjungan)) as total_bawa,
+        (SELECT IFNULL(SUM(jumlah_hilang), 0) FROM denda d WHERE d.id_tiket IN (SELECT id_tiket FROM tiket WHERE tanggal_kunjungan = t.tanggal_kunjungan)) as total_hilang
+    FROM tiket t
+    WHERE t.tanggal_kunjungan LIKE '$selected_month%'
+    GROUP BY t.tanggal_kunjungan
+");
+
+$data_db = [];
+while($row = mysqli_fetch_assoc($query_tren)) {
+    $data_db[$row['tanggal_kunjungan']] = $row;
+}
+
+$labels_sampah = [];
+$data_bawa = [];
+$data_hilang = [];
+
+for($d = 1; $d <= $jumlah_hari; $d++) {
+    $tgl_cek = $selected_month . "-" . str_pad($d, 2, '0', STR_PAD_LEFT);
+    $labels_sampah[] = $d; 
+    $data_bawa[] = isset($data_db[$tgl_cek]) ? (int)$data_db[$tgl_cek]['total_bawa'] : 0;
+    $data_hilang[] = isset($data_db[$tgl_cek]) ? (int)$data_db[$tgl_cek]['total_hilang'] : 0;
+}
+
+// Encode untuk JS
+$json_labels_sampah = json_encode($labels_sampah);
+$json_data_bawa = json_encode($data_bawa);
+$json_data_hilang = json_encode($data_hilang);
+$nama_bulan_pilih = date('F Y', strtotime($selected_month.'-01'));
+
+$data_db = [];
+while($row = mysqli_fetch_assoc($query_tren)) {
+    $data_db[$row['tanggal_kunjungan']] = $row;
+}
+
+$labels_sampah = [];
+$data_bawa = [];
+$data_hilang = [];
+
+for($d = 1; $d <= $jumlah_hari; $d++) {
+    $tgl_cek = $selected_month . "-" . str_pad($d, 2, '0', STR_PAD_LEFT);
+    $labels_sampah[] = $d; 
+    $data_bawa[] = isset($data_db[$tgl_cek]) ? (int)$data_db[$tgl_cek]['total_bawa'] : 0;
+    $data_hilang[] = isset($data_db[$tgl_cek]) ? (int)$data_db[$tgl_cek]['total_hilang'] : 0;
+}
+
+$active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'tab-data';
 
 $username = $_SESSION['admin'];
 
@@ -37,14 +92,131 @@ $count_2 = $query_count_2 ? mysqli_fetch_assoc($query_count_2)['total'] : 0;
 $query = mysqli_query($koneksi, "SELECT * FROM tiket ORDER BY id_tiket DESC");
 
 // ==========================================
+// [DATA REKAP] 4 KOTAK INDIKATOR KECIL
+// ==========================================
+// 1. Total Tiket
+$q_tot_tiket = mysqli_query($koneksi, "SELECT COUNT(id_tiket) as jml_tiket FROM tiket");
+$tot_tiket = ($q_tot_tiket) ? mysqli_fetch_assoc($q_tot_tiket)['jml_tiket'] : 0;
+
+// 2. Total Orang
+$q_tot_orang = mysqli_query($koneksi, "SELECT SUM(orang) as jml_orang FROM tiket");
+$tot_orang = ($q_tot_orang) ? mysqli_fetch_assoc($q_tot_orang)['jml_orang'] : 0;
+
+// 3. Total Pemasukan (Harga Tiket Rp 6.500 / orang)
+$tot_pemasukan = $tot_orang * 6500;
+
+// 4. Total Denda (Total semua denda di tabel denda)
+$q_tot_denda = mysqli_query($koneksi, "SELECT SUM(total_denda) as jml_denda FROM denda");
+$tot_denda = ($q_tot_denda) ? mysqli_fetch_assoc($q_tot_denda)['jml_denda'] : 0;
+
+// ==========================================
 // [FITUR BARU] CEK INGATAN NOTIF DARURAT
 // ==========================================
-$notif_file = '../../config/status_darurat.json';
+$notif_file = 'config/status_darurat.json';
 $darurat_aktif = false;
 $pesan_darurat = '';
 $waktu_darurat = '00.00';
 $dikirim_ke = 0;
 
+
+$jumlah_hari = date('t'); // Otomatis mendeteksi total hari bulan ini (28-31)[cite: 4]
+$label_tgl_array = [];
+$data_sampah_array = array_fill(0, $jumlah_hari, 0); // Siapkan array isi 0 sebanyak jumlah hari
+
+for ($i = 1; $i <= $jumlah_hari; $i++) {
+    $label_tgl_array[] = $i; // Label tanggal 1, 2, 3, dst[cite: 4]
+}
+
+// ==========================================
+// [DATA GRAFIK] TREN SAMPAH HARIAN
+// ==========================================
+// 1. Ambil bulan dari URL (jika ada), kalau tidak pakai bulan ini
+$active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'tab-data';
+
+// ==========================================
+// [FITUR BARU] HITUNG ULASAN PENDING UNTUK NOTIFIKASI
+// ==========================================
+$q_pending = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM ulasan WHERE status = 'pending'");
+$pending_count = $q_pending ? mysqli_fetch_assoc($q_pending)['total'] : 0;
+
+// ==========================================
+// KUNCI FILTER BULAN UNTUK SEMUA DATA
+// ==========================================
+$bulan_filter = isset($_GET['bulan']) ? $_GET['bulan'] : date('Y-m');
+$bulan_f = date('m', strtotime($bulan_filter));
+$tahun_f = date('Y', strtotime($bulan_filter));
+
+// 1. Hitung data untuk 3 Kotak Indikator Status & Tabel Wisatawan
+$query_count_0 = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM tiket WHERE status = 'Belum Check-in' AND MONTH(tanggal_kunjungan) = '$bulan_f' AND YEAR(tanggal_kunjungan) = '$tahun_f'");
+$count_0 = $query_count_0 ? mysqli_fetch_assoc($query_count_0)['total'] : 0;
+
+$query_count_1 = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM tiket WHERE status = 'Masih di Wisata' AND MONTH(tanggal_kunjungan) = '$bulan_f' AND YEAR(tanggal_kunjungan) = '$tahun_f'");
+$count_1 = $query_count_1 ? mysqli_fetch_assoc($query_count_1)['total'] : 0;
+
+$query_count_2 = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM tiket WHERE status = 'Sudah Pulang' AND MONTH(tanggal_kunjungan) = '$bulan_f' AND YEAR(tanggal_kunjungan) = '$tahun_f'");
+$count_2 = $query_count_2 ? mysqli_fetch_assoc($query_count_2)['total'] : 0;
+
+// Tabel Utama Data Wisatawan (Ikut difilter)
+$query = mysqli_query($koneksi, "SELECT * FROM tiket WHERE MONTH(tanggal_kunjungan) = '$bulan_f' AND YEAR(tanggal_kunjungan) = '$tahun_f' ORDER BY id_tiket DESC");
+
+// 2. Hitung 4 Kotak Rekap Kecil (Tiket, Orang, Pemasukan, Denda)
+$q_tot_tiket = mysqli_query($koneksi, "SELECT COUNT(id_tiket) as jml_tiket FROM tiket WHERE MONTH(tanggal_kunjungan) = '$bulan_f' AND YEAR(tanggal_kunjungan) = '$tahun_f'");
+$tot_tiket = ($q_tot_tiket) ? mysqli_fetch_assoc($q_tot_tiket)['jml_tiket'] : 0;
+
+$q_tot_orang = mysqli_query($koneksi, "SELECT SUM(orang) as jml_orang FROM tiket WHERE MONTH(tanggal_kunjungan) = '$bulan_f' AND YEAR(tanggal_kunjungan) = '$tahun_f'");
+$tot_orang = ($q_tot_orang) ? mysqli_fetch_assoc($q_tot_orang)['jml_orang'] : 0;
+
+$tot_pemasukan = $tot_orang * 6500;
+
+// Denda dihubungkan ke tiket agar bisa difilter bulannya
+$q_tot_denda = mysqli_query($koneksi, "SELECT SUM(d.total_denda) as jml_denda FROM denda d JOIN tiket t ON d.id_tiket = t.id_tiket WHERE MONTH(t.tanggal_kunjungan) = '$bulan_f' AND YEAR(t.tanggal_kunjungan) = '$tahun_f'");
+$tot_denda = ($q_tot_denda) ? mysqli_fetch_assoc($q_tot_denda)['jml_denda'] : 0;
+
+// ==========================================
+// 3. [DATA GRAFIK] TREN SAMPAH HARIAN
+// ==========================================
+$jumlah_hari = date('t', strtotime($bulan_filter . '-01')); 
+$labels_tgl = [];
+$data_sampah_array = array_fill(0, $jumlah_hari, 0); 
+
+for ($i = 1; $i <= $jumlah_hari; $i++) {
+    $labels_tgl[] = $i . ' ' . date('M', strtotime($bulan_filter . '-01')); 
+}
+
+$q_grafik_sampah = mysqli_query($koneksi, "
+    SELECT 
+        DAY(t.tanggal_kunjungan) as hari, 
+        SUM(s.jumlah) as total_qty 
+    FROM tiket t
+    JOIN sampah s ON t.id_tiket = s.id_tiket
+    WHERE MONTH(t.tanggal_kunjungan) = '$bulan_f' 
+      AND YEAR(t.tanggal_kunjungan) = '$tahun_f'
+    GROUP BY DAY(t.tanggal_kunjungan)
+");
+
+// Ambil data dari database KHUSUS untuk bulan dan tahun saat ini
+$q_grafik = mysqli_query($koneksi, "
+    SELECT DAY(t.tanggal_kunjungan) as hari, SUM(d.total_denda) as denda_harian
+    FROM tiket t
+    LEFT JOIN denda d ON t.id_tiket = d.id_tiket
+    WHERE MONTH(t.tanggal_kunjungan) = MONTH(CURDATE()) 
+      AND YEAR(t.tanggal_kunjungan) = YEAR(CURDATE())
+    GROUP BY DAY(t.tanggal_kunjungan)
+");
+
+// Cocokkan data dari database ke tanggal di kalender grafik
+if ($q_grafik && mysqli_num_rows($q_grafik) > 0) {
+    while($rg = mysqli_fetch_assoc($q_grafik)) {
+        $hari_kunjungan = (int)$rg['hari']; // Dapat tanggal ke berapa (misal: 15)
+        $denda = $rg['denda_harian'] ? $rg['denda_harian'] : 0;
+        
+        // Masukkan data ke array sesuai index tanggalnya (index array mulai dari 0, jadi hari - 1)
+        $data_jml_hilang[$hari_kunjungan - 1] = (int)($denda / 10000); // Rp 10.000 = 1 item sampah
+    }
+}
+
+// Ubah format menjadi JSON untuk dibaca oleh JavaScript
+$json_data_hilang = json_encode($data_jml_hilang);
 if (file_exists($notif_file)) {
     $data_json = json_decode(file_get_contents($notif_file), true);
     if (isset($data_json['aktif']) && $data_json['aktif'] === true) {
@@ -62,8 +234,9 @@ if (file_exists($notif_file)) {
     <meta charset="UTF-8">
     <title>Dashboard Admin - SI-TANCAK PANTI</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="[https://cdn.jsdelivr.net/npm/chart.js](https://cdn.jsdelivr.net/npm/chart.js)"></script>
-    <link rel="stylesheet" href="../../style/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/tancak-panti/style/admin.css">
 </head>
 <body class="flex flex-col min-h-screen text-gray-800">
 
@@ -103,7 +276,7 @@ if (file_exists($notif_file)) {
                 </button>
                 <?php endif; ?>
                 
-                <a href="logout.php" class="flex items-center gap-2 px-5 py-2.5 border border-gray-200 text-gray-500 rounded-[14px] text-[13px] font-bold hover:bg-gray-50 transition-colors">
+                <a href="/tancak-panti/admin/logout" class="flex items-center gap-2 px-5 py-2.5 border border-gray-200 text-gray-500 rounded-[14px] text-[13px] font-bold hover:bg-gray-50 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                     Keluar
                 </a>
@@ -112,29 +285,29 @@ if (file_exists($notif_file)) {
 
         <!-- TAB NAVIGASI -->
         <div class="flex flex-wrap gap-3 mb-8">
-            <!-- Data Wisatawan (DEFAULT AKTIF) -->
-            <button data-target="tab-data" class="tab-btn active px-5 py-2.5 rounded-[12px] font-semibold flex items-center gap-2 shadow-sm cursor-pointer">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <!-- Tombol Data Wisatawan -->
+            <button data-target="tab-data" class="tab-btn <?= $active_tab == 'tab-data' ? 'active' : '' ?> px-5 py-2.5 rounded-[12px] font-semibold flex items-center gap-2 shadow-sm cursor-pointer">
+                <!-- SVG Icon -->
                 Data Wisatawan
             </button>
 
-            <!-- Rekap Wisatawan -->
-            <button data-target="tab-rekap" class="tab-btn px-5 py-2.5 rounded-[12px] font-semibold flex items-center gap-2 shadow-sm cursor-pointer">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <!-- Tombol Rekap Wisatawan -->
+            <button data-target="tab-rekap" class="tab-btn <?= $active_tab == 'tab-rekap' ? 'active' : '' ?> px-5 py-2.5 rounded-[12px] font-semibold flex items-center gap-2 shadow-sm cursor-pointer">
+                <!-- SVG Icon -->
                 Rekap Wisatawan
             </button>
 
-            <!-- Moderasi Ulasan -->
-            <button data-target="tab-ulasan" class="tab-btn px-5 py-2.5 rounded-[12px] font-semibold flex items-center gap-2 shadow-sm cursor-pointer">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+            <!-- Tombol Moderasi Ulasan -->
+            <button data-target="tab-ulasan" class="tab-btn <?= $active_tab == 'tab-ulasan' ? 'active' : '' ?> px-5 py-2.5 rounded-[12px] font-semibold flex items-center gap-2 shadow-sm cursor-pointer relative">
                 Moderasi Ulasan
+                <span id="badge-pending" class="<?= $pending_count > 0 ? '' : 'hidden' ?> absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border-2 border-white shadow-sm transition-all"><?= $pending_count ?></span>
             </button>
         </div>
         
         <!-- ========================================== -->
         <!-- ISI TAB 1: DATA WISATAWAN (DEFAULT AKTIF) -->
         <!-- ========================================== -->
-        <div id="tab-data" class="tab-content active">
+        <div id="tab-data" class="tab-content <?= $active_tab == 'tab-data' ? 'active' : '' ?>">
             
             <!-- KOTAK STATUS REALTIME -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -304,7 +477,7 @@ if (file_exists($notif_file)) {
         <!-- ========================================== -->
         <!-- ISI TAB 2: REKAP WISATAWAN & DENDA -->
         <!-- ========================================== -->
-        <div id="tab-rekap" class="tab-content">
+        <div id="tab-rekap" class="tab-content <?= $active_tab == 'tab-rekap' ? 'active' : '' ?>">
             
             <!-- HEADER REKAP & FILTER -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
@@ -315,35 +488,52 @@ if (file_exists($notif_file)) {
                 <div class="flex items-center gap-3 w-full md:w-auto">
                     <!-- Filter Bulan -->
                     <div class="bg-white border border-gray-200 rounded-[10px] px-3 py-2 flex items-center shadow-sm w-full md:w-auto">
-                        <input type="month" id="filter-bulan-rekap" value="<?= date('Y-m'); ?>" class="text-[13px] text-gray-600 font-medium outline-none bg-transparent cursor-pointer w-full">
+                        <input type="month" id="filter-bulan-rekap" value="<?= isset($_GET['bulan']) ? $_GET['bulan'] : date('Y-m'); ?>" class="text-[13px] text-gray-600 font-medium outline-none bg-transparent cursor-pointer w-full">
                     </div>
                     <!-- Tombol Cetak -->
-                    <button class="bg-[#1a3326] hover:bg-[#12241b] text-white px-5 py-2.5 rounded-[10px] text-[13px] font-bold flex items-center gap-2 transition-colors shadow-sm whitespace-nowrap">
+                    <button onclick="cetakLaporan()" class="bg-[#1a3326] hover:bg-[#12241b] text-white px-5 py-2.5 rounded-[10px] text-[13px] font-bold flex items-center gap-2 transition-colors shadow-sm whitespace-nowrap">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                         Cetak Rekap
                     </button>
+
+                    <script>
+                    function cetakLaporan() {
+                        const bulan = document.getElementById('filter-bulan-rekap').value;
+                        
+                        // Membuka jendela baru dengan ukuran spesifik (kayak di gambar sampeyan)
+                        const lebar = 1100;
+                        const tinggi = 800;
+                        const kiri = (screen.width - lebar) / 2;
+                        const atas = (screen.height - tinggi) / 2;
+                        
+                        window.open(
+                            '/tancak-panti/admin/cetak?bulan=' + bulan, 
+                            'LaporanKunjungan', 
+                            `width=${lebar},height=${tinggi},left=${kiri},top=${atas},scrollbars=yes`
+                        );
+                    }
+                    </script>
                 </div>
             </div>
 
             <!-- 5 KOTAK INDIKATOR KECIL (TOTAL) -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                <div class="bg-gray-50 rounded-[14px] p-4 border border-gray-125 shadow-sm">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div class="bg-gray-50 rounded-[14px] p-4 border border-gray-100 shadow-sm">
                     <p class="text-[11px] text-gray-500 font-semibold mb-1">Total Tiket</p>
-                    <p class="text-[14px] font-bold text-gray-800"><span class="text-[18px] font-extrabold">8</span> tiket</p>
+                    <p class="text-[14px] font-bold text-gray-800"><span class="text-[18px] font-extrabold"><?= $tot_tiket ?></span> tiket</p>
                 </div>
-                <div class="bg-blue-50 rounded-[14px] p-4 border border-blue-125 shadow-sm">
+                <div class="bg-blue-50 rounded-[14px] p-4 border border-blue-100 shadow-sm">
                     <p class="text-[11px] text-blue-500 font-semibold mb-1">Total Orang</p>
-                    <p class="text-[14px] font-bold text-blue-600"><span class="text-[18px] font-extrabold">27</span> orang</p>
+                    <p class="text-[14px] font-bold text-blue-600"><span class="text-[18px] font-extrabold"><?= $tot_orang ?></span> orang</p>
                 </div>
-                <div class="bg-green-50 rounded-[14px] p-4 border border-green-125 shadow-sm">
+                <div class="bg-green-50 rounded-[14px] p-4 border border-green-100 shadow-sm">
                     <p class="text-[11px] text-green-600 font-semibold mb-1">Total Pemasukan</p>
-                    <p class="text-[16px] font-extrabold text-green-600">Rp 202.500</p>
+                    <p class="text-[16px] font-extrabold text-green-600">Rp <?= number_format($tot_pemasukan, 0, ',', '.') ?></p>
                 </div>
-                <div class="bg-red-50 rounded-[14px] p-4 border border-red-125 shadow-sm">
+                <div class="bg-red-50 rounded-[14px] p-4 border border-red-100 shadow-sm">
                     <p class="text-[11px] text-red-500 font-semibold mb-1">Total Denda</p>
-                    <p class="text-[16px] font-extrabold text-red-600">Rp 60.000</p>
+                    <p class="text-[16px] font-extrabold text-red-600">Rp <?= number_format($tot_denda, 0, ',', '.') ?></p>
                 </div>
-
             </div>
 
             <!-- 3 KOTAK STATUS BESAR -->
@@ -374,48 +564,56 @@ if (file_exists($notif_file)) {
                     </div>
                 </div>
 
-                <!-- Tabel List Sampah -->
-                <div class="bg-white border border-red-100 rounded-[12px] overflow-hidden shadow-sm">
+                <div class="bg-white p-6 rounded-[20px] border border-gray-100 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-bl-full -z-10 opacity-50"></div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead class="bg-red-50 text-red-700 border-b border-red-100">
+                        <table class="w-full text-left text-[13px]">
+                            <thead class="bg-gray-50/50 text-gray-500">
                                 <tr>
-                                    <th class="px-5 py-3.5 text-[12px] font-bold uppercase tracking-wider">Nama Item Sampah</th>
-                                    <th class="px-5 py-3.5 text-[12px] font-bold uppercase tracking-wider text-center w-[150px]">Jumlah Hilang</th>
+                                    <th class="p-3 font-bold rounded-l-[10px] w-16 text-center">No</th>
+                                    <th class="p-3 font-bold">Jenis Item Sampah</th>
+                                    <th class="p-3 font-bold rounded-r-[10px] text-center w-36 whitespace-nowrap">Total Qty</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Contoh Data 1 -->
-                                <tr class="border-b border-gray-100 hover:bg-red-50/40 transition-colors">
-                                    <td class="px-5 py-4 text-[13px] font-semibold text-gray-800">Botol Plastik</td>
-                                    <td class="px-5 py-4 text-[13px] font-bold text-red-600 text-center">
-                                        <span class="bg-red-100 px-3 py-1.5 rounded-md">6 pcs</span>
-                                    </td>
-                                </tr>
-                                
-                                <!-- Contoh Data 2 -->
-                                <tr class="border-b border-gray-100 hover:bg-red-50/40 transition-colors">
-                                    <td class="px-5 py-4 text-[13px] font-semibold text-gray-800">Tisu</td>
-                                    <td class="px-5 py-4 text-[13px] font-bold text-red-600 text-center">
-                                        <span class="bg-red-100 px-3 py-1.5 rounded-md">2 pcs</span>
-                                    </td>
-                                </tr>
+                                <?php 
+                                $bulan_filter = isset($_GET['bulan']) ? $_GET['bulan'] : date('Y-m');
 
-                                <!-- Contoh Data 3 -->
-                                <tr class="border-b border-gray-100 hover:bg-red-50/40 transition-colors">
-                                    <td class="px-5 py-4 text-[13px] font-semibold text-gray-800">Cup Mie</td>
-                                    <td class="px-5 py-4 text-[13px] font-bold text-red-600 text-center">
-                                        <span class="bg-red-100 px-3 py-1.5 rounded-md">2 pcs</span>
-                                    </td>
-                                </tr>
+                                $q_rekap_sampah = mysqli_query($koneksi, "
+                                    SELECT s.nama_sampah, SUM(s.jumlah) as total_qty 
+                                    FROM sampah s
+                                    JOIN tiket t ON s.id_tiket = t.id_tiket
+                                    WHERE DATE_FORMAT(t.tanggal_kunjungan, '%Y-%m') = '$bulan_filter'
+                                    GROUP BY s.nama_sampah
+                                    ORDER BY total_qty DESC
+                                ");
 
-                                <!-- Contoh Data 4 -->
-                                <tr class="hover:bg-red-50/40 transition-colors">
-                                    <td class="px-5 py-4 text-[13px] font-semibold text-gray-800">Bungkus Makanan</td>
-                                    <td class="px-5 py-4 text-[13px] font-bold text-red-600 text-center">
-                                        <span class="bg-red-100 px-3 py-1.5 rounded-md">1 pcs</span>
+                                $no_sampah = 1;
+                                if(mysqli_num_rows($q_rekap_sampah) > 0) {
+                                    while($sampah = mysqli_fetch_assoc($q_rekap_sampah)): 
+                                ?>
+                                <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                                    <td class="p-3 text-center text-gray-400 font-medium"><?= $no_sampah++ ?></td>
+                                    <td class="p-3 font-bold text-gray-700 capitalize"><?= htmlspecialchars($sampah['nama_sampah']) ?></td>
+                                    <td class="p-3 text-center">
+                                        <span class="inline-block bg-green-50 text-green-600 px-4 py-1.5 rounded-[8px] font-extrabold text-[12px] whitespace-nowrap shadow-sm">
+                                            <?= $sampah['total_qty'] ?> pcs
+                                        </span>
                                     </td>
                                 </tr>
+                                <?php 
+                                    endwhile; 
+                                } else { 
+                                ?>
+                                <tr>
+                                    <td colspan="3" class="p-8 text-center text-gray-400 border-b border-gray-50">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <svg class="w-10 h-10 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                                            <span>Belum ada data sampah masuk di bulan ini.</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php } ?>
                             </tbody>
                         </table>
                     </div>
@@ -423,44 +621,169 @@ if (file_exists($notif_file)) {
             </div>
 
             <!-- ========================================== -->
-            <!-- 1. GRAFIK STATUS WISATAWAN (BAR HORIZONTAL) -->
+            <!-- 1. GRAFIK STATUS WISATAWAN -->
             <!-- ========================================== -->
             <div class="bg-white rounded-[16px] border border-gray-200 p-6 mb-8 shadow-sm">
                 <div class="mb-5">
-                    <h3 class="font-bold text-[15px] text-gray-800">Distribusi Status Wisatawan</h3>
+                    <h3 class="font-bold text-[15px] text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-chart-bar text-[#10b981]"></i> Distribusi Status Wisatawan</h3>
                     <p class="text-[12px] text-gray-500 mt-0.5">Perbandingan total akumulasi tiket berdasarkan status</p>
                 </div>
-                <!-- Wadah Grafiknya -->
-                <div class="w-full h-[220px]">
+
+                    <div class="w-full h-[220px]">
                     <canvas id="chartStatusWisatawan"></canvas>
                 </div>
             </div>
-
-            <!-- ========================================== -->
-            <!-- 2. GRAFIK TREN SAMPAH HILANG (LINE CHART) -->
-            <!-- ========================================== -->
+            
             <div class="bg-white rounded-[16px] border border-gray-200 p-6 mb-8 shadow-sm">
-                <div class="mb-5">
-                    <h3 class="font-bold text-[15px] text-gray-800">Tren Kuantitas Sampah Hilang (Harian)</h3>
-                    <p class="text-[12px] text-gray-500 mt-0.5">Jumlah item sampah yang tidak dikembalikan dari tanggal awal s.d akhir bulan</p>
+                <div class="mb-5 flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold text-[15px] text-gray-800 flex items-center gap-2">
+                            <i class="fas fa-chart-line text-[#3c8dbc]"></i> Tren Sampah Harian
+                        </h3>
+                        <p class="text-[12px] text-gray-500 mt-0.5">Fluktuasi jumlah item sampah pada bulan ini</p>
+                    </div>
                 </div>
-                <!-- Wadah Grafiknya -->
-                <div class="w-full h-[300px]">
-                    <canvas id="chartTrenSampah"></canvas>
+                <div class="w-full h-[220px] chart-container">
+                    <canvas id="lineChartSampah"></canvas>
                 </div>
             </div>
+        </div>
 
         <!-- ========================================== -->
         <!-- ISI TAB 3: MODERASI ULASAN -->
         <!-- ========================================== -->
-        <div id="tab-ulasan" class="tab-content">
-            <div class="bg-white p-8 rounded-[16px] border border-gray-200 text-center">
-                <h2 class="font-bold text-lg mb-4 text-[#1a3326]">Moderasi Ulasan Pengunjung</h2>
-                <p class="text-gray-500 text-[13px]">Daftar ulasan akan ditampilkan di sini...</p>
-            </div>
-        </div>
+<div id="tab-ulasan" class="tab-content <?= $active_tab == 'tab-ulasan' ? 'active' : '' ?>">
+            
+            <?php
+            // ==========================================
+            // 1. BAGIAN OTAK FILTER (HANYA SEKALI SAJA)
+            // ==========================================
+            $filter_status = isset($_GET['status']) ? $_GET['status'] : 'semua';
 
+            // Kueri menyesuaikan tab yang diklik
+            if ($filter_status == 'menunggu') {
+                $query_ulasan = mysqli_query($koneksi, "SELECT * FROM ulasan WHERE status = 'menunggu' ORDER BY id_ulasan DESC");
+            } elseif ($filter_status == 'disetujui') {
+                $query_ulasan = mysqli_query($koneksi, "SELECT * FROM ulasan WHERE status = 'setuju' ORDER BY id_ulasan DESC");
+            } elseif ($filter_status == 'ditolak') {
+                $query_ulasan = mysqli_query($koneksi, "SELECT * FROM ulasan WHERE status = 'tolak' ORDER BY id_ulasan DESC");
+            } else {
+                $query_ulasan = mysqli_query($koneksi, "SELECT * FROM ulasan ORDER BY id_ulasan DESC");
+            }
+            ?>
+
+            <div class="bg-white border-b border-gray-200 w-full mb-6">
+                <nav class="-mb-px flex space-x-4 overflow-x-auto custom-scrollbar" aria-label="Tabs">
+                    <a href="/tancak-panti/admin/dashboard?tab=tab-ulasan" 
+                       class="<?= ($filter_status == 'semua') ? 'border-[#1b3d2f] text-[#1b3d2f] bg-[#f4f9f6] font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 font-medium' ?> whitespace-nowrap px-4 py-2 border-b-2 text-[14px] transition-all duration-200">
+                        Semua
+                    </a>
+                    <a href="/tancak-panti/admin/dashboard?tab=tab-ulasan&status=menunggu" 
+                       class="<?= ($filter_status == 'menunggu') ? 'border-[#1b3d2f] text-[#1b3d2f] bg-[#f4f9f6] font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 font-medium' ?> whitespace-nowrap px-4 py-2 border-b-2 text-[14px] transition-all duration-200">
+                        Menunggu
+                    </a>
+                    <a href="/tancak-panti/admin/dashboard?tab=tab-ulasan&status=disetujui" 
+                       class="<?= ($filter_status == 'disetujui') ? 'border-[#1b3d2f] text-[#1b3d2f] bg-[#f4f9f6] font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 font-medium' ?> whitespace-nowrap px-4 py-2 border-b-2 text-[14px] transition-all duration-200">
+                        Disetujui
+                    </a>
+                    <a href="/tancak-panti/admin/dashboard?tab=tab-ulasan&status=ditolak" 
+                       class="<?= ($filter_status == 'ditolak') ? 'border-[#1b3d2f] text-[#1b3d2f] bg-[#f4f9f6] font-semibold' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50 font-medium' ?> whitespace-nowrap px-4 py-2 border-b-2 text-[14px] transition-all duration-200">
+                        Ditolak
+                    </a>
+                </nav>
+            </div>
+
+            <?php if(mysqli_num_rows($query_ulasan) > 0): ?>
+                <div id="ulasan-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <?php 
+                    while($ul = mysqli_fetch_assoc($query_ulasan)):
+                        $status_db = strtolower($ul['status']);
+                    ?>
+                    <div class="ulasan-card bg-white rounded-[20px] shadow-sm overflow-hidden flex flex-col border border-gray-100 transition-all duration-300" data-status="<?= $status_db ?>" data-id="<?= $ul['id_ulasan'] ?>">
+                        
+                        <div class="status-ribbon px-4 py-2.5 flex items-center justify-between text-[11px] font-extrabold uppercase tracking-widest border-b transition-colors duration-300">
+                            </div>
+                        
+                        <div class="p-5 flex-1 flex flex-col">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="avatar-circle w-9 h-9 rounded-full bg-[#1a3326] text-white flex items-center justify-center font-extrabold text-[13px] shrink-0 transition-colors duration-300">
+                                        <?= strtoupper(substr($ul['nama'], 0, 1)) ?>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-800 text-[13.5px] font-extrabold leading-tight"><?= htmlspecialchars($ul['nama']) ?></p>
+                                        <p class="text-gray-400 text-[11px] font-medium mt-0.5"><?= isset($ul['tanggal']) ? date('d M Y', strtotime($ul['tanggal'])) : 'Baru saja' ?></p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex gap-0.5">
+                                    <?php for($i=1; $i<=5; $i++): ?>
+                                        <?php if($i <= (int)$ul['rating']): ?>
+                                            <svg class="w-3.5 h-3.5 text-amber-400 fill-amber-400" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                        <?php else: ?>
+                                            <svg class="w-3.5 h-3.5 text-gray-200 fill-none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                        <?php endif; ?>
+                                    <?php endfor; ?>
+                                </div>
+                            </div>
+                            
+                            <p class="text-gray-600 text-[13px] font-medium leading-relaxed flex-1 mb-5">
+                                <?= htmlspecialchars($ul['teks']) ?>
+                            </p>
+                            
+                            <?php 
+                            if(!empty($ul['gambar']) && strpos($ul['gambar'], 'http') === 0): 
+                                $link_bersih_ulasan = str_replace(['https://', 'http://'], '', $ul['gambar']);
+                                $link_proxy_ulasan = 'https://wsrv.nl/?url=' . $link_bersih_ulasan;
+                            ?>
+                                <div class="mb-4">
+                                    <img src="<?= htmlspecialchars($link_proxy_ulasan) ?>" 
+                                         class="w-full h-[140px] object-cover rounded-[12px] border border-gray-200 cursor-pointer hover:opacity-80 transition-all shadow-sm" 
+                                         onclick="openBuktiUlasan('<?= htmlspecialchars($link_proxy_ulasan) ?>')" 
+                                         alt="Foto Ulasan">
+                                </div>
+                            <?php endif; ?>
+                            
+                            <div class="action-buttons flex gap-2 mt-auto">
+                                </div>
+                        </div>
+                    </div>
+                    <?php endwhile; ?>
+                </div>
+            <?php else: ?>
+                <div class="flex flex-col items-center justify-center py-10 w-full">
+                    <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-10 text-center flex flex-col items-center justify-center w-full max-w-md mx-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                        <h3 class="text-lg font-bold text-gray-700 mb-1">Tidak Ada Ulasan</h3>
+                        <p class="text-gray-500 text-sm">Belum ada data ulasan untuk status <strong>"<?= ucfirst($filter_status) ?>"</strong> saat ini.</p>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+        </div>
     </main>
+
+
+<!-- 1. LOAD MESIN CHART -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- 2. JEMBATAN DATA (PASTIKAN NAMA VARIABEL SAMA DENGAN DI PHP ATAS) -->
+    <script>
+        // Jembatan Data PHP ke JS
+        window.labelGrafikSampah = <?= $json_labels_sampah ?>;
+        window.dataSampahBawa = <?= $json_data_bawa ?>;
+        window.dataSampahHilang = <?= $json_data_hilang ?>;
+        window.namaBulanPilih = "<?= $nama_bulan_pilih ?>";
+        
+        // Data untuk Grafik Status
+        const valBelum = <?= (int)$count_0 ?>;
+        const valMasih = <?= (int)$count_1 ?>;
+        const valPulang = <?= (int)$count_2 ?>;
+    </script>
+    <script src="/tancak-panti/js/admin.js"></script>
 
     <!-- SEMUA MODAL DILETAKKAN DI LUAR AREA TAB -->
 
@@ -600,14 +923,73 @@ if (file_exists($notif_file)) {
             </div>
         </div>
     </div>
+    
+    <div id="modal-bukti" class="fixed inset-0 z-[999] hidden items-center justify-center bg-black/90 backdrop-blur-md p-4 transition-all duration-300 opacity-0 pointer-events-none" onclick="closeBukti()">
+        <div class="relative w-full h-full flex items-center justify-center">
+            <button onclick="closeBukti()" class="absolute top-5 right-5 z-[1000] bg-white/20 hover:bg-red-500 text-white p-3 rounded-full transition-all shadow-lg">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            
+            <div class="flex items-center justify-center p-4" onclick="event.stopPropagation()">
+                <img id="img-bukti-full" src="" 
+                    class="max-w-[95vw] max-h-[90vh] object-contain rounded-lg shadow-2xl border-2 border-white/10 transform scale-95 transition-transform duration-300">
+            </div>
+
+            <div class="absolute bottom-6 text-white/50 text-[11px] tracking-widest uppercase">
+                Klik di mana saja untuk kembali
+            </div>
+        </div>
+    </div>
+    
     <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
         // Data Status Wisatawan
-        const dataStatusBelum = <?= isset($count_0) ? $count_0 : 0 ?>;
-        const dataStatusMasih = <?= isset($count_1) ? $count_1 : 0 ?>;
-        const dataStatusPulang = <?= isset($count_2) ? $count_2 : 0 ?>;
+        const valBelum = <?= $count_0 ?? 0 ?>;
+        const valMasih = <?= $count_1 ?? 0 ?>;
+        const valPulang = <?= $count_2 ?? 0 ?>;
+
+        // Data Kalender Sampah
+
+        const labelsKalenderSampah = <?= $json_labels_sampah ?>;
+        const dataTrenSampah = <?= $json_data_sampah ?>;
+    });
     </script>
 
-    <script src="../../js/admin.js"></script>
+    <!-- SCRIPT NAVIGASI TAB (Bebas Cache) -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        
+        if(tabButtons.length > 0) {
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault(); // Mencegah error bawaan tombol
+                    
+                    const targetId = this.getAttribute('data-target');
+                    
+                    // Reload halaman dan ganti URL tab-nya
+                    window.location.href = '?tab=' + targetId;
+                });
+            });
+        }
+    });
+    </script>
+
+    <script>
+    function openBuktiUlasan(src) {
+        const modalBukti = document.getElementById('modal-bukti');
+        const imgFull = document.getElementById('img-bukti-full');
+        if (src && src !== "") {
+            imgFull.src = src;
+            modalBukti.classList.remove('hidden'); 
+            setTimeout(() => {
+                modalBukti.classList.add('active');
+                document.body.style.overflow = 'hidden'; 
+            }, 10);
+        }
+    }
+    </script>
 
 </body>
 </html>

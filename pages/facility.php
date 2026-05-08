@@ -6,15 +6,15 @@
     <title>Facility - SI-TANCAK PANTI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../style/navbar.css">
-    <link rel="stylesheet" href="../style/facility.css"> 
+    <link rel="stylesheet" href="/tancak-panti/style/navbar.css">
+    <link rel="stylesheet" href="/tancak-panti/style/facility.css"> 
     <style>
         body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; background-color: #eff3f0; overflow-x: hidden; }
     </style>
 </head>
 <body>
 
-    <?php include '../components/navbar.php'; ?>
+    <?php include 'components/navbar.php'; ?>
     <!-- Kode Navbar Kamu Berakhir di Sini -->
     </nav> 
 
@@ -63,7 +63,7 @@
             </div>
         </section>
 
-<section class="max-w-7xl mx-auto px-6 lg:px-8 mb-16 tracking-section reveal-up" style="transition-delay: 0.2s;">
+        <section class="max-w-7xl mx-auto px-6 lg:px-8 mb-16 tracking-section reveal-up" style="transition-delay: 0.2s;">
             
             <!-- CSS Animasi -->
             <style>
@@ -100,7 +100,7 @@
                         <div class="space-y-4">
                             <div class="flex items-center space-x-4 bg-white/5 p-4 rounded-2xl">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#a8d5a2" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                <div><p class="text-xs text-white/50">Jarak Tempuh</p><p class="font-bold">± 2.5 KM</p></div>
+                                <div><p class="text-xs text-white/50">Jarak Tempuh</p><p class="font-bold">± 3.5 KM</p></div>
                             </div>
                             <div class="flex items-center space-x-4 bg-white/5 p-4 rounded-2xl">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#a8d5a2" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -155,7 +155,7 @@
                 
                 <div class="facility-card bg-white rounded-[24px] border border-gray-100 reveal-up flex flex-col" style="transition-delay: 0.1s;">
                     <div class="facility-img-wrapper">
-                        <img src="../assets/images/parkir.jpeg" class="facility-img" alt="Area Parkir">
+                        <img src="/tancak-panti/assets/images/parkir.jpeg" class="facility-img" alt="Area Parkir">
                         <div class="w-12 h-12 rounded-xl bg-[#e3efe8] text-[#2d6a4f] flex items-center justify-center shadow-lg">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="22" height="13" rx="2"/><path d="M7 21h10"/></svg>
                         </div>
@@ -168,7 +168,7 @@
 
                 <div class="facility-card bg-white rounded-[24px] border border-gray-100 reveal-up flex flex-col" style="transition-delay: 0.2s;">
                     <div class="facility-img-wrapper">
-                        <img src="../assets/images/Taman.jpeg" class="facility-img" alt="taman">
+                        <img src="/tancak-panti/assets/images/Taman.jpeg" class="facility-img" alt="taman">
                         <div class="w-12 h-12 rounded-xl bg-[#e3efe8] text-[#2d6a4f] flex items-center justify-center shadow-lg">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
                         </div>
@@ -181,7 +181,7 @@
 
                 <div class="facility-card bg-white rounded-[24px] border border-gray-100 reveal-up flex flex-col" style="transition-delay: 0.3s;">
                     <div class="facility-img-wrapper">
-                        <img src="../assets/images/wc.jpeg" class="facility-img" alt="Toilet">
+                        <img src="/tancak-panti/assets/images/wc.jpeg" class="facility-img" alt="Toilet">
                         <div class="w-12 h-12 rounded-xl bg-[#e3efe8] text-[#2d6a4f] flex items-center justify-center shadow-lg">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21V10"/><path d="M15 21V10"/><path d="M12 3a2 2 0 0 0-2 2v2h4V5a2 2 0 0 0-2-2Z"/><path d="M6 10h12"/><path d="M4 14h2"/><path d="M18 14h2"/></svg>
                         </div>
@@ -201,7 +201,7 @@
                 <p class="text-white/80 text-[15px] mb-8 max-w-xl mx-auto">
                     Nikmati seluruh fasilitas di atas hanya dengan membeli tiket masuk resmi melalui sistem online kami.
                 </p>
-                <a href="tiket.php" class="inline-block bg-white hover:bg-gray-100 text-[#1a3326] font-bold py-4 px-10 rounded-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                <a href="/tancak-panti/tiket" class="inline-block bg-white hover:bg-gray-100 text-[#1a3326] font-bold py-4 px-10 rounded-full transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                     Pesan Tiket Sekarang
                 </a>
             </div>
@@ -209,8 +209,8 @@
 
     </div>
 
-    <?php include '../components/footer.php'; ?>
-    <script src="../js/facility.js"></script>
-    <script src="../js/navbar.js"></script>
+    <?php include 'components/footer.php'; ?>
+    <script src="/tancak-panti/js/facility.js"></script>
+    <script src="/tancak-panti/js/navbar.js"></script>
 </body>
 </html>

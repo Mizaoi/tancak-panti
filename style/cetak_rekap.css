@@ -1,0 +1,40 @@
+
+    /* RESET & BASE */
+    * { 
+        box-sizing: border-box; 
+        -webkit-print-color-adjust: exact; /* UNTUK CHROME & SAFARI: Paksa munculkan warna */
+        print-color-adjust: exact;         /* STANDAR BARU: Agar warna background tidak hilang */
+    }
+    
+    body { font-family: 'Poppins', sans-serif; color: #1a3326; margin: 0; padding: 0; background: #fff; }
+
+    @page { 
+        size: A4 portrait; 
+        margin: 15mm; 
+    }
+
+    .page {
+        width: 100%;
+        page-break-after: always;
+    }
+    .page:last-child { page-break-after: auto; }
+
+    /* Pastikan warna-warna ini didefinisikan dengan jelas */
+    .section-title { 
+        background-color: #f4f9f6 !important; /* Gunakan !important jika masih membandel */
+        padding: 8px; 
+        border: 1px solid #d1f4e0; 
+        font-weight: bold;
+    }
+
+    th { 
+        background-color: #1a3326 !important; 
+        color: white !important; 
+    }
+
+    .total-banner { 
+        background-color: #1a3326 !important; 
+        color: white !important; 
+        padding: 15px; 
+        border-radius: 10px;
+    }

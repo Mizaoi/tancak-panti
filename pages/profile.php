@@ -8,8 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="../style/navbar.css">
-    <link rel="stylesheet" href="../style/profile.css"> <style>
+    <link rel="stylesheet" href="style/navbar.css">
+    <link rel="stylesheet" href="style/profile.css"> <style>
         body {
             font-family: 'Poppins', sans-serif;
             margin: 0;
@@ -21,7 +21,7 @@
 </head>
 <body>
 
-    <?php include '../components/navbar.php'; ?>
+    <?php include 'components/navbar.php'; ?>
     <!-- Kode Navbar Kamu Berakhir di Sini -->
     </nav> 
 
@@ -67,8 +67,8 @@
                 <div class="carousel-track relative w-full h-full bg-[#1a3326]">
                     
                     <div class="carousel-slide absolute inset-0 w-full h-full">
-                        <img src="../assets/images/slide1.jpeg" class="w-full h-full object-cover" alt="Air Terjun Tancak">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
+                        <img src="assets/images/slide1.jpeg" class="w-full h-full object-cover" alt="Air Terjun Tancak">
+                        <div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-10">
                             <h2 class="text-white text-3xl md:text-4xl font-bold mb-2">Air Terjun Tancak</h2>
                             <p class="text-white/80 flex items-center text-sm md:text-base">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> 
@@ -78,16 +78,16 @@
                     </div>
                     
                     <div class="carousel-slide absolute inset-0 w-full h-full">
-                        <img src="../assets/images/panorama2.jpeg" class="w-full h-full object-cover" alt="Suasana Tancak">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
+                        <img src="assets/images/panorama2.jpeg" class="w-full h-full object-cover" alt="Suasana Tancak">
+                        <div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-10">
                             <h2 class="text-white text-3xl md:text-4xl font-bold mb-2">Keindahan Alam Alami</h2>
                             <p class="text-white/80 text-sm md:text-base">Udara sejuk di kaki Gunung Argopuro</p>
                         </div>
                     </div>
 
                     <div class="carousel-slide absolute inset-0 w-full h-full">
-                        <img src="../assets/images/slide3.jpeg" class="w-full h-full object-cover" alt="Air Jernih Tancak">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
+                        <img src="assets/images/slide3.jpeg" class="w-full h-full object-cover" alt="Air Jernih Tancak">
+                        <div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-10">
                             <h2 class="text-white text-3xl md:text-4xl font-bold mb-2">Mata Air Pegunungan</h2>
                             <p class="text-white/80 text-sm md:text-base">Kesegaran air murni yang menenangkan jiwa</p>
                         </div>
@@ -145,7 +145,7 @@
             </div>
         </section>
 
-<section class="max-w-7xl mx-auto px-6 lg:px-8 mb-12 reveal-up">
+        <section class="max-w-7xl mx-auto px-6 lg:px-8 mb-12 reveal-up">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
                 <div class="bg-[#1e3a29] rounded-[24px] p-6 py-8 flex flex-col items-center justify-center text-white text-center shadow-lg">
@@ -183,7 +183,7 @@
             </div>
 
             <div class="mt-8 flex justify-center">
-                <a href="tiket.php" class="bg-[#2d6a4f] hover:bg-[#1a3326] text-white font-bold py-3 px-8 text-[14px] rounded-full transition-colors shadow-md hover:shadow-lg">
+                <a href="/tancak-panti/tiket" class="bg-[#2d6a4f] hover:bg-[#1a3326] text-white font-bold py-3 px-8 text-[14px] rounded-full transition-colors shadow-md hover:shadow-lg">
                     Pesan Tiket Sekarang
                 </a>
             </div>
@@ -191,10 +191,10 @@
 
     </div>
 
-    <?php include '../components/footer.php'; ?>
+    <?php include 'components/footer.php'; ?>
 
-    <script src="../js/navbar.js"></script>
-    <script src="../js/profile.js"></script>
+    <script src="/tancak-panti/js/navbar.js"></script>
+    <script src="/tancak-panti/js/profile.js"></script>
 
 </body>
 </html>

@@ -1,6 +1,5 @@
 <?php
-session_start();
-include '../config/koneksi.php';
+include 'config/koneksi.php';
 
 $tiket_found = false;
 $data_tiket = null;
@@ -55,18 +54,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cari_tiket'])) {
     <title>Cek Tiket - SI-TANCAK PANTI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../style/navbar.css">
-    <link rel="stylesheet" href="../style/cek_tiket.css">
+    <link rel="stylesheet" href="/tancak-panti/style/navbar.css">
+    <link rel="stylesheet" href="/tancak-panti/style/cek_tiket.css">
 </head>
 <body class="bg-[#eff3f0] font-[Poppins] flex flex-col min-h-screen">
 
-    <?php include '../components/navbar.php'; ?>
+    <?php include 'components/navbar.php'; ?>
     <!-- Kode Navbar Kamu Berakhir di Sini -->
     </nav> 
 
     <?php
         // Cek Status Darurat dari file JSON
-        $notif_file = 'config/status_darurat.json'; // Sesuaikan path folder config-nya jika file index ini ada di luar
+        $notif_file = 'config/status_darurat.json'; 
         $darurat_aktif = false;
         $pesan_darurat = '';
         
@@ -103,13 +102,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cari_tiket'])) {
                 <div id="main-tab-indicator" class="absolute top-0 bottom-0 left-0 w-1/2 bg-[#1a3326] transition-transform duration-[350ms] ease-in-out transform translate-x-full"></div>
 
                 <!-- Tab Inaktif (Menuju Halaman Beli) -->
-                <a href="tiket.php" id="link-to-beli" class="flex-1 py-4 flex justify-center items-center gap-2 font-semibold text-[14px] relative z-10 text-gray-500 hover:text-[#1a3326] transition-colors duration-300">
+                <a href="/tancak-panti/tiket" id="link-to-beli" class="flex-1 py-4 flex justify-center items-center gap-2 font-semibold text-[14px] relative z-10 text-gray-500 hover:text-[#1a3326] transition-colors duration-300">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     Pembelian Tiket
                 </a>
                 
                 <!-- Tab Aktif (Halaman Cek) -> Sekarang bisa diklik buat refresh -->
-                <a href="cek_tiket.php" class="flex-1 py-4 flex justify-center items-center gap-2 font-bold text-[14px] relative z-10 text-white transition-colors duration-300">
+                <a href="/tancak-panti/cek_tiket" class="flex-1 py-4 flex justify-center items-center gap-2 font-bold text-[14px] relative z-10 text-white transition-colors duration-300">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     Cek Tiket
                 </a>
@@ -169,10 +168,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cari_tiket'])) {
             </div>
 
             <?php else: ?>
-            <!-- ... (SISA KODE TAMPILAN E-TIKET SAMA PERSIS SEPERTI SEBELUMNYA) ... -->
+
             <div class="p-8 lg:p-10 bg-[#f8faf9]">
-                <!-- (Biarkan isi E-Tiket disini sama persis dengan kode cek_tiket.php sebelumnya) -->
-                <!-- Aku potong teksnya biar gak terlalu panjang, kamu tinggal sisipkan kode E-Tiket dari yang atas ya Cak -->
                 <div class="flex justify-center mb-5">
                     <div class="w-[60px] h-[60px] bg-[#1a3326] rounded-full flex items-center justify-center text-white shadow-sm">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
@@ -293,6 +290,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cari_tiket'])) {
         </div>
     </main>
 
-    <script src="../js/cek_tiket.js"></script>
+    <script src="/tancak-panti/js/cek_tiket.js"></script>
 </body>
 </html>

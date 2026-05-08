@@ -39,3 +39,60 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: #2d3748; 
 }
+
+/* ========================================== */
+/* ANIMASI HALAMAN RATING (TAMBAHAN BARU)     */
+/* ========================================== */
+
+/* 1. Animasi Form (Dari belakang ke depan / Zoom in) */
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.animate-pop-in {
+  animation: popIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 2. Animasi Ulasan (Dari Kanan ke Kiri) */
+@keyframes slideFromRight {
+  0% {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-left {
+    /* Harus ada 'forwards' supaya setelah gerak, opacity-nya tetep 1 (muncul) */
+    animation: slideFromRight 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    
+    /* Tambahan biar makin aman */
+    visibility: visible !important;
+}
+
+@keyframes slideFromRight {
+    0% {
+        opacity: 0;
+        transform: translateX(40px);
+    }
+    100% {
+        opacity: 1; /* Ini yang bakal nimpa style="opacity: 0" tadi */
+        transform: translateX(0);
+    }
+}
+
+/* Delay berurutan (Stagger) biar keluarnya satu-satu */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }

@@ -1,7 +1,6 @@
 <?php
-session_start();
-include '../config/koneksi.php';
-include '../config/wa.php'; // Di sini harus ada TOKEN_FONNTE dan TOKEN_IMGBB
+include 'config/koneksi.php';
+include 'config/wa.php'; // Di sini harus ada TOKEN_FONNTE dan TOKEN_IMGBB
 
 // 1. Deklarasi awal
 $show_ticket = false;
@@ -17,7 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_tiket'])) {
     $orang = (int)$_POST['jumlah_orang'];
     $telepon_1 = mysqli_real_escape_string($koneksi, $_POST['no_telp']);
     $telepon_2 = mysqli_real_escape_string($koneksi, $_POST['no_darurat']);
-    
+
+    if (!is_numeric($telepon_1) || strlen($telepon_1) < 11 || !is_numeric($telepon_2) || strlen($telepon_2) < 11) {
+    echo "<script>alert('KEDUA nomor telepon wajib diisi minimal 11 angka dan hanya boleh angka!'); window.history.back();</script>";
+    exit;
+}
+
     $kode_tiket = "TCK-" . strtoupper(substr(md5(time()), 0, 7));
 
     // Upload ke ImgBB
@@ -51,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_tiket'])) {
         }
 
         // KIRIM WA PAKAI TOKEN_FONNTE
-        $link_cek = "http://localhost/tancak-panti/pages/wisatawan/cek_tiket.php"; 
+        $link_cek = "http://localhost/tancak-panti/tancak-panti/cek_tiket"; 
             $pesan_wa = "✨ *YEAY! TIKETMU SUDAH SIAP* ✨\n\n";
             $pesan_wa .= "Halo, *" . $nama . "*! Terima kasih sudah mampir ke SI-TANCAK PANTI. Tiketmu sudah berhasil kami amankan, nih! 🎫🌿\n\n";
             $pesan_wa .= "━━━━━━━━━━━━━━\n";
@@ -78,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_tiket'])) {
         curl_close($curl);
 
         $_SESSION['beli_sukses_trigger'] = true;
-        header("Location: tiket.php");
+        header("Location: /tancak-panti/tiket");
         exit;
     }
 }
@@ -120,7 +124,7 @@ if (isset($_SESSION['beli_sukses_trigger'])) {
     <title>Beli Tiket - SI-TANCAK PANTI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../style/navbar.css">
+    <link rel="stylesheet" href="style/navbar.css">
     <style>
     input[type=number]::-webkit-inner-spin-button, 
     input[type=number]::-webkit-outer-spin-button { 
@@ -132,7 +136,7 @@ if (isset($_SESSION['beli_sukses_trigger'])) {
 </head>
 <body class="bg-[#eff3f0] font-[Poppins] flex flex-col min-h-screen">
 
-    <?php include '../components/navbar.php'; ?>
+    <?php include 'components/navbar.php'; ?>
     </nav> 
 
     <?php
@@ -169,12 +173,12 @@ if (isset($_SESSION['beli_sukses_trigger'])) {
             <div class="relative flex border-b border-gray-100 bg-white">
                 <div id="main-tab-indicator" class="absolute top-0 bottom-0 left-0 w-1/2 bg-[#1a3326] transition-transform duration-[350ms] ease-in-out transform translate-x-0"></div>
 
-                <a href="tiket.php" class="flex-1 py-4 flex justify-center items-center gap-2 font-bold text-[14px] relative z-10 text-white transition-colors duration-300">
+                <a href="/tancak-panti/tiket" class="flex-1 py-4 flex justify-center items-center gap-2 font-bold text-[14px] relative z-10 text-white transition-colors duration-300">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     Pembelian Tiket
                 </a>
                 
-                <a href="cek_tiket.php" id="link-to-cek" class="flex-1 py-4 flex justify-center items-center gap-2 font-semibold text-[14px] relative z-10 text-gray-500 hover:text-[#1a3326] transition-colors duration-300">
+                <a href="/tancak-panti/cek_tiket" id="link-to-cek" class="flex-1 py-4 flex justify-center items-center gap-2 font-semibold text-[14px] relative z-10 text-gray-500 hover:text-[#1a3326] transition-colors duration-300">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     Cek Tiket
                 </a>
@@ -298,7 +302,7 @@ if (isset($_SESSION['beli_sukses_trigger'])) {
             <div class="p-8 lg:p-10">
                 <h2 class="text-[22px] font-bold text-[#1a3326] text-center mb-10 tracking-tight">Pembelian Tiket Air Terjun Tancak Panti</h2>
 
-                <form action="" method="POST" enctype="multipart/form-data">
+                <form action="" method="POST" enctype="multipart/form-data" id="form-beli-tiket">
                     <div class="space-y-5 mb-10">
                         <div class="grid grid-cols-3 items-center gap-4">
                             <label class="font-bold text-[#1a3326] text-[14px]">Nama <span class="text-red-500 font-bold">*</span></label>
@@ -325,14 +329,30 @@ if (isset($_SESSION['beli_sukses_trigger'])) {
                         <div class="grid grid-cols-3 items-start gap-4">
                             <label class="font-bold text-[#1a3326] text-[14px] mt-3">No. Telepon <span class="text-red-500 font-bold">*</span></label>
                             <div class="col-span-2 relative">
-                                <input type="text" id="input-telp1" name="no_telp" required placeholder="No. WA Aktif (min. 11 digit)" class="w-full bg-[#f8faf9] border border-gray-200 rounded-[12px] px-4 py-3 text-[14px] outline-none pr-14 transition-all">
+                                <input type="text" 
+                                        id="input-telp1" 
+                                        name="no_telp" 
+                                        required 
+                                        minlength="11" 
+                                        maxlength="15" 
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
+                                        placeholder="No. WA Aktif (min. 11 digit)" 
+                                        class="w-full bg-[#f8faf9] border border-gray-200 rounded-[12px] px-4 py-3 text-[14px] outline-none pr-14 transition-all">
                                 <span id="counter-telp1" class="absolute right-4 top-4 text-[11px] text-gray-400 font-bold transition-colors">0/11</span>
                             </div>
                         </div>
                         <div class="grid grid-cols-3 items-start gap-4">
                             <label class="font-bold text-[#1a3326] text-[14px] mt-3">No. Darurat <span class="text-red-500 font-bold">*</span>  </label>
                             <div class="col-span-2 relative">
-                                <input type="text" id="input-telp2" name="no_darurat" required placeholder="No. Orang Terdekat" class="w-full bg-[#f8faf9] border border-gray-200 rounded-[12px] px-4 py-3 text-[14px] outline-none pr-14 transition-all">
+                                <input type="text" 
+                                        id="input-telp2" 
+                                        name="no_darurat" 
+                                        required 
+                                        minlength="11" 
+                                        maxlength="15" 
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
+                                        placeholder="No. Orang Terdekat (min. 11 digit)" 
+                                        class="w-full bg-[#f8faf9] border border-gray-200 rounded-[12px] px-4 py-3 text-[14px] outline-none pr-14 transition-all">
                                 <span id="counter-telp2" class="absolute right-4 top-4 text-[11px] text-gray-400 font-bold transition-colors">0/11</span>
                             </div>
                         </div>
@@ -449,14 +469,23 @@ if (isset($_SESSION['beli_sukses_trigger'])) {
                         </p>
                     </div>
 
-                    <button type="submit" name="submit_tiket" class="w-full bg-[#1b3d2f] text-white font-semibold text-[15px] py-4 rounded-[12px] flex items-center justify-center gap-2 hover:bg-[#122b21] transition-all shadow-sm active:scale-[0.98]">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                           <path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                        </svg>
-                        Beli Tiket
-                    </button>
-                </form>
-            </div>
+                    <div class="mt-8 pt-6 border-t border-gray-100">
+                        
+                        <div class="px-6 md:px-10"> 
+                            
+                            <button type="submit" 
+                                    name="submit_tiket" 
+                                    id="btn-submit-tiket" 
+                                    class="w-full bg-[#1b3d2f] text-white font-semibold text-[15px] h-[58px] rounded-[12px] flex items-center justify-center gap-2 hover:bg-[#122b21] transition-all shadow-sm active:scale-[0.98]">
+                                Beli Tiket Sekarang
+                            </button>
+                            
+                            <p class="text-center text-[11px] text-gray-400 mt-4 leading-relaxed italic">
+                                *Mohon periksa kembali data kunjungan Anda sebelum melanjutkan proses pembuatan tiket.
+                            </p>
+                            
+                        </div>
+                    </div>
             
             <?php endif; ?>
 
@@ -480,7 +509,7 @@ if (isset($_SESSION['beli_sukses_trigger'])) {
             </p>
             
             <div class="flex flex-col gap-3">
-                <a href="cek_tiket.php" class="w-full bg-[#1a3326] hover:bg-[#12241b] text-white py-3.5 rounded-[14px] text-[14px] font-bold shadow-md transition-all flex items-center justify-center gap-2">
+                <a href="/tancak-panti/cek_tiket" class="w-full bg-[#1a3326] hover:bg-[#12241b] text-white py-3.5 rounded-[14px] text-[14px] font-bold shadow-md transition-all flex items-center justify-center gap-2">
                     Cek E-Tiket Sekarang
                 </a>
                 <button onclick="tutupModalSukses()" class="w-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 py-3.5 rounded-[14px] text-[14px] font-bold transition-all">
@@ -522,15 +551,25 @@ if (isset($_SESSION['beli_sukses_trigger'])) {
         setupTelp('input-telp2', 'counter-telp2');
 
         // Loading Animasi Tombol (Fitur Asli)
-        const form = document.getElementById('form-beli-tiket');
-        if(form) {
-            form.addEventListener('submit', function() {
-                const btn = document.getElementById('btn-submit-tiket');
-                btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white inline-block mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memproses...`;
-                btn.classList.add('opacity-80', 'cursor-not-allowed');
-                btn.style.pointerEvents = 'none';
-            });
-        }
+        const formTiket = document.getElementById('form-beli-tiket');
+        const btnSubmit = document.getElementById('btn-submit-tiket');
+
+        if (formTiket && btnSubmit) {
+            formTiket.addEventListener('submit', function(e) {
+            if (formTiket.checkValidity()) {
+                btnSubmit.innerHTML = `
+                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Memproses...</span>
+                `;
+                btnSubmit.style.pointerEvents = 'none'; // Biar gak diklik berkali-kali
+            } else {
+                e.preventDefault(); // Cegah submit kalau form gak valid
+            }
+        });
+    }
 
         // Trigger Modal Sukses
         if(sessionStorage.getItem('beli_sukses')) {
