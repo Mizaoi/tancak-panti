@@ -1,70 +1,27 @@
 <?php
 include 'config/koneksi.php';
+
 // Proteksi Halaman Admin
 if (!isset($_SESSION['admin'])) {
     header("Location: /tancak-panti/admin/login");
     exit;
 }
 
-// --- [LOGIKA GRAFIK SAMPAH BULANAN - VERSI FIX] ---
-$selected_month = isset($_GET['bulan']) ? $_GET['bulan'] : date('Y-m');
-$tahun_pilih = date('Y', strtotime($selected_month . "-01"));
-$bulan_pilih = date('m', strtotime($selected_month . "-01"));
-$jumlah_hari = cal_days_in_month(CAL_GREGORIAN, $bulan_pilih, $tahun_pilih);
-
-// Ambil data bawa dari tabel sampah & data hilang dari tabel denda
-$query_tren = mysqli_query($koneksi, "
-    SELECT 
-        t.tanggal_kunjungan,
-        (SELECT IFNULL(SUM(jumlah), 0) FROM sampah s WHERE s.id_tiket IN (SELECT id_tiket FROM tiket WHERE tanggal_kunjungan = t.tanggal_kunjungan)) as total_bawa,
-        (SELECT IFNULL(SUM(jumlah_hilang), 0) FROM denda d WHERE d.id_tiket IN (SELECT id_tiket FROM tiket WHERE tanggal_kunjungan = t.tanggal_kunjungan)) as total_hilang
-    FROM tiket t
-    WHERE t.tanggal_kunjungan LIKE '$selected_month%'
-    GROUP BY t.tanggal_kunjungan
-");
-
-$data_db = [];
-while($row = mysqli_fetch_assoc($query_tren)) {
-    $data_db[$row['tanggal_kunjungan']] = $row;
-}
-
-$labels_sampah = [];
-$data_bawa = [];
-$data_hilang = [];
-
-for($d = 1; $d <= $jumlah_hari; $d++) {
-    $tgl_cek = $selected_month . "-" . str_pad($d, 2, '0', STR_PAD_LEFT);
-    $labels_sampah[] = $d; 
-    $data_bawa[] = isset($data_db[$tgl_cek]) ? (int)$data_db[$tgl_cek]['total_bawa'] : 0;
-    $data_hilang[] = isset($data_db[$tgl_cek]) ? (int)$data_db[$tgl_cek]['total_hilang'] : 0;
-}
-
-// Encode untuk JS
-$json_labels_sampah = json_encode($labels_sampah);
-$json_data_bawa = json_encode($data_bawa);
-$json_data_hilang = json_encode($data_hilang);
-$nama_bulan_pilih = date('F Y', strtotime($selected_month.'-01'));
-
-$data_db = [];
-while($row = mysqli_fetch_assoc($query_tren)) {
-    $data_db[$row['tanggal_kunjungan']] = $row;
-}
-
-$labels_sampah = [];
-$data_bawa = [];
-$data_hilang = [];
-
-for($d = 1; $d <= $jumlah_hari; $d++) {
-    $tgl_cek = $selected_month . "-" . str_pad($d, 2, '0', STR_PAD_LEFT);
-    $labels_sampah[] = $d; 
-    $data_bawa[] = isset($data_db[$tgl_cek]) ? (int)$data_db[$tgl_cek]['total_bawa'] : 0;
-    $data_hilang[] = isset($data_db[$tgl_cek]) ? (int)$data_db[$tgl_cek]['total_hilang'] : 0;
-}
-
+$username = $_SESSION['admin'];
 $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'tab-data';
 
-$username = $_SESSION['admin'];
+// ==========================================
+// 1. KUNCI FILTER BULAN (Satu untuk Semua)
+// ==========================================
+$selected_month = isset($_GET['bulan']) ? $_GET['bulan'] : date('Y-m');
+$tahun_f = date('Y', strtotime($selected_month . "-01"));
+$bulan_f = date('m', strtotime($selected_month . "-01"));
+$jumlah_hari = cal_days_in_month(CAL_GREGORIAN, $bulan_f, $tahun_f);
+$nama_bulan_pilih = date('F Y', strtotime($selected_month . '-01'));
 
+// ==========================================
+// 2. FUNGSI & FITUR LAIN (TETAP AMAN)
+// ==========================================
 // Fungsi format nomor WhatsApp
 function formatWA($nomor) {
     $nomor = preg_replace('/[^0-9]/', '', $nomor); 
@@ -78,145 +35,13 @@ function formatWA($nomor) {
     return $nomor;
 }
 
-// Hitung data untuk kotak indikator
-$query_count_0 = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM tiket WHERE status = 'Belum Check-in'");
-$count_0 = $query_count_0 ? mysqli_fetch_assoc($query_count_0)['total'] : 0;
-
-$query_count_1 = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM tiket WHERE status = 'Masih di Wisata'");
-$count_1 = $query_count_1 ? mysqli_fetch_assoc($query_count_1)['total'] : 0;
-
-$query_count_2 = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM tiket WHERE status = 'Sudah Pulang'");
-$count_2 = $query_count_2 ? mysqli_fetch_assoc($query_count_2)['total'] : 0;
-
-// Ambil semua data tiket
-$query = mysqli_query($koneksi, "SELECT * FROM tiket ORDER BY id_tiket DESC");
-
-// ==========================================
-// [DATA REKAP] 4 KOTAK INDIKATOR KECIL
-// ==========================================
-// 1. Total Tiket
-$q_tot_tiket = mysqli_query($koneksi, "SELECT COUNT(id_tiket) as jml_tiket FROM tiket");
-$tot_tiket = ($q_tot_tiket) ? mysqli_fetch_assoc($q_tot_tiket)['jml_tiket'] : 0;
-
-// 2. Total Orang
-$q_tot_orang = mysqli_query($koneksi, "SELECT SUM(orang) as jml_orang FROM tiket");
-$tot_orang = ($q_tot_orang) ? mysqli_fetch_assoc($q_tot_orang)['jml_orang'] : 0;
-
-// 3. Total Pemasukan (Harga Tiket Rp 6.500 / orang)
-$tot_pemasukan = $tot_orang * 6500;
-
-// 4. Total Denda (Total semua denda di tabel denda)
-$q_tot_denda = mysqli_query($koneksi, "SELECT SUM(total_denda) as jml_denda FROM denda");
-$tot_denda = ($q_tot_denda) ? mysqli_fetch_assoc($q_tot_denda)['jml_denda'] : 0;
-
-// ==========================================
-// [FITUR BARU] CEK INGATAN NOTIF DARURAT
-// ==========================================
+// Cek Ingatan Notif Darurat
 $notif_file = 'config/status_darurat.json';
 $darurat_aktif = false;
 $pesan_darurat = '';
 $waktu_darurat = '00.00';
 $dikirim_ke = 0;
 
-
-$jumlah_hari = date('t'); // Otomatis mendeteksi total hari bulan ini (28-31)[cite: 4]
-$label_tgl_array = [];
-$data_sampah_array = array_fill(0, $jumlah_hari, 0); // Siapkan array isi 0 sebanyak jumlah hari
-
-for ($i = 1; $i <= $jumlah_hari; $i++) {
-    $label_tgl_array[] = $i; // Label tanggal 1, 2, 3, dst[cite: 4]
-}
-
-// ==========================================
-// [DATA GRAFIK] TREN SAMPAH HARIAN
-// ==========================================
-// 1. Ambil bulan dari URL (jika ada), kalau tidak pakai bulan ini
-$active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'tab-data';
-
-// ==========================================
-// [FITUR BARU] HITUNG ULASAN PENDING UNTUK NOTIFIKASI
-// ==========================================
-$q_pending = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM ulasan WHERE status = 'pending'");
-$pending_count = $q_pending ? mysqli_fetch_assoc($q_pending)['total'] : 0;
-
-// ==========================================
-// KUNCI FILTER BULAN UNTUK SEMUA DATA
-// ==========================================
-$bulan_filter = isset($_GET['bulan']) ? $_GET['bulan'] : date('Y-m');
-$bulan_f = date('m', strtotime($bulan_filter));
-$tahun_f = date('Y', strtotime($bulan_filter));
-
-// 1. Hitung data untuk 3 Kotak Indikator Status & Tabel Wisatawan
-$query_count_0 = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM tiket WHERE status = 'Belum Check-in' AND MONTH(tanggal_kunjungan) = '$bulan_f' AND YEAR(tanggal_kunjungan) = '$tahun_f'");
-$count_0 = $query_count_0 ? mysqli_fetch_assoc($query_count_0)['total'] : 0;
-
-$query_count_1 = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM tiket WHERE status = 'Masih di Wisata' AND MONTH(tanggal_kunjungan) = '$bulan_f' AND YEAR(tanggal_kunjungan) = '$tahun_f'");
-$count_1 = $query_count_1 ? mysqli_fetch_assoc($query_count_1)['total'] : 0;
-
-$query_count_2 = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM tiket WHERE status = 'Sudah Pulang' AND MONTH(tanggal_kunjungan) = '$bulan_f' AND YEAR(tanggal_kunjungan) = '$tahun_f'");
-$count_2 = $query_count_2 ? mysqli_fetch_assoc($query_count_2)['total'] : 0;
-
-// Tabel Utama Data Wisatawan (Ikut difilter)
-$query = mysqli_query($koneksi, "SELECT * FROM tiket WHERE MONTH(tanggal_kunjungan) = '$bulan_f' AND YEAR(tanggal_kunjungan) = '$tahun_f' ORDER BY id_tiket DESC");
-
-// 2. Hitung 4 Kotak Rekap Kecil (Tiket, Orang, Pemasukan, Denda)
-$q_tot_tiket = mysqli_query($koneksi, "SELECT COUNT(id_tiket) as jml_tiket FROM tiket WHERE MONTH(tanggal_kunjungan) = '$bulan_f' AND YEAR(tanggal_kunjungan) = '$tahun_f'");
-$tot_tiket = ($q_tot_tiket) ? mysqli_fetch_assoc($q_tot_tiket)['jml_tiket'] : 0;
-
-$q_tot_orang = mysqli_query($koneksi, "SELECT SUM(orang) as jml_orang FROM tiket WHERE MONTH(tanggal_kunjungan) = '$bulan_f' AND YEAR(tanggal_kunjungan) = '$tahun_f'");
-$tot_orang = ($q_tot_orang) ? mysqli_fetch_assoc($q_tot_orang)['jml_orang'] : 0;
-
-$tot_pemasukan = $tot_orang * 6500;
-
-// Denda dihubungkan ke tiket agar bisa difilter bulannya
-$q_tot_denda = mysqli_query($koneksi, "SELECT SUM(d.total_denda) as jml_denda FROM denda d JOIN tiket t ON d.id_tiket = t.id_tiket WHERE MONTH(t.tanggal_kunjungan) = '$bulan_f' AND YEAR(t.tanggal_kunjungan) = '$tahun_f'");
-$tot_denda = ($q_tot_denda) ? mysqli_fetch_assoc($q_tot_denda)['jml_denda'] : 0;
-
-// ==========================================
-// 3. [DATA GRAFIK] TREN SAMPAH HARIAN
-// ==========================================
-$jumlah_hari = date('t', strtotime($bulan_filter . '-01')); 
-$labels_tgl = [];
-$data_sampah_array = array_fill(0, $jumlah_hari, 0); 
-
-for ($i = 1; $i <= $jumlah_hari; $i++) {
-    $labels_tgl[] = $i . ' ' . date('M', strtotime($bulan_filter . '-01')); 
-}
-
-$q_grafik_sampah = mysqli_query($koneksi, "
-    SELECT 
-        DAY(t.tanggal_kunjungan) as hari, 
-        SUM(s.jumlah) as total_qty 
-    FROM tiket t
-    JOIN sampah s ON t.id_tiket = s.id_tiket
-    WHERE MONTH(t.tanggal_kunjungan) = '$bulan_f' 
-      AND YEAR(t.tanggal_kunjungan) = '$tahun_f'
-    GROUP BY DAY(t.tanggal_kunjungan)
-");
-
-// Ambil data dari database KHUSUS untuk bulan dan tahun saat ini
-$q_grafik = mysqli_query($koneksi, "
-    SELECT DAY(t.tanggal_kunjungan) as hari, SUM(d.total_denda) as denda_harian
-    FROM tiket t
-    LEFT JOIN denda d ON t.id_tiket = d.id_tiket
-    WHERE MONTH(t.tanggal_kunjungan) = MONTH(CURDATE()) 
-      AND YEAR(t.tanggal_kunjungan) = YEAR(CURDATE())
-    GROUP BY DAY(t.tanggal_kunjungan)
-");
-
-// Cocokkan data dari database ke tanggal di kalender grafik
-if ($q_grafik && mysqli_num_rows($q_grafik) > 0) {
-    while($rg = mysqli_fetch_assoc($q_grafik)) {
-        $hari_kunjungan = (int)$rg['hari']; // Dapat tanggal ke berapa (misal: 15)
-        $denda = $rg['denda_harian'] ? $rg['denda_harian'] : 0;
-        
-        // Masukkan data ke array sesuai index tanggalnya (index array mulai dari 0, jadi hari - 1)
-        $data_jml_hilang[$hari_kunjungan - 1] = (int)($denda / 10000); // Rp 10.000 = 1 item sampah
-    }
-}
-
-// Ubah format menjadi JSON untuk dibaca oleh JavaScript
-$json_data_hilang = json_encode($data_jml_hilang);
 if (file_exists($notif_file)) {
     $data_json = json_decode(file_get_contents($notif_file), true);
     if (isset($data_json['aktif']) && $data_json['aktif'] === true) {
@@ -226,7 +51,85 @@ if (file_exists($notif_file)) {
         $dikirim_ke = isset($data_json['dikirim_ke']) ? $data_json['dikirim_ke'] : 0;
     }
 }
-?>
+
+// Hitung Ulasan Pending untuk Notifikasi
+$q_pending = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM ulasan WHERE status = 'pending'");
+$pending_count = $q_pending ? mysqli_fetch_assoc($q_pending)['total'] : 0;
+
+
+// ==========================================
+// 3. TABEL WISATAWAN & INDIKATOR KUNJUNGAN
+// ==========================================
+$query_count_0 = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM tiket WHERE status = 'Belum Check-in' AND tanggal_kunjungan LIKE '$selected_month%'");
+$count_0 = $query_count_0 ? mysqli_fetch_assoc($query_count_0)['total'] : 0;
+
+$query_count_1 = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM tiket WHERE status = 'Masih di Wisata' AND tanggal_kunjungan LIKE '$selected_month%'");
+$count_1 = $query_count_1 ? mysqli_fetch_assoc($query_count_1)['total'] : 0;
+
+$query_count_2 = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM tiket WHERE status = 'Sudah Pulang' AND tanggal_kunjungan LIKE '$selected_month%'");
+$count_2 = $query_count_2 ? mysqli_fetch_assoc($query_count_2)['total'] : 0;
+
+// Tabel Utama Data Wisatawan
+$query = mysqli_query($koneksi, "SELECT * FROM tiket WHERE tanggal_kunjungan LIKE '$selected_month%' ORDER BY tanggal_kunjungan DESC, id_tiket ASC");
+
+
+// ==========================================
+// 4. DATA REKAP KEUANGAN (4 KOTAK KECIL)
+// ==========================================
+$q_tot_tiket = mysqli_query($koneksi, "SELECT COUNT(id_tiket) as jml_tiket FROM tiket WHERE tanggal_kunjungan LIKE '$selected_month%'");
+$tot_tiket = ($q_tot_tiket) ? mysqli_fetch_assoc($q_tot_tiket)['jml_tiket'] : 0;
+
+$q_tot_orang = mysqli_query($koneksi, "SELECT SUM(orang) as jml_orang FROM tiket WHERE tanggal_kunjungan LIKE '$selected_month%'");
+$tot_orang = ($q_tot_orang) ? mysqli_fetch_assoc($q_tot_orang)['jml_orang'] : 0;
+
+$tot_pemasukan = $tot_orang * 6500;
+
+// Denda dihubungkan ke tiket agar bisa difilter bulannya
+$q_tot_denda = mysqli_query($koneksi, "SELECT SUM(d.total_denda) as jml_denda FROM denda d JOIN tiket t ON d.id_tiket = t.id_tiket WHERE t.tanggal_kunjungan LIKE '$selected_month%'");
+$tot_denda = ($q_tot_denda) ? mysqli_fetch_assoc($q_tot_denda)['jml_denda'] : 0;
+
+
+// ==========================================
+// 5. DATA GRAFIK (DIJADIKAN SATU BIAR KENCANG)
+// ==========================================
+// Siapkan array kosong sesuai jumlah hari pada bulan yang dipilih
+$labels_sampah = [];
+$data_bawa = array_fill(0, $jumlah_hari, 0); 
+$data_hilang = array_fill(0, $jumlah_hari, 0);
+
+for ($i = 1; $i <= $jumlah_hari; $i++) {
+    $labels_sampah[] = $i;
+}
+
+// Kueri gabungan yang sudah PASTI ngikutin Filter Bulan
+$query_tren = mysqli_query($koneksi, "
+    SELECT 
+        DAY(t.tanggal_kunjungan) as hari,
+        (SELECT IFNULL(SUM(jumlah), 0) FROM sampah s WHERE s.id_tiket IN (SELECT id_tiket FROM tiket WHERE tanggal_kunjungan = t.tanggal_kunjungan)) as total_bawa,
+        (SELECT IFNULL(SUM(jumlah_hilang), 0) FROM denda d WHERE d.id_tiket IN (SELECT id_tiket FROM tiket WHERE tanggal_kunjungan = t.tanggal_kunjungan)) as total_hilang
+    FROM tiket t
+    WHERE t.tanggal_kunjungan LIKE '$selected_month%'
+    GROUP BY t.tanggal_kunjungan
+");
+
+// Masukkan data dari DB ke dalam array yang sudah kita siapkan
+if ($query_tren) {
+    while($row = mysqli_fetch_assoc($query_tren)) {
+        $hari_index = (int)$row['hari'] - 1; // Karena array mulai dari 0
+        $data_bawa[$hari_index] = (int)$row['total_bawa'];
+        $data_hilang[$hari_index] = (int)$row['total_hilang'];
+    }
+}
+
+// Encode untuk dikirim ke Javascript
+$json_labels_sampah = json_encode($labels_sampah);
+$json_data_bawa = json_encode($data_bawa);
+$json_data_hilang = json_encode($data_hilang);
+
+// Khusus karena di file JS grafik sampeyan kadang butuh nama variabel ini
+$json_data_sampah = $json_data_hilang; 
+
+?> 
 
 <!DOCTYPE html>
 <html lang="id">
@@ -346,8 +249,8 @@ if (file_exists($notif_file)) {
                     <input type="text" id="main-search" placeholder="Cari tiket, nama, no telp, status..." class="w-full text-[13px] outline-none bg-transparent font-medium text-gray-700 placeholder-gray-400">
                 </div>
                 <div class="flex items-center gap-2 border-t md:border-t-0 md:border-l border-gray-200 pt-2 md:pt-0 md:pl-4 w-full md:w-auto">
-                    <span class="text-[12px] text-gray-600 font-semibold whitespace-nowrap">Filter:</span>
-                    <input type="date" id="date-filter" class="bg-gray-50 border border-gray-200 rounded-[8px] px-2 py-1.5 text-[12px] font-medium outline-none focus:border-[#2d6a4f] text-gray-700 w-full md:w-auto cursor-pointer">
+                    <span class="text-[12px] text-gray-600 font-bold whitespace-nowrap">Filter Bulan:</span>
+                    <input type="month" id="month-filter-tab1" value="<?= isset($_GET['bulan']) ? $_GET['bulan'] : date('Y-m'); ?>" onchange="window.location.href='/tancak-panti/admin/dashboard?tab=tab-data&bulan=' + this.value" class="bg-[#f4f9f6] border border-[#1b3d2f] rounded-[8px] px-2 py-1.5 text-[12px] font-bold text-[#1b3d2f] outline-none cursor-pointer">
                 </div>
             </div>
 
@@ -471,6 +374,11 @@ if (file_exists($notif_file)) {
                         <?php endif; ?>
                     </tbody>
                 </table>
+                <div class="px-5 py-4 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between bg-white w-full gap-4">
+                    <span id="page-info" class="text-[13px] text-gray-500 font-medium tracking-wide">Menampilkan 0 tiket</span>
+                    <div id="pagination-controls" class="flex items-center gap-2">
+                        </div>
+                </div>
             </div>
         </div>
 
@@ -488,11 +396,11 @@ if (file_exists($notif_file)) {
                 <div class="flex items-center gap-3 w-full md:w-auto">
                     <!-- Filter Bulan -->
                     <div class="bg-white border border-gray-200 rounded-[10px] px-3 py-2 flex items-center shadow-sm w-full md:w-auto">
-                        <input type="month" id="filter-bulan-rekap" value="<?= isset($_GET['bulan']) ? $_GET['bulan'] : date('Y-m'); ?>" class="text-[13px] text-gray-600 font-medium outline-none bg-transparent cursor-pointer w-full">
+                        <input type="month" id="filter-bulan-rekap" value="<?= isset($_GET['bulan']) ? $_GET['bulan'] : date('Y-m'); ?>" onchange="window.location.href='/tancak-panti/admin/dashboard?tab=tab-rekap&bulan=' + this.value" class="text-[13px] text-gray-600 font-medium outline-none bg-transparent cursor-pointer w-full">
                     </div>
                     <!-- Tombol Cetak -->
                     <button onclick="cetakLaporan()" class="bg-[#1a3326] hover:bg-[#12241b] text-white px-5 py-2.5 rounded-[10px] text-[13px] font-bold flex items-center gap-2 transition-colors shadow-sm whitespace-nowrap">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 ２ 0 00-２ ２v４h１０z"></path></svg>
                         Cetak Rekap
                     </button>
 
@@ -537,7 +445,7 @@ if (file_exists($notif_file)) {
             </div>
 
             <!-- 3 KOTAK STATUS BESAR -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                 <div class="bg-[#fef2f2] rounded-[16px] p-6 text-center shadow-sm border border-red-100">
                     <div class="text-[#dc2626] text-[40px] font-black leading-none mb-2"><?= $count_0 ?></div>
                     <div class="text-red-600 text-[12px] font-bold tracking-wide">Belum Check-in</div>
@@ -552,7 +460,18 @@ if (file_exists($notif_file)) {
                 </div>
             </div>
 
-            <!-- SEKSI BARU: TABEL SAMPAH/BENDA KETINGGALAN -->
+            <div class="bg-white rounded-[16px] border border-gray-200 p-6 mb-8 shadow-sm">
+                <div class="mb-5">
+                    <h3 class="font-bold text-[15px] text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-chart-bar text-[#10b981]"></i> Distribusi Status Wisatawan</h3>
+                    <p class="text-[12px] text-gray-500 mt-0.5">Perbandingan total akumulasi tiket berdasarkan status</p>
+                </div>
+
+                <div class="w-full h-[220px]">
+                    <canvas id="chartStatusWisatawan"></canvas>
+                </div>
+            </div>
+
             <div class="bg-[#fff5f5] rounded-[20px] p-6 mb-8 border border-red-100 shadow-sm">
                 <div class="flex items-center gap-4 mb-5">
                     <div class="bg-[#ef4444] text-white p-3 rounded-[12px] shadow-sm flex items-center justify-center">
@@ -620,21 +539,6 @@ if (file_exists($notif_file)) {
                 </div>
             </div>
 
-            <!-- ========================================== -->
-            <!-- 1. GRAFIK STATUS WISATAWAN -->
-            <!-- ========================================== -->
-            <div class="bg-white rounded-[16px] border border-gray-200 p-6 mb-8 shadow-sm">
-                <div class="mb-5">
-                    <h3 class="font-bold text-[15px] text-gray-800 flex items-center gap-2">
-                        <i class="fas fa-chart-bar text-[#10b981]"></i> Distribusi Status Wisatawan</h3>
-                    <p class="text-[12px] text-gray-500 mt-0.5">Perbandingan total akumulasi tiket berdasarkan status</p>
-                </div>
-
-                    <div class="w-full h-[220px]">
-                    <canvas id="chartStatusWisatawan"></canvas>
-                </div>
-            </div>
-            
             <div class="bg-white rounded-[16px] border border-gray-200 p-6 mb-8 shadow-sm">
                 <div class="mb-5 flex justify-between items-center">
                     <div>
@@ -649,11 +553,11 @@ if (file_exists($notif_file)) {
                 </div>
             </div>
         </div>
-
+        
         <!-- ========================================== -->
         <!-- ISI TAB 3: MODERASI ULASAN -->
         <!-- ========================================== -->
-<div id="tab-ulasan" class="tab-content <?= $active_tab == 'tab-ulasan' ? 'active' : '' ?>">
+        <div id="tab-ulasan" class="tab-content <?= $active_tab == 'tab-ulasan' ? 'active' : '' ?>">
             
             <?php
             // ==========================================
@@ -663,7 +567,7 @@ if (file_exists($notif_file)) {
 
             // Kueri menyesuaikan tab yang diklik
             if ($filter_status == 'menunggu') {
-                $query_ulasan = mysqli_query($koneksi, "SELECT * FROM ulasan WHERE status = 'menunggu' ORDER BY id_ulasan DESC");
+                $query_ulasan = mysqli_query($koneksi, "SELECT * FROM ulasan WHERE status = 'pending' ORDER BY id_ulasan DESC");
             } elseif ($filter_status == 'disetujui') {
                 $query_ulasan = mysqli_query($koneksi, "SELECT * FROM ulasan WHERE status = 'setuju' ORDER BY id_ulasan DESC");
             } elseif ($filter_status == 'ditolak') {
@@ -703,7 +607,8 @@ if (file_exists($notif_file)) {
                     <div class="ulasan-card bg-white rounded-[20px] shadow-sm overflow-hidden flex flex-col border border-gray-100 transition-all duration-300" data-status="<?= $status_db ?>" data-id="<?= $ul['id_ulasan'] ?>">
                         
                         <div class="status-ribbon px-4 py-2.5 flex items-center justify-between text-[11px] font-extrabold uppercase tracking-widest border-b transition-colors duration-300">
-                            </div>
+                            <?= htmlspecialchars(ucfirst($status_db)) ?>
+                        </div>
                         
                         <div class="p-5 flex-1 flex flex-col">
                             <div class="flex items-start justify-between mb-3">
@@ -746,7 +651,8 @@ if (file_exists($notif_file)) {
                             <?php endif; ?>
                             
                             <div class="action-buttons flex gap-2 mt-auto">
-                                </div>
+                                <button class="bg-[#1a3326] text-white px-4 py-2 rounded-full text-sm font-bold hover:bg-[#2a4436] transition-colors" onclick="openBuktiUlasan('<?= htmlspecialchars($link_proxy_ulasan) ?>')">Lihat Bukti</button>
+                            </div>
                         </div>
                     </div>
                     <?php endwhile; ?>
@@ -941,22 +847,22 @@ if (file_exists($notif_file)) {
         </div>
     </div>
     
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-
-        // Data Status Wisatawan
-        const valBelum = <?= $count_0 ?? 0 ?>;
-        const valMasih = <?= $count_1 ?? 0 ?>;
-        const valPulang = <?= $count_2 ?? 0 ?>;
-
-        // Data Kalender Sampah
-
-        const labelsKalenderSampah = <?= $json_labels_sampah ?>;
-        const dataTrenSampah = <?= $json_data_sampah ?>;
-    });
+        // Jembatan Data PHP ke JS
+        window.labelGrafikSampah = <?= $json_labels_sampah ?>;
+        window.dataSampahBawa = <?= $json_data_bawa ?>;
+        window.dataSampahHilang = <?= $json_data_hilang ?>;
+        window.namaBulanPilih = "<?= $nama_bulan_pilih ?>";
+        
+        // Data untuk Grafik Status
+        const valBelum = <?= (int)$count_0 ?>;
+        const valMasih = <?= (int)$count_1 ?>;
+        const valPulang = <?= (int)$count_2 ?>;
     </script>
+    <script src="/tancak-panti/js/admin.js"></script>
 
-    <!-- SCRIPT NAVIGASI TAB (Bebas Cache) -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const tabButtons = document.querySelectorAll('.tab-btn');
@@ -968,15 +874,23 @@ if (file_exists($notif_file)) {
                     
                     const targetId = this.getAttribute('data-target');
                     
-                    // Reload halaman dan ganti URL tab-nya
-                    window.location.href = '?tab=' + targetId;
+                    // Ambil parameter bulan yang sedang aktif biar nggak ilang pas pindah tab
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const currentBulan = urlParams.get('bulan');
+                    
+                    // Susun URL pintar yang diarahkan ke sistem Router
+                    let newUrl = '/tancak-panti/admin/dashboard?tab=' + targetId;
+                    if (currentBulan) {
+                        newUrl += '&bulan=' + currentBulan;
+                    }
+                    
+                    window.location.href = newUrl;
                 });
             });
         }
     });
-    </script>
 
-    <script>
+    // FUNGSI MODAL BUKTI ULASAN (Dipindah ke sini biar rapi)
     function openBuktiUlasan(src) {
         const modalBukti = document.getElementById('modal-bukti');
         const imgFull = document.getElementById('img-bukti-full');
@@ -987,6 +901,17 @@ if (file_exists($notif_file)) {
                 modalBukti.classList.add('active');
                 document.body.style.overflow = 'hidden'; 
             }, 10);
+        }
+    }
+    
+    function closeBukti() {
+        const modalBukti = document.getElementById('modal-bukti');
+        if(modalBukti) {
+            modalBukti.classList.remove('active');
+            setTimeout(() => {
+                modalBukti.classList.add('hidden');
+                document.body.style.overflow = ''; 
+            }, 300);
         }
     }
     </script>

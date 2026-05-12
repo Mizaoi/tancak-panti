@@ -10,9 +10,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalBukti = document.getElementById('modal-bukti');
     const imgFull = document.getElementById('img-bukti-full');
 
-    // Variabel Filter Search
+    // Variabel Filter Search (HANYA SEARCH, TANGGAL DIHAPUS)
     const searchInput = document.getElementById('main-search');
-    const dateInput = document.getElementById('date-filter');
 
     // Variabel Modal Sampah
     const modalTrash = document.getElementById('modal-trash');
@@ -42,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const textAreaPesan = document.getElementById('notif-pesan-teks');
 
     // ==========================================
-    // 1. LOGIKA PINDAH TABS (REALTIME VIA URL)
+    // 1. LOGIKA PINDAH TABS PINTAR
     // ==========================================
     const tabButtons = document.querySelectorAll('.tab-btn');
     if(tabButtons.length > 0) {
@@ -54,13 +53,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     return; 
                 }
                 const targetId = this.getAttribute('data-target');
-                window.location.href = 'dashboard.php?tab=' + targetId;
+                const urlParams = new URLSearchParams(window.location.search);
+                const currentBulan = urlParams.get('bulan');
+                
+                let newUrl = '/tancak-panti/admin/dashboard?tab=' + targetId;
+                if (currentBulan) newUrl += '&bulan=' + currentBulan;
+                window.location.href = newUrl;
             });
         });
     }
 
-    // ==========================================
-    // RENDER GRAFIK 1: STATUS WISATAWAN 
+// ==========================================
+    // 2. RENDER GRAFIK STATUS WISATAWAN 
     // ==========================================
     const canvasStatus = document.getElementById('chartStatusWisatawan');
     if (canvasStatus && typeof Chart !== 'undefined') {
@@ -74,114 +78,132 @@ document.addEventListener('DOMContentLoaded', function() {
                            typeof valMasih !== 'undefined' ? valMasih : 0, 
                            typeof valPulang !== 'undefined' ? valPulang : 0],
                     backgroundColor: ['#ef4444', '#f59e0b', '#10b981'], 
-                    borderRadius: 8,
-                    barThickness: 35 // Ketebalan balok pas
+                    borderRadius: 8, barThickness: 35
                 }]
             },
             options: {
-                indexAxis: 'y', // KEMBALIKAN GRAFIK JADI REBAHAN (Kiri ke Kanan)
-                responsive: true,
-                maintainAspectRatio: false,
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false } },
                 scales: {
                     x: { 
-                        // Sumbu X sekarang jadi Angka (Kiri ke Kanan)
                         grid: { display: false, drawBorder: false }, 
-                        beginAtZero: true,
-                        ticks: { stepSize: 1, font: { size: 11 }, color: '#6b7280' } 
+                        beginAtZero: true, 
+                        ticks: { 
+                            precision: 0, // <--- INI SAKTI NYA CAK! Otomatis ngitung kelipatan 10, 50, 100, dst.
+                            font: { size: 11 }, 
+                            color: '#6b7280' 
+                        } 
                     },
                     y: { 
-                        // Sumbu Y sekarang jadi Tulisan Label (Atas ke Bawah)
                         grid: { display: false, drawBorder: false }, 
                         ticks: { font: { weight: 'bold', size: 12 }, color: '#374151' } 
                     }
-                },
-                // 🚀 INI OBATNYA CAK: Tracking/Tooltip diarahkan ke Sumbu Y (Atas-Bawah)
-                interaction: { mode: 'index', axis: 'y', intersect: false }
+                }
             }
         });
     }
 
 // ==========================================
-    // RENDER GRAFIK 2: AESTHETIC OVERLAP AREA (2 GARIS)
+    // 3. RENDER GRAFIK TREN SAMPAH HARIAN
     // ==========================================
     const canvasLine = document.getElementById('lineChartSampah');
     if (canvasLine && typeof Chart !== 'undefined') {
-        
         new Chart(canvasLine, {
             type: 'line', 
             data: {
                 labels: window.labelGrafikSampah, 
                 datasets: [
-                    {
-                        label: 'Total Sampah Bawa',
-                        data: window.dataSampahBawa,
+                    { 
+                        label: 'Total Sampah Bawa', 
+                        data: window.dataSampahBawa, 
                         borderColor: '#3b82f6', 
                         backgroundColor: 'rgba(59, 130, 246, 0.1)', 
-                        fill: true,
+                        fill: true, 
                         tension: 0.4, 
-                        pointRadius: 0, 
-                        borderWidth: 2,
+                        pointRadius: 0,                  
+                        pointBackgroundColor: '#3b82f6', 
+                        borderWidth: 2, 
                         order: 2 
                     },
-                    {
-                        label: 'Sampah Aman (Kembali)',
-                        // Rumus anti-minus
-                        data: window.dataSampahBawa.map((val, i) => Math.max(0, val - (window.dataSampahHilang[i] || 0))),
+                    { 
+                        label: 'Sampah Aman (Kembali)', 
+                        data: window.dataSampahBawa.map((val, i) => Math.max(0, val - (window.dataSampahHilang[i] || 0))), 
                         borderColor: '#10b981', 
                         backgroundColor: 'rgba(16, 185, 129, 0.4)', 
-                        fill: true,
+                        fill: true, 
                         tension: 0.4, 
-                        pointRadius: 4,
-                        pointBackgroundColor: '#10b981',
-                        borderWidth: 3,
+                        pointRadius: 0, 
+                        pointBackgroundColor: '#10b981', 
+                        borderWidth: 3, 
                         order: 1 
                     }
                 ]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                responsive: true, maintainAspectRatio: false,
                 plugins: { 
-                    legend: { 
-                        position: 'top',
-                        labels: { usePointStyle: true, font: { weight: 'bold', size: 12 } }
-                    },
-                    tooltip: { mode: 'index', intersect: false }
+                    legend: { position: 'top', labels: { usePointStyle: true, font: { weight: 'bold', size: 12 } } },
+                    
+                    // REKAYASA HOVER TOOLTIP KUSTOM
+                    tooltip: { 
+                        mode: 'index', 
+                        intersect: false,
+                        
+                        // ---> INI KUNCI URUTANNYA CAK! <---
+                        // Memaksa dataset 0 (Sampah Bawa) selalu di atas dataset 1 (Sampah Kembali)
+                        itemSort: function(a, b) {
+                            return a.datasetIndex - b.datasetIndex; 
+                        },
+                        
+                        backgroundColor: 'rgba(26, 51, 38, 0.95)', 
+                        titleColor: '#ffffff',
+                        bodyColor: '#e5e7eb',
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13, weight: 'normal' },
+                        padding: 12,
+                        cornerRadius: 8,
+                        displayColors: false, 
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                return 'Tanggal ' + tooltipItems[0].label;
+                            },
+                            label: function(context) {
+                                if (context.datasetIndex === 0) {
+                                    return 'Sampah dibawa : ' + context.raw;
+                                } else if (context.datasetIndex === 1) {
+                                    return 'Sampah kembali : ' + context.raw;
+                                }
+                            }
+                        }
+                    } 
                 },
                 scales: {
-                    x: { 
-                        grid: { display: false },
-                        title: { display: true, text: 'Tanggal di Bulan ' + (typeof window.namaBulanPilih !== 'undefined' ? window.namaBulanPilih : '') }
-                    },
-                    y: { 
-                        beginAtZero: true,
-                        stacked: false, 
-                        ticks: { stepSize: 1 }
-                    }
-                },
-                interaction: { mode: 'nearest', axis: 'x', intersect: false }
+                    x: { grid: { display: false }, title: { display: true, text: 'Tanggal di Bulan ' + (typeof window.namaBulanPilih !== 'undefined' ? window.namaBulanPilih : '') } },
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                }
             }
         });
     }
 
     // ==========================================
-    // FILTER SEARCH & REALTIME COUNTER
+    // 4. FILTER SEARCH & PAGINATION (25 BARIS)
     // ==========================================
-    if(tbody && searchInput && dateInput) {
-        const rows = tbody.querySelectorAll('.row-tiket');
+    if(tbody && searchInput) {
+        const allRows = Array.from(tbody.querySelectorAll('.row-tiket'));
+        const rowsPerPage = 25; 
+        let currentPage = 1;
+        let filteredRows = [...allRows]; 
 
-        function updateRealtimeCounts() {
+        // Hitung ulang 3 kotak besar (Belum Check-in, dll) sesuai pencarian
+        function updateRealtimeCounts(rowsToCount) {
             let c0 = 0, c1 = 0, c2 = 0;
-            rows.forEach(row => {
-                if (row.style.display !== 'none') {
-                    const statusBtn = row.querySelector('.status-toggle');
-                    if (statusBtn) {
-                        const state = parseInt(statusBtn.getAttribute('data-state'));
-                        if (state === 0) c0++;
-                        if (state === 1) c1++;
-                        if (state === 2) c2++;
-                    }
+            rowsToCount.forEach(row => {
+                const statusBtn = row.querySelector('.status-toggle');
+                if (statusBtn) {
+                    const state = parseInt(statusBtn.getAttribute('data-state'));
+                    if (state === 0) c0++;
+                    if (state === 1) c1++;
+                    if (state === 2) c2++;
                 }
             });
             
@@ -189,38 +211,88 @@ document.addEventListener('DOMContentLoaded', function() {
             if(document.getElementById('count-1')) document.getElementById('count-1').innerText = c1;
             if(document.getElementById('count-2')) document.getElementById('count-2').innerText = c2;
 
-            // KUNCI 2: Perintahkan grafik untuk memuat data hasil filter yang baru
             if(window.chartStatusObj) {
                 window.chartStatusObj.data.datasets[0].data = [c0, c1, c2];
-                window.chartStatusObj.update(); // <-- Ini yang bikin grafik bergerak
+                window.chartStatusObj.update(); 
             }
         }
 
-        function filterTable() {
-            const keyword = searchInput.value.toLowerCase();
-            const selectedDate = dateInput.value;
+        // Tampilkan tabel & Pagination (Batas 25 Baris)
+        function renderPagination() {
+            let totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+            if (totalPages === 0) totalPages = 1; // PAKSA MINIMAL 1 HALAMAN BIAR PAGINATION SELALU MUNCUL!
+            
+            const paginationControls = document.getElementById('pagination-controls');
+            const pageInfo = document.getElementById('page-info');
+            
+            allRows.forEach(row => row.style.display = 'none'); // Sembunyikan semua dulu
+            
+            if (filteredRows.length === 0) {
+                if(pageInfo) pageInfo.innerHTML = 'Menampilkan <span class="font-extrabold text-gray-800">0</span> tiket';
+            } else {
+                const startIndex = (currentPage - 1) * rowsPerPage;
+                const endIndex = Math.min(startIndex + rowsPerPage, filteredRows.length);
+                
+                // Munculkan hanya 25 baris di halaman ini
+                for(let i = startIndex; i < endIndex; i++) {
+                    filteredRows[i].style.display = '';
+                }
 
-            rows.forEach(row => {
-                const rowText = row.innerText.toLowerCase(); 
-                const rowDateEl = row.querySelector('.data-tgl');
-                // Pakai .trim() untuk membuang spasi gaib
-                const rowDate = rowDateEl ? rowDateEl.getAttribute('data-value').trim() : "";
+                if(pageInfo) {
+                    pageInfo.innerHTML = `Menampilkan <span class="font-extrabold text-gray-800">${startIndex + 1} - ${endIndex}</span> dari <span class="font-extrabold text-gray-800">${filteredRows.length}</span> tiket`;
+                }
+            }
+
+            // Bikin Tombol Prev & Next UI Elegan
+            if(paginationControls) {
+                let html = '';
+                const btnBase = "flex items-center justify-center px-3.5 py-1.5 rounded-[8px] text-[13px] font-bold transition-all duration-200 border outline-none";
+                const btnDisabled = "text-gray-400 border-gray-100 bg-gray-50 cursor-not-allowed opacity-70";
+                const btnActive = "text-gray-600 border-gray-200 bg-white hover:bg-gray-50 hover:text-[#1a3326] hover:border-[#1a3326] shadow-sm cursor-pointer";
                 
-                const matchKeyword = rowText.includes(keyword);
-                // Karena tipe DATE, kita langsung pakai sama dengan (===)
-                const matchDate = (selectedDate === '') || (rowDate === selectedDate);
+                const isPrevDisabled = currentPage === 1;
+                html += `<button type="button" onclick="goToPage(${currentPage - 1})" class="${btnBase} ${isPrevDisabled ? btnDisabled : btnActive}" ${isPrevDisabled ? 'disabled' : ''}><svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg> Prev</button>`;
                 
-                row.style.display = (matchKeyword && matchDate) ? '' : 'none';
-            });
-            updateRealtimeCounts(); // Panggil saat ngetik/pilih tanggal
+                html += `<div class="flex items-center justify-center px-4 py-1.5 text-[13px] font-extrabold text-[#1a3326] bg-[#f4f9f6] rounded-[8px] border border-[#d1f4e0] shadow-sm min-w-[80px]">${currentPage} <span class="mx-1.5 text-[#1a3326] opacity-40 font-medium">/</span> ${totalPages}</div>`;
+                
+                const isNextDisabled = currentPage === totalPages;
+                html += `<button type="button" onclick="goToPage(${currentPage + 1})" class="${btnBase} ${isNextDisabled ? btnDisabled : btnActive}" ${isNextDisabled ? 'disabled' : ''}>Next <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg></button>`;
+                
+                paginationControls.innerHTML = html;
+            }
         }
 
-        searchInput.addEventListener('input', filterTable);
-        dateInput.addEventListener('change', filterTable);
+        window.goToPage = function(page) {
+            const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+            if(page >= 1 && page <= totalPages) {
+                currentPage = page;
+                renderPagination();
+            }
+        };
+
+        // Fungsi Otak Filter Lintas Pagination
+        function applyFilters() {
+            const keyword = searchInput.value.toLowerCase();
+
+            // Saring SEMUA data, bukan cuma yang ada di layar
+            filteredRows = allRows.filter(row => {
+                const rowText = row.innerText.toLowerCase(); 
+                return rowText.includes(keyword);
+            });
+            
+            currentPage = 1; // Balik ke halaman 1 kalau abis nyari
+            updateRealtimeCounts(filteredRows); 
+            renderPagination();
+        }
+
+        searchInput.addEventListener('input', applyFilters);
+        
+        // JALANKAN OTOMATIS SAAT HALAMAN DIBUKA!
+        applyFilters();
     }
 
     // ==========================================
-    // 4. LOGIKA KLIK STATUS TIKET (AJAX)
+    // 5. LOGIKA KLIK STATUS TIKET (AJAX)
     // ==========================================
     if(tbody) {
         tbody.addEventListener('click', async function(e) {
@@ -272,7 +344,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // 5. LOGIKA MODAL OVERLAY SAMPAH
+    // 6. LOGIKA MODAL SAMPAH (AJAX)
     // ==========================================
     document.querySelectorAll('.btn-kelola-sampah').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -377,7 +449,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if(document.getElementById('m-btn-batal')) document.getElementById('m-btn-batal').addEventListener('click', closeModalSampah);
 
     // ==========================================
-    // 6. LOGIKA MODAL OVERLAY DENDA
+    // 7. LOGIKA MODAL DENDA (AJAX)
     // ==========================================
     document.querySelectorAll('.btn-kelola-denda').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -489,7 +561,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if(document.getElementById('d-btn-batal')) document.getElementById('d-btn-batal').addEventListener('click', closeModalDenda);
 
     // ==========================================
-    // 7. LOGIKA NOTIFIKASI DARURAT & WHATSAPP
+    // 8. LOGIKA NOTIFIKASI DARURAT & WHATSAPP
     // ==========================================
     if(btnNotifHeader) {
         let isNotifActive = topBanner && !topBanner.classList.contains('hidden');
@@ -651,7 +723,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // ==========================================
-    // 8. LOGIKA ZOOM FOTO (OVERLAY BESAR)
+    // 9. LOGIKA ZOOM FOTO BUKTI TRANSFER/ULASAN
     // ==========================================
     if (tbody && modalBukti) {
         tbody.addEventListener('click', function(e) {
@@ -682,13 +754,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // LOGIKA MODERASI ULASAN (REAL-TIME, 3 KONTAINER, WARNA TIPIS)
+    // 10. LOGIKA MODERASI ULASAN (ANTI-DUPLIKAT)
     // ==========================================
     const containerUlasan = document.getElementById('ulasan-container');
     const emptyUlasan = document.getElementById('ulasan-empty');
     const filterBtnsUlasan = document.querySelectorAll('.filter-btn-ulasan');
 
-    // Sistem Pintar Lencana Notifikasi
     function updatePendingBadge(change) {
         const badge = document.getElementById('badge-pending');
         if (badge) {
@@ -703,8 +774,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // FUNGSI AJAIB: Mengubah tampilan kartu seketika persis briefing terbaru
-// FUNGSI AJAIB: Mengubah UI Kartu sesuai Desain Baru
     function updateCardUI(card, status, isInitialLoad = false) {
         const oldStatus = card.getAttribute('data-status');
         card.setAttribute('data-status', status);
@@ -713,7 +782,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const actionContainer = card.querySelector('.action-buttons');
         const avatarCircle = card.querySelector('.avatar-circle');
 
-        // Reset Ribbon Classes
         ribbon.className = "status-ribbon px-4 py-2.5 flex items-center justify-between text-[11px] font-extrabold uppercase tracking-widest border-b transition-colors duration-300";
 
         if (status === 'pending') {
@@ -794,7 +862,6 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => filterBtnsUlasan[0].click(), 50);
     }
 
-    // Klik tombol AKSI secara Real-time
     if (containerUlasan) {
         containerUlasan.addEventListener('click', function(e) {
             const btn = e.target.closest('.btn-aksi-ulasan');
@@ -837,99 +904,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Eksekusi tampilan awal saat web dibuka
-    if (containerUlasan) {
-        containerUlasan.querySelectorAll('.ulasan-card').forEach(card => {
-            updateCardUI(card, card.getAttribute('data-status'));
-        });
-    }
-
-    // Fungsi Filter Real-Time
-    function filterUlasanCards(statusFilter) {
-        const cards = document.querySelectorAll('.ulasan-card');
-        let visibleCount = 0;
-        cards.forEach(card => {
-            if (statusFilter === 'semua' || card.getAttribute('data-status') === statusFilter) {
-                card.style.display = 'flex';
-                visibleCount++;
-            } else {
-                card.style.display = 'none';
-            }
-        });
-        if (emptyUlasan) {
-            visibleCount === 0 ? emptyUlasan.classList.remove('hidden') : emptyUlasan.classList.add('hidden');
-            visibleCount === 0 ? emptyUlasan.classList.add('flex') : emptyUlasan.classList.remove('flex');
-        }
-    }
-
-    // Klik tombol filter (Ganti Warna & Filter Data)
-    if (filterBtnsUlasan.length > 0) {
-        filterBtnsUlasan.forEach(btn => {
-            btn.addEventListener('click', function() {
-                // Matikan semua tombol
-                filterBtnsUlasan.forEach(b => b.className = `filter-btn-ulasan py-2 rounded-lg font-bold text-[12px] transition-all shadow-sm ${b.getAttribute('data-inactive')}`);
-                // Hidupkan tombol yang diklik dengan warna khasnya
-                this.className = `filter-btn-ulasan py-2 rounded-lg font-bold text-[12px] transition-all shadow-sm ${this.getAttribute('data-active')}`;
-                // Terapkan filter
-                filterUlasanCards(this.getAttribute('data-status'));
-            });
-        });
-        // Klik 'Semua' secara otomatis di awal
-        setTimeout(() => filterBtnsUlasan[0].click(), 50);
-    }
-
-    // Klik tombol AKSI (Setuju/Tolak/Hapus) - REALTIME
-    if (containerUlasan) {
-        containerUlasan.addEventListener('click', function(e) {
-            const btn = e.target.closest('.btn-aksi-ulasan');
-            if (btn) {
-                const action = btn.getAttribute('data-action');
-                const card = btn.closest('.ulasan-card');
-                const idUlasan = card.getAttribute('data-id');
-
-                if (action === 'Hapus' && !confirm("Yakin hapus ulasan ini permanen?")) return;
-
-                // Tampilkan efek loading sebentar pada tombol
-                const teksAsli = btn.innerText;
-                btn.innerText = "⏳...";
-                btn.disabled = true;
-
-                // 1. UPDATE DATABASE VIA AJAX
-                const fd = new URLSearchParams();
-                fd.append('id_ulasan', idUlasan);
-                fd.append('action', action);
-
-                fetch('/tancak-panti/api/proses_ulasan.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: fd.toString()
-                }).then(() => {
-                    // 2. UPDATE TAMPILAN KARTU SEKETIKA (TANPA RELOAD)
-                    if (action === 'Hapus') {
-                        card.remove(); // Lenyapkan dari muka bumi
-                    } else {
-                        updateCardUI(card, action.toLowerCase()); // Ubah jadi setuju/tolak
-                    }
-                    
-                    // 3. RAPUKAN FILTERNYA KEMBALI
-                    const activeFilterBtn = document.querySelector('#filter-ulasan .text-white');
-                    if(activeFilterBtn) filterUlasanCards(activeFilterBtn.getAttribute('data-status'));
-                }).catch(err => {
-                    console.error(err);
-                    btn.innerText = teksAsli;
-                    btn.disabled = false;
-                });
-            }
-        });
-    }
     // ==========================================
-    // LOGIKA FILTER BULAN REKAP & GRAFIK
+    // 11. LOGIKA FILTER BULAN REKAP & GRAFIK (ANTI 404)
     // ==========================================
     const filterBulanRekap = document.getElementById('filter-bulan-rekap');
     if(filterBulanRekap) {
         filterBulanRekap.addEventListener('change', function() {
-            // Reload halaman, arahkan ke Tab Rekap, dan bawa nilai bulannya ke PHP!
-            window.location.href = 'dashboard.php?tab=tab-rekap&bulan=' + this.value;
+            // Tembak lurus ke Router tanpa ekstensi .php!
+            window.location.href = '/tancak-panti/admin/dashboard?tab=tab-rekap&bulan=' + this.value;
         });
     }
 });

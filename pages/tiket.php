@@ -321,7 +321,7 @@ if (isset($_SESSION['beli_sukses_trigger'])) {
                             <div class="col-span-2">
                                 <input type="number" id="input-orang" name="jumlah_orang" min="1" required placeholder="Berapa Orang" class="w-full bg-[#f8faf9] border border-gray-200 rounded-[12px] px-4 py-3 text-[14px] outline-none focus:border-[#2d6a4f]">
                                 <div class="flex justify-between items-center mt-2 px-1">
-                                    <span class="text-[11px] text-gray-400">Rp 6.500 / orang</span>
+                                    <span class="text-[11px] text-gray-400">Rp 10.000 / orang</span>
                                     <span id="teks-total" class="text-[13px] font-bold text-[#006A6A]">Total: Rp 0</span>
                                 </div>
                             </div>
@@ -492,7 +492,7 @@ if (isset($_SESSION['beli_sukses_trigger'])) {
         </div>
     </main>
 
-    <script src="../js/tiket.js"></script>
+    <script src="   js/tiket.js"></script>
 <!-- MODAL CUSTOM SUKSES BELI TIKET -->
     <div id="modal-sukses-beli" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 hidden backdrop-blur-sm transition-all duration-300">
         <div class="bg-white rounded-[24px] p-8 max-w-[380px] w-full text-center shadow-2xl transform scale-95 transition-transform duration-300" id="modal-card">
