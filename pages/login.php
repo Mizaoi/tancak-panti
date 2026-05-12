@@ -1,7 +1,5 @@
 <?php
-session_start();
-// 1. Jalur koneksi untuk file di dalam folder 'pages' cukup mundur 1 kali
-include '../config/koneksi.php';
+include 'config/koneksi.php';
 
 // 2. LOGIKA PROSES LOGIN YANG BENAR
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
@@ -13,11 +11,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
 
     if ($data && $password == $data['password']) {
         $_SESSION['admin'] = $data['username'];
-        header("Location: admin/dashboard.php"); 
+        header("Location: /tancak-panti/admin/dashboard"); 
         exit;
     } else {
         $_SESSION['alert'] = ['type' => 'error', 'msg' => '⚠️ Username atau password salah, coba lagi ya!'];
-        header("Location: login.php");
+        header("Location: /tancak-panti/login");
         exit; 
     }
 }
@@ -32,8 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../style/navbar.css">
-    <link rel="stylesheet" href="../style/login.css">
+    <link rel="stylesheet" href="/tancak-panti/style/navbar.css">
+    <link rel="stylesheet" href="/tancak-panti/style/login.css">
     
     <style>
         body { font-family: 'Poppins', sans-serif; overflow-x: hidden; }
@@ -42,12 +40,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
 <body class="flex flex-col min-h-screen relative bg-gray-900">
 
     <div class="absolute inset-0 z-0">
-        <img src="../assets/images/login.jpeg" alt="Background" class="w-full h-full object-cover">
+        <img src="/tancak-panti/assets/images/login.jpeg" alt="Background" class="w-full h-full object-cover">
         <div class="absolute inset-0 bg-black/60"></div>
     </div>
 
     <div class="relative z-20">
-        <?php include '../components/navbar.php'; ?>
+        <?php include 'components/navbar.php'; ?>
         <!-- Kode Navbar Kamu Berakhir di Sini -->
     </nav> 
 
@@ -150,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
         </div>
     </main>
 
-    <script src="../js/navbar.js"></script>
+    <script src="/tancak-panti/js/navbar.js"></script>
 
     <!-- SCRIPT KHUSUS UNTUK TOGGLE MATA (ANTI CACHE) -->
     <script>

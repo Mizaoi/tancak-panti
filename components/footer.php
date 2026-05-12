@@ -6,7 +6,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
             
             <div class="reveal-up" style="transition-delay: 0.1s;">
-                <a href="home.php" class="flex items-center space-x-3 mb-6 hover:opacity-80 transition-opacity w-fit">
+                <a href="/tancak-panti/home" class="flex items-center space-x-3 mb-6 hover:opacity-80 transition-opacity w-fit">
                     <div class="border border-white/30 rounded-full p-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6.5 1.2 1 2.5 1C5.8 7 7 6 7 6s1.2-1 2.5-1c1.3 0 2.5 1 2.5 1s1.2 1 2.5 1c1.3 0 2.5-1 2.5-1s1.2-1 2.5-1 2.5 1 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 1.3 0 2.5-1 2.5-1s1.2-1 2.5-1c1.3 0 2.5 1 2.5 1s1.2 1 2.5 1c1.3 0 2.5-1 2.5-1s1.2-1 2.5-1 2.5 1 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 1.3 0 2.5-1 2.5-1s1.2-1 2.5-1c1.3 0 2.5 1 2.5 1s1.2 1 2.5 1c1.3 0 2.5-1 2.5-1s1.2-1 2.5-1 2.5 1 2.5 1"/></svg>
                     </div>
@@ -20,12 +20,11 @@
                     Lepas penatmu di air terjun tertinggi Jember. Destinasi wisata alam yang sempurna di kaki Gunung Argopuro untuk keluarga dan petualangan.
                 </p>
                 
-                <a href="rating.php" class="flex items-center space-x-1 text-yellow-500 hover:opacity-80 transition-opacity w-fit" title="Lihat Ulasan">
+                <a href="/tancak-panti/rating" class="flex items-center space-x-1 text-yellow-500 hover:opacity-80 transition-opacity w-fit" title="Lihat Ulasan">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28z"/></svg>
                     <span class="text-white/60 text-xs ml-2 hover:text-white">(4.8/5)</span>
                 </a>
             </div>
@@ -36,12 +35,12 @@
                     Quick Links
                 </h4>
                 <ul class="space-y-3 text-[14px] text-white/60">
-                    <li><a href="home.php" class="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Beranda</a></li>
-                    <li><a href="tiket.php" class="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Pesan Tiket</a></li>
-                    <li><a href="profile.php" class="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Profil</a></li>
-                    <li><a href="facility.php" class="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Fasilitas</a></li>
-                    <li><a href="contact.php" class="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Narahubung</a></li>
-                    <li><a href="rating.php" class="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Ulasan Pengunjung</a></li>
+                    <li><a href="/tancak-panti/home" class="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Beranda</a></li>
+                    <li><a href="/tancak-panti/tiket" class="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Pesan Tiket</a></li>
+                    <li><a href="/tancak-panti/profile" class="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Profil</a></li>
+                    <li><a href="/tancak-panti/facility" class="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Fasilitas</a></li>
+                    <li><a href="/tancak-panti/contact" class="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Narahubung</a></li>
+                    <li><a href="/tancak-panti/rating" class="hover:text-white hover:translate-x-1 inline-block transition-all duration-300">Ulasan Pengunjung</a></li>
                 </ul>
             </div>
 
@@ -106,7 +105,7 @@
                     <span class="text-white/40 cursor-default">Syarat & Ketentuan</span>
                     <span class="opacity-20 cursor-default">•</span>
                     
-                    <a href="login.php" class="hover:text-[#a8d5a2] transition-colors font-medium flex items-center">
+                    <a href="/tancak-panti/login" class="hover:text-[#a8d5a2] transition-colors font-medium flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
                         Login
                     </a>

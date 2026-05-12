@@ -8,8 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="../style/navbar.css">
-    <link rel="stylesheet" href="../style/home.css">
+    <link rel="stylesheet" href="/tancak-panti/style/navbar.css">
+    <link rel="stylesheet" href="/tancak-panti/style/home.css">
     
     <style>
         body {
@@ -23,13 +23,12 @@
 </head>
 <body>
 
-    <?php include '../components/navbar.php'; ?>
-    <!-- Kode Navbar Kamu Berakhir di Sini -->
+    <?php include 'components/navbar.php'; ?>
     </nav> 
 
     <?php
         // Cek Status Darurat dari file JSON
-        $notif_file = 'config/status_darurat.json'; // Sesuaikan path folder config-nya jika file index ini ada di luar
+        $notif_file = '/tancak-panti/config/status_darurat.json'; // Sesuaikan path folder config-nya jika file index ini ada di luar
         $darurat_aktif = false;
         $pesan_darurat = '';
         
@@ -58,7 +57,7 @@
     <?php endif; ?>
 
     <section class="relative h-[93vh] min-h-[560px] flex items-center overflow-hidden">
-        <img src="../assets/images/home.jpeg" alt="Air Terjun Tancak" class="absolute inset-0 w-full h-full object-cover">
+        <img src="/tancak-panti/assets/images/home.jpeg" alt="Air Terjun Tancak" class="absolute inset-0 w-full h-full object-cover">
         <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent z-10"></div>
 
@@ -76,10 +75,10 @@
                     <span class="text-[#a8d5a2] font-semibold">Rp 7.500</span>.
                 </p>
                 <div class="flex flex-wrap gap-4">
-                    <a href="tiket.php" class="bg-[#2d6a4f] hover:bg-[#245a40] text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-green-900/40 hover:-translate-y-0.5 active:translate-y-0">
+                    <a href="/tancak-panti/tiket" class="bg-[#2d6a4f] hover:bg-[#245a40] text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-green-900/40 hover:-translate-y-0.5 active:translate-y-0">
                         Pesan Sekarang
                     </a>
-                    <a href="profile.php" class="bg-white/20 hover:bg-white/30 text-white border border-white/50 px-8 py-3 rounded-full font-semibold backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5">
+                    <a href="/tancak-panti/profile" class="bg-white/20 hover:bg-white/30 text-white border border-white/50 px-8 py-3 rounded-full font-semibold backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5">
                         Lihat Detail
                     </a>
                 </div>
@@ -140,15 +139,15 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
                 <div class="relative rounded-[24px] overflow-hidden reveal-zoom group cursor-pointer" style="transition-delay: 0.1s;">
-                    <img src="../assets/images/panorama1.jpeg" alt="Galeri 1 - Air Terjun Tancak" class="w-full h-[350px] object-cover transition-transform duration-700 group-hover:scale-110">
+                    <img src="/tancak-panti/assets/images/panorama1.jpeg" alt="Galeri 1 - Air Terjun Tancak" class="w-full h-[350px] object-cover transition-transform duration-700 group-hover:scale-110">
                     <div class="absolute inset-0 bg-black/40 group-hover:bg-black/0 transition-colors duration-500"></div>
                 </div>
                 <div class="relative rounded-[24px] overflow-hidden reveal-zoom group cursor-pointer" style="transition-delay: 0.2s;">
-                    <img src="../assets/images/panorama2.jpeg" alt="Galeri 2" class="w-full h-[350px] object-cover transition-transform duration-700 group-hover:scale-110">
+                    <img src="/tancak-panti/assets/images/panorama2.jpeg" alt="Galeri 2" class="w-full h-[350px] object-cover transition-transform duration-700 group-hover:scale-110">
                     <div class="absolute inset-0 bg-black/40 group-hover:bg-black/0 transition-colors duration-500"></div>
                 </div>
                 <div class="relative rounded-[24px] overflow-hidden reveal-zoom group cursor-pointer" style="transition-delay: 0.3s;">
-                    <img src="../assets/images/panorama3.jpeg" alt="Galeri 3" class="w-full h-[350px] object-cover transition-transform duration-700 group-hover:scale-110">
+                    <img src="/tancak-panti/assets/images/panorama3.jpeg" alt="Galeri 3" class="w-full h-[350px] object-cover transition-transform duration-700 group-hover:scale-110">
                     <div class="absolute inset-0 bg-black/40 group-hover:bg-black/0 transition-colors duration-500"></div>
                 </div>
             </div>
@@ -162,20 +161,20 @@
                 Pesan tiket sekarang dan nikmati keindahan Air Terjun Tancak bersama orang-orang tersayang
             </p>
             <div class="flex flex-wrap justify-center gap-4">
-                <a href="tiket.php" class="bg-white text-[#1a3326] hover:bg-gray-100 px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
+                <a href="/tancak-panti/tiket" class="bg-white text-[#1a3326] hover:bg-gray-100 px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
                     Beli Tiket Sekarang
                 </a>
-                <a href="rating.php" class="bg-transparent text-white border border-white/70 hover:bg-white/10 px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:-translate-y-0.5">
+                <a href="/tancak-panti/rating" class="bg-transparent text-white border border-white/70 hover:bg-white/10 px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:-translate-y-0.5">
                     Lihat Ulasan
                 </a>
             </div>
         </div>
     </section>
 
-    <?php include '../components/footer.php'; ?>
+    <?php include 'components/footer.php'; ?>
 
-    <script src="../js/navbar.js"></script>
-    <script src="../js/home.js"></script>
+    <script src="/tancak-panti/js/navbar.js"></script>
+    <script src="/tancak-panti/js/home.js"></script>
 
 </body>
 </html>

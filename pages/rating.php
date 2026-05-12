@@ -1,12 +1,11 @@
 <?php
-session_start();
-include '../config/koneksi.php'; 
+include 'config/koneksi.php'; 
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
     
     // FITUR ANTI-SPAM / ANTI-LAG (COOLDOWN 10 DETIK)
     if (isset($_SESSION['last_submit']) && (time() - $_SESSION['last_submit'] < 10)) {
-        header("Location: rating.php"); 
+        header("Location: /tancak-panti/rating"); 
         exit;
     }
     $_SESSION['last_submit'] = time(); 
@@ -26,8 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
     $query_insert = "INSERT INTO ulasan (nama, rating, teks, gambar) VALUES ('$nama', '$rating', '$isi', '$link_gambar')";
     mysqli_query($koneksi, $query_insert);
     
-    $_SESSION['alert'] = ['type' => 'success', 'msg' => 'Proses selesai! Silakan cek ulasan Anda.'];
-    header("Location: rating.php");
+    $_SESSION['alert'] = ['type' => 'success', 'msg' => 'Ulasanmu terkirim! 🎉 Menunggu persetujuan admin ⏳'];
+    header("Location: rating");
     exit;
 }
 ?>
@@ -40,13 +39,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
     <title>Ulasan - SI-TANCAK PANTI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../style/navbar.css">
-    <link rel="stylesheet" href="../style/rating.css"> 
+    <link rel="stylesheet" href="style/navbar.css">
+    <link rel="stylesheet" href="style/rating.css"> 
     <style>body { font-family: 'Poppins', sans-serif; background-color: #eff3f0; overflow-x: hidden; }</style>
 </head>
 <body class="flex flex-col min-h-screen relative">
 
-    <?php include '../components/navbar.php'; ?>
+    <?php include 'components/navbar.php'; ?>
     </nav> 
 
     <?php
@@ -94,11 +93,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
         <?php unset($_SESSION['alert']); ?>
     <?php endif; ?>
 
-    <main class="flex-1 pt-28 pb-12">
+    <main class="flex-1 pt-[30px] pb-12">
         <div class="max-w-7xl mx-auto px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 
-                <div class="lg:col-span-5 bg-white rounded-[16px] p-8 shadow-sm">
+                <div class="lg:col-span-5 bg-white p-8 rounded-2xl shadow-sm border border-gray-100 animate-pop-in">
                     <h2 class="text-[#1a3326] text-[20px] font-bold mb-1">Tulis Ulasan Anda</h2>
                     <p class="text-gray-400 text-[13px] mb-6">Ulasan Anda akan membantu pengunjung lainnya.</p>
 
@@ -108,26 +107,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
                             <input type="text" name="nama" required placeholder="Nama Anda" class="w-full bg-[#f8faf9] border border-gray-100 rounded-[12px] px-4 py-3.5 text-[14px] text-gray-700 outline-none focus:border-[#2d6a4f] transition-colors">
                         </div>
 
-<div class="mb-4">
-    <p class="text-gray-500 text-[13px] mb-2">Rating Anda</p>
-    <!-- Hidden input untuk nyimpen nilai ke database -->
-    <input type="hidden" name="rating" id="rating-val" value="5">
-    
-    <div class="flex gap-1">
-        <!-- Bintang 1 -->
-        <svg onclick="ubahBintang(1)" id="bintang-1" class="w-7 h-7 text-yellow-400 cursor-pointer transition-colors duration-200" fill="currentColor" viewBox="0 0 20 20"><path pointer-events="none" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-        <!-- Bintang 2 -->
-        <svg onclick="ubahBintang(2)" id="bintang-2" class="w-7 h-7 text-yellow-400 cursor-pointer transition-colors duration-200" fill="currentColor" viewBox="0 0 20 20"><path pointer-events="none" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-        <!-- Bintang 3 -->
-        <svg onclick="ubahBintang(3)" id="bintang-3" class="w-7 h-7 text-yellow-400 cursor-pointer transition-colors duration-200" fill="currentColor" viewBox="0 0 20 20"><path pointer-events="none" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-        <!-- Bintang 4 -->
-        <svg onclick="ubahBintang(4)" id="bintang-4" class="w-7 h-7 text-yellow-400 cursor-pointer transition-colors duration-200" fill="currentColor" viewBox="0 0 20 20"><path pointer-events="none" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-        <!-- Bintang 5 -->
-        <svg onclick="ubahBintang(5)" id="bintang-5" class="w-7 h-7 text-yellow-400 cursor-pointer transition-colors duration-200" fill="currentColor" viewBox="0 0 20 20"><path pointer-events="none" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-    </div>
-</div>
-
-
+                            <div class="mb-4">
+                                <p class="text-gray-500 text-[13px] mb-2">Rating Anda</p>
+                                <!-- Hidden input untuk nyimpen nilai ke database -->
+                                <input type="hidden" name="rating" id="rating-val" value="5">
+                                
+                                <div class="flex gap-1">
+                                    <!-- Bintang 1 -->
+                                    <svg onclick="ubahBintang(1)" id="bintang-1" class="w-7 h-7 text-yellow-400 cursor-pointer transition-colors duration-200" fill="currentColor" viewBox="0 0 20 20"><path pointer-events="none" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <!-- Bintang 2 -->
+                                    <svg onclick="ubahBintang(2)" id="bintang-2" class="w-7 h-7 text-yellow-400 cursor-pointer transition-colors duration-200" fill="currentColor" viewBox="0 0 20 20"><path pointer-events="none" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <!-- Bintang 3 -->
+                                    <svg onclick="ubahBintang(3)" id="bintang-3" class="w-7 h-7 text-yellow-400 cursor-pointer transition-colors duration-200" fill="currentColor" viewBox="0 0 20 20"><path pointer-events="none" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <!-- Bintang 4 -->
+                                    <svg onclick="ubahBintang(4)" id="bintang-4" class="w-7 h-7 text-yellow-400 cursor-pointer transition-colors duration-200" fill="currentColor" viewBox="0 0 20 20"><path pointer-events="none" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                    <!-- Bintang 5 -->
+                                    <svg onclick="ubahBintang(5)" id="bintang-5" class="w-7 h-7 text-yellow-400 cursor-pointer transition-colors duration-200" fill="currentColor" viewBox="0 0 20 20"><path pointer-events="none" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                </div>
+                            </div>
 
                         <div class="mb-4">
                             <textarea name="isi" required rows="4" placeholder="Bagikan pengalaman Anda di Air Terjun Tancak..." class="w-full bg-[#f8faf9] border border-gray-100 rounded-[12px] px-4 py-3.5 text-[14px] text-gray-700 outline-none focus:border-[#2d6a4f] transition-colors resize-none"></textarea>
@@ -167,10 +164,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
                     <div class="flex flex-col gap-4" id="review-container">
                         
                        <?php
-                        // Menarik Gabungan Teks Lokal + Link ImgBB 
-                        $query_db = mysqli_query($koneksi, "SELECT * FROM ulasan WHERE nama != '' AND teks != '' AND status = 'setuju' ORDER BY id_ulasan DESC");
+                        // Query ini hanya mengambil ulasan yang sudah di-SETUJU-i oleh Admin
+                        $query_db = mysqli_query($koneksi, "SELECT * FROM ulasan WHERE status = 'setuju' ORDER BY id_ulasan DESC");
                         
                         $count = 0;
+                        $delay = 100; // Inisiasi delay awal
                         while($row = mysqli_fetch_assoc($query_db)) {
                             
                             $row['isi'] = $row['teks'];
@@ -183,9 +181,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
                             $bintang = $row['rating'];
                             
                             $hide_class = ($count >= 4) ? 'hidden review-hidden' : '';
+                            
+                            // Batasi maksimal delay biar gak kelamaan nunggu kalau data banyak
+                            if($delay > 500) $delay = 500; 
                         ?>
 
-                        <div class="bg-white rounded-[16px] p-6 shadow-sm border <?php echo ($row['is_pinned'] == 1) ? 'border-[#2d6a4f]/20' : 'border-gray-50'; ?> relative <?php echo $hide_class; ?>">
+                        <div class="bg-white rounded-[16px] p-6 shadow-sm border <?php echo ($row['is_pinned'] == 1) ? 'border-[#2d6a4f]/20' : 'border-gray-50'; ?> relative animate-slide-left delay-<?php echo $delay; ?> <?php echo $hide_class; ?>" style="opacity: 0;">
                             
                             <?php if($row['is_pinned'] == 1): ?>
                             <div class="absolute top-4 right-4 bg-[#e3efe8] text-[#2d6a4f] text-[10px] font-bold px-2 py-1 rounded-md flex items-center border border-[#2d6a4f]/30">
@@ -224,22 +225,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
                             
                             <?php if(!empty($row['foto']) && strpos($row['foto'], 'http') === 0): 
                                 // JURUS ANTI BLOKIR KOMINFO & PROVIDER
-                                $link_bersih = str_replace('https://', '', $row['foto']);
+                                $link_bersih = str_replace(['https://', 'http://'], '', $row['foto']);
                                 $link_proxy = 'https://wsrv.nl/?url=' . $link_bersih;
                             ?>
                             <div class="mt-2">
                                 <img src="<?php echo htmlspecialchars($link_proxy); ?>" alt="Foto Ulasan" class="h-20 w-32 object-cover rounded-[8px] cursor-pointer hover:opacity-80 transition-opacity border border-gray-200">
                             </div>
                             <?php endif; ?>
-
-                        </div>
-                        
-                        <?php $count++; } ?>
-                        
-                        <?php if($count == 0): ?>
-                            <div class="text-center py-10 text-gray-400 text-[13px]">Belum ada ulasan. Jadilah yang pertama!</div>
-                        <?php endif; ?>
-
+                        </div>                        
+                        <?php 
+                            $count++; 
+                            $delay += 100; // Tambahkan delay untuk kartu berikutnya
+                        } 
+                        ?>
                     </div>
 
                     <?php if($count > 4): ?>
@@ -255,10 +253,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
         </div>
     </main>
 
-    <?php include '../components/footer.php'; ?>
+    <?php include 'components/footer.php'; ?>
     
-    <script src="../js/navbar.js"></script>
-    <script src="../js/rating.js"></script>
+    <script src="/tancak-panti/js/navbar.js"></script>
+    <script src="/tancak-panti/js/rating.js"></script>
     <script>
     const formTiket = document.querySelector('form');
     
