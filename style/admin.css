@@ -99,3 +99,42 @@ body {
     from { opacity: 0; transform: translateY(5px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* Pastikan ini ada di style/admin.css */
+#modal-bukti.active {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+#modal-bukti.active #img-bukti-full {
+    transform: scale(1) !important;
+}
+
+/* Kursor saat hover di tabel */
+.btn-zoom-bukti {
+    cursor: zoom-in;
+}
+
+/* ==========================================
+   ANIMASI EFEK DOMINO (MODERASI ULASAN)
+========================================== */
+.ulasan-card {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: top center;
+    opacity: 1;
+    transform: scale(1);
+    max-height: 400px; /* Batas tinggi kartu */
+    overflow: hidden;
+}
+
+/* Kelas ini dipasang oleh JS saat tombol aksi diklik */
+.ulasan-card.is-leaving {
+    opacity: 0 !important;
+    transform: scale(0.8) translateY(-20px) !important;
+    max-height: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    border-width: 0 !important;
+}

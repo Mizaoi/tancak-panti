@@ -1,0 +1,8 @@
+RewriteEngine On
+
+# Jangan belokkan request kalau yang diakses adalah folder/file asli yang diizinkan (seperti css, js, gambar)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Belokkan semua URL palsu kita ke index.php, dan masukkan ke variabel $_GET['url']
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]

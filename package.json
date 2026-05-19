@@ -1,6 +1,26 @@
 {
-  "dependencies": {
-    "@tailwindcss/cli": "^4.2.4",
-    "tailwindcss": "^4.2.4"
+  "name": "tancak-panti",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+"scripts": {
+    "dev": "tailwindcss -i ./style/input.css -o ./style/output.css --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mizaoi/tancak-panti.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Mizaoi/tancak-panti/issues"
+  },
+  "homepage": "https://github.com/Mizaoi/tancak-panti#readme",
+  "devDependencies": {
+    "autoprefixer": "^10.5.0",
+    "postcss": "^8.5.14",
+    "tailwindcss": "^3.4.19"
   }
 }

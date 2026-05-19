@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     
+    
     // 1. Validasi hanya angka untuk No Telp
    // Validasi hanya angka untuk No Telp (HAPUS SAJA BLOK INI)
     const inputCariTelp = document.getElementById('input-cari-telp');
@@ -85,4 +86,6 @@ document.addEventListener('DOMContentLoaded', function() {
             inputAlamat.required = true;
         });
     }
+
+    
 });

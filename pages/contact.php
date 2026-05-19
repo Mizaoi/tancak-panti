@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Narahubung - SI-TANCAK PANTI</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="/tancak-panti/style/output.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="../style/navbar.css">
-    <link rel="stylesheet" href="../style/contact.css"> 
+    <link rel="stylesheet" href="/tancak-panti/style/navbar.css">
     
     <style>
         body {
@@ -23,7 +22,7 @@
 </head>
 <body class="flex flex-col min-h-screen">
 
-    <?php include '../components/navbar.php'; ?>
+    <?php include 'components/navbar.php'; ?>
     <!-- Kode Navbar Kamu Berakhir di Sini -->
     </nav> 
 
@@ -127,10 +126,10 @@
 
     </div>
 
-    <?php include '../components/footer.php'; ?>
+    <?php include 'components/footer.php'; ?>
 
-    <script src="../js/navbar.js"></script>
-    <script src="../js/contact.js"></script>
+    <script src="/tancak-panti/js/navbar.js"></script>
+    <script src="/tancak-panti/js/contact.js"></script>
 
 </body>
 </html>
