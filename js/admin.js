@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const topBannerCheck = document.getElementById('top-banner-notif');
         const isBannerVisible = topBannerCheck && !topBannerCheck.classList.contains('hidden');
-        toast.style.top = isBannerVisible ? "130px" : "80px";
+        toast.style.top = isBannerVisible ? "130px" : "70px";
         
         toast.innerText = msg;
         document.body.appendChild(toast);
@@ -25,41 +25,102 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ==========================================
-    // 2. FUNGSI MODAL KONFIRMASI (DEFENSIVE)
+    // 2. FUNGSI MODAL KONFIRMASI (PROMISE-BASED)
     // ==========================================
-window.showConfirm = function(msg) {
-    return new Promise((resolve) => {
-        const modal = document.getElementById('confirm-modal');
-        const msgEl = document.getElementById('confirm-msg');
-        
-        if (!modal) return resolve(false);
-        
-        // Isi pesan
-        if (msgEl) msgEl.innerText = msg;
-        
-        // Tampilkan modal dengan cara halus
-        modal.classList.remove('hidden');
-        modal.classList.add('flex'); // Ini akan memicu CSS Tailwind/Bootstrap kamu
-        
-        // Event Listener untuk tombol
-        const btnConfirm = document.getElementById('btn-confirm');
-        const btnCancel = document.getElementById('btn-cancel');
+    window.showConfirm = function(message) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('confirm-modal');
+            const msgEl = document.getElementById('confirm-msg');
+            const btnConfirm = document.getElementById('btn-confirm');
+            const btnCancel = document.getElementById('btn-cancel');
 
-        btnConfirm.onclick = () => { 
-            modal.classList.add('hidden'); // Sembunyikan lagi
-            modal.classList.remove('flex');
-            resolve(true); 
-        };
-        
-        btnCancel.onclick = () => { 
-            modal.classList.remove('hidden'); // Tambahkan ini
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            resolve(false); 
-        };
-    });
-};
+            if (!modal || !msgEl || !btnConfirm || !btnCancel) {
+                resolve(false);
+                return;
+            }
+
+            msgEl.innerText = message;
+            modal.style.display = 'flex';
+
+            // Bersihkan listener lama dengan cloning
+            const newBtnConfirm = btnConfirm.cloneNode(true);
+            const newBtnCancel = btnCancel.cloneNode(true);
+            btnConfirm.parentNode.replaceChild(newBtnConfirm, btnConfirm);
+            btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
+
+            newBtnConfirm.addEventListener('click', () => {
+                modal.style.display = 'none';
+                resolve(true);
+            });
+
+            newBtnCancel.addEventListener('click', () => {
+                modal.style.display = 'none';
+                resolve(false);
+            });
+        });
+    };
+
+    const btnMatikanNotif = document.getElementById('btn-matikan-notif');
+    if (btnMatikanNotif) {
+        btnMatikanNotif.addEventListener('click', async () => {
+            const confirmed = await showConfirm("Apakah sampeyan yakin ingin mematikan notifikasi?");
+            if (!confirmed) return;
+
+            fetch('/tancak-panti/api/matikan_notif.php', {
+                method: 'POST'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showToast("Notifikasi berhasil dimatikan");
+                    location.reload();
+                } else {
+                    showToast("Gagal mematikan notif", "error");
+                }
+            })
+            .catch(err => {
+                console.error("Error:", err);
+                showToast("Terjadi kesalahan saat mematikan notif", "error");
+            });
+        });
+    }
     
+    // 2. Perbaikan Hapus Ulasan (Sesuaikan dengan class tombol di dashboard.php)
+    document.addEventListener('click', async function(e) {
+        if (e.target.closest('.btn-hapus-ulasan')) {
+            const btn = e.target.closest('.btn-hapus-ulasan');
+            const idUlasan = btn.getAttribute('data-id');
+
+            const confirmed = await showConfirm("Yakin ingin menghapus ulasan ini?");
+            if (!confirmed) return;
+
+            const formData = new URLSearchParams();
+            formData.append('id_ulasan', idUlasan);
+            formData.append('action', 'Hapus');
+
+            fetch('/tancak-panti/api/proses_ulasan.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: formData.toString()
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    showToast("Ulasan dihapus!");
+                    // Hapus elemen card ulasan secara visual
+                    const card = btn.closest('.ulasan-card');
+                    if(card) card.remove();
+                } else {
+                    showToast("Gagal: " + data.message, "error");
+                }
+            })
+            .catch(err => {
+                console.error("Error:", err);
+                showToast("Terjadi kesalahan saat menghapus ulasan", "error");
+            });
+        }
+    });
+
     // ==========================================
     // 3. DEKLARASI SEMUA VARIABEL GLOBAL
     // ==========================================
@@ -707,6 +768,11 @@ window.showConfirm = function(msg) {
                                 }
                             } else {
                                 listContainer.innerHTML = '<div class="text-center text-gray-500 py-4 font-medium">Tidak ada wisatawan di area.</div>';
+                                if (btnAktifkan) {
+                                    btnAktifkan.disabled = true;
+                                    btnAktifkan.style.opacity = '0.5';
+                                    btnAktifkan.style.cursor = 'not-allowed';
+                                }
                             }
                         } else {
                             listContainer.innerHTML = '<div class="text-red-500 text-center py-4 font-medium">Gagal memuat data dari database!</div>';
@@ -992,18 +1058,30 @@ window.showConfirm = function(msg) {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: fd.toString()
-                }).then(() => {
-                    if (action === 'Hapus') {
-                        card.remove(); 
-                        if (currentStatus === 'pending') updatePendingBadge(-1);
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        if (action === 'Hapus') {
+                            card.remove(); 
+                            if (currentStatus === 'pending') updatePendingBadge(-1);
+                            showToast("Ulasan berhasil dihapus!", "success");
+                        } else {
+                            updateCardUI(card, action.toLowerCase(), false); 
+                            showToast(`Ulasan berhasil di${action === 'Setuju' ? 'setujui' : 'tolak'}!`, "success");
+                        }
+                        
+                        const activeFilterBtn = document.querySelector('#filter-ulasan .text-white');
+                        if (activeFilterBtn) filterUlasanCards(activeFilterBtn.getAttribute('data-status'));
                     } else {
-                        updateCardUI(card, action.toLowerCase(), false); 
+                        showToast("Gagal memproses ulasan: " + (data.message || 'Error unknown'), "error");
+                        btn.innerText = teksAsli;
+                        btn.disabled = false;
                     }
-                    
-                    const activeFilterBtn = document.querySelector('#filter-ulasan .text-white');
-                    if (activeFilterBtn) filterUlasanCards(activeFilterBtn.getAttribute('data-status'));
-                }).catch(err => {
-                    console.error(err);
+                })
+                .catch(err => {
+                    console.error("Error:", err);
+                    showToast("Terjadi kesalahan jaringan", "error");
                     btn.innerText = teksAsli;
                     btn.disabled = false;
                 });

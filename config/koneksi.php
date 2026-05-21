@@ -43,7 +43,7 @@ if (!function_exists('uploadKeImgBB')) {
             return $json['data']['url'];
         } else {
             // KALAU GAGAL, KEMBALIKAN PESAN ERROR ASLINYA BIAR KITA TAHU
-            $pesan = isset($json['error']['message']) ? $json['error']['message'] : 'Gagal koneksi ke API';
+            $pesan = isset($json['error']['message']) ? $json['error']['message'] : 'Internet kurang stabil';
             return "API_ERROR: " . $pesan;
         }
     }

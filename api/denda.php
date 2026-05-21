@@ -50,21 +50,29 @@ if ($action == 'save') {
     $json = file_get_contents('php://input');
     $data = json_decode($json, true);
     
+    if (!$data) {
+        echo json_encode(['status' => 'error', 'msg' => 'Data JSON tidak valid']); exit;
+    }
+
     $id_tiket = (int)$data['id_tiket'];
     $nama_wisatawan = mysqli_real_escape_string($koneksi, trim($data['nama_wisatawan']));
     $items = $data['items'];
     
-    // Hapus histori denda lama untuk tiket ini biar bersih
-    mysqli_query($koneksi, "DELETE FROM denda WHERE id_tiket = $id_tiket");
+    // Hapus histori denda lama
+    if (!mysqli_query($koneksi, "DELETE FROM denda WHERE id_tiket = $id_tiket")) {
+        echo json_encode(['status' => 'error', 'msg' => 'Gagal hapus denda lama: ' . mysqli_error($koneksi)]); exit;
+    }
     
-    // Insert denda yang baru per item sampah
+    // Insert denda baru
     foreach ($items as $item) {
         $nama = mysqli_real_escape_string($koneksi, trim($item['nama_sampah']));
         $hilang = (int)$item['hilang'];
-        $total_denda_item = $hilang * 10000; // Rp 10.000 per item
+        $total_denda_item = $hilang * 10000; 
         
         if ($hilang > 0) {
-            mysqli_query($koneksi, "INSERT INTO denda (id_tiket, nama_wisatawan, nama_sampah, jumlah_hilang, total_denda) VALUES ($id_tiket, '$nama_wisatawan', '$nama', $hilang, $total_denda_item)");
+            if (!mysqli_query($koneksi, "INSERT INTO denda (id_tiket, nama_wisatawan, nama_sampah, jumlah_hilang, total_denda) VALUES ($id_tiket, '$nama_wisatawan', '$nama', $hilang, $total_denda_item)")) {
+                echo json_encode(['status' => 'error', 'msg' => 'Gagal insert denda: ' . mysqli_error($koneksi)]); exit;
+            }
         }
     }
     

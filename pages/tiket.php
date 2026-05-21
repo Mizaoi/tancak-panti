@@ -6,6 +6,7 @@ $show_ticket = false;
 $data_tiket = null;
 $data_sampah = [];
 $total_item_sampah = 0;
+$total_denda = 0;
     
 // LOGIKA DATABASE & KIRIM WA 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_tiket'])) {
@@ -74,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_tiket'])) {
             }
         }
 
-        $link_cek = "http://localhost/tancak-panti/cek_tiket"; 
+        $link_cek = "http://tancak-panti.mif.myhost.id/cek_tiket?id=" . $id_baru; 
         $pesan_wa = "✨ *YEAY! TIKETMU SUDAH SIAP* ✨\n\n";
         $pesan_wa .= "Halo, *" . $nama . "*! Terima kasih sudah mampir ke SI-TANCAK PANTI. Tiketmu sudah berhasil kami amankan, nih! 🎫🌿\n\n";
         $pesan_wa .= "━━━━━━━━━━━━━━\n";
@@ -107,22 +108,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_tiket'])) {
         curl_exec($curl);
         curl_close($curl);
 
-        echo "<script>window.location.href = window.location.pathname + '?sukses=1';</script>";
+        echo "<script>window.location.href = window.location.pathname + '?sukses=1&id=" . $id_baru . "';</script>";
         exit;
     }
 }
 
 // LOGIKA TAMPILKAN E-TIKET SETELAH BELI 
-if (isset($_GET['sukses']) && $_GET['sukses'] == '1') {
+if (isset($_GET['sukses']) && $_GET['sukses'] == '1' && isset($_GET['id'])) {
     $show_ticket = true;
+    $id_tk = mysqli_real_escape_string($koneksi, $_GET['id']);
     
-    $q_ambil = mysqli_query($koneksi, "SELECT * FROM tiket ORDER BY id_tiket DESC LIMIT 1");
+    $q_ambil = mysqli_query($koneksi, "SELECT * FROM tiket WHERE id_tiket = '$id_tk'");
     $data_tiket = mysqli_fetch_assoc($q_ambil);
     
     if ($data_tiket) {
-        $id_tk = $data_tiket['id_tiket'];
-        
-        $q_anggota = mysqli_query($koneksi, "SELECT * FROM anggota WHERE id_tiket = $id_tk");
+        // Ambil Data Anggota
+        $q_anggota = mysqli_query($koneksi, "SELECT * FROM anggota WHERE id_tiket = '$id_tk'");
         $data_anggota = [];
         while($ang = mysqli_fetch_assoc($q_anggota)){ 
             $data_anggota[] = $ang['nama_anggota'];
@@ -130,16 +131,29 @@ if (isset($_GET['sukses']) && $_GET['sukses'] == '1') {
         $data_tiket['data_anggota'] = $data_anggota;
         $data_tiket['jumlah_orang'] = 1 + count($data_anggota);
         
-        if (!isset($data_tiket['denda'])) {
-            $data_tiket['denda'] = 0; 
-        }
-
-        $q_sampah = mysqli_query($koneksi, "SELECT * FROM sampah WHERE id_tiket = $id_tk");
+        // Ambil Data Sampah
+        $q_sampah = mysqli_query($koneksi, "SELECT * FROM sampah WHERE id_tiket = '$id_tk'");
         while($row = mysqli_fetch_assoc($q_sampah)) {
             $row['nama_item'] = $row['nama_sampah']; 
             $data_sampah[] = $row;
             $total_item_sampah += $row['jumlah'];
         }
+
+        // --- INI BAGIAN YANG DITAMBAHKAN: AMBIL DATA DENDA ---
+        $q_denda = mysqli_query($koneksi, "SELECT SUM(total_denda) as total FROM denda WHERE id_tiket = '$id_tk'");
+        if (!$q_denda) {
+            die("Error Query Denda: " . mysqli_error($koneksi));
+        }
+        $r_denda = mysqli_fetch_assoc($q_denda);
+        $total_denda = $r_denda['total'] ?? 0;
+
+        // Cek apakah data benar-benar ada
+        if ($total_denda == 0) {
+            // echo "Debug: Data denda untuk ID $id_tk tidak ditemukan di DB.";
+        }
+        $r_denda = mysqli_fetch_assoc($q_denda);
+        $total_denda = $r_denda['total'] ?? 0;
+        // -----------------------------------------------------
     }
 }
 ?>
@@ -240,8 +254,15 @@ if (isset($_GET['sukses']) && $_GET['sukses'] == '1') {
                                 </div>
                                 <div>
                                     <p class="text-[11px] text-gray-400 font-medium mb-0.5">Total Bayar</p>
-                                    <p class="text-[14px] font-extrabold text-[#1a3326]">Rp <?= number_format($data_tiket['jumlah_orang'] * 10000, 0, ',', '.') ?></p>
+                                    <p class="text-[14px] font-bold text-[#1a3326]">Rp <?= number_format($data_tiket['jumlah_orang'] * 10000, 0, ',', '.') ?></p>
                                 </div>
+
+                                <?php if ($total_denda > 0): ?>
+                                <div>
+                                    <p class="text-[11px] text-red-400 font-medium mb-0.5">Total Denda</p>
+                                    <p class="text-[14px] font-extrabold text-red-600">Rp <?= number_format($total_denda, 0, ',', '.') ?></p>
+                                </div>
+                                <?php endif; ?>
                             </div>
                             
                             <div class="mb-8">
@@ -394,6 +415,11 @@ if (isset($_GET['sukses']) && $_GET['sukses'] == '1') {
                                     <svg class="w-10 h-10 mb-3 text-gray-300 group-hover:text-[#2d6a4f] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                     <span class="text-gray-500 text-[13px] font-bold">Klik untuk upload foto bukti transfer</span>
                                 </div>
+                                <div id="error-bukti-container" class="hidden text-red-500 text-[12px] font-bold mt-2 flex items-center gap-1.5 ml-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span id="error-bukti-text"></span>
+                                </div>
+                                
                                 <img id="upload-preview" class="hidden absolute inset-0 w-full h-full object-contain bg-gray-50 z-10">
                             </label>
                             <input type="file" class="hidden" name="bukti_transfer" id="bukti-input" accept="image/*" required>
