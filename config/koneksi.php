@@ -13,6 +13,11 @@ if (!$koneksi) {
     die("Aduh Cak, Koneksi database gagal: " . mysqli_connect_error());
 }
 
+mysqli_query($koneksi, "UPDATE tiket 
+    SET status = 'Hangus' 
+    WHERE tanggal_kunjungan < CURDATE() 
+    AND status = 'Belum Check-in'");
+    
 if (!function_exists('uploadKeImgBB')) {
     function uploadKeImgBB($file_path, $label) {
         // KITA TEMBAK LANGSUNG PAKAI API KEY IMGBB ASLI (BUKAN FONNTE)

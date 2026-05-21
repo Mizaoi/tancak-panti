@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Beranda - SI-TANCAK PANTI</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="/tancak-panti/style/output.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="/tancak-panti/style/navbar.css">
@@ -28,7 +28,7 @@
 
     <?php
         // Cek Status Darurat dari file JSON
-        $notif_file = '/tancak-panti/config/status_darurat.json'; // Sesuaikan path folder config-nya jika file index ini ada di luar
+        $notif_file = 'config/status_darurat.json'; // Sesuaikan path folder config-nya jika file index ini ada di luar
         $darurat_aktif = false;
         $pesan_darurat = '';
         

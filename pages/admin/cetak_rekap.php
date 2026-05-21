@@ -1,8 +1,13 @@
 <?php
 include 'config/koneksi.php';
 
-if (!isset($_SESSION['admin'])) {
-    header("Location: /tancak-panti/admin/login");
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Cek kunci admin
+if (!isset($_SESSION['admin']) || empty($_SESSION['admin'])) {
+    header("Location: /tancak-panti/login");
     exit;
 }
 
@@ -88,6 +93,7 @@ $query_sampah_hilang = mysqli_query($koneksi, "
     <meta charset="UTF-8">
     <title>Rekap Laporan <?= $nama_bulan ?></title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="/tancak-panti/style/output.css" rel="stylesheet">
     <style>
         /* ===================================================
            1. PENGATURAN KERTAS & PRINT DASAR

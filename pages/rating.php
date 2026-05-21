@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ulasan - SI-TANCAK PANTI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="/tancak-panti/style/output.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style/navbar.css">
     <link rel="stylesheet" href="style/rating.css"> 
@@ -271,5 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
         });
     }
     </script>
+
+    <script src="/tancak-panti/js/profile.js"></script>
 </body>
 </html>

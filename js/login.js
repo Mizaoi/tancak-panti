@@ -8,11 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 100);
 
-    // 2. Fitur Toggle Intip Password
- document.addEventListener('DOMContentLoaded', function() {
-    
-    document.addEventListener('DOMContentLoaded', function() {
-    
     // ==========================================
     // FITUR MATA: TOGGLE PASSWORD VISIBILITY
     // ==========================================
@@ -50,7 +45,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-});
 
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -67,5 +61,4 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => errorBox.remove(), 600);
         }, 4000); 
     }
-});
 });
