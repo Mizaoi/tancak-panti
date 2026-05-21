@@ -14,17 +14,37 @@ if (strpos($request_uri, 'tancak-panti/') === 0) {
     $request_uri = substr($request_uri, strlen('tancak-panti/'));
 }
 
+// =======================================================
+// SATPAM UTAMA (MIDDLEWARE PROTEKSI AKSES ADMIN)
+// =======================================================
+// Pengecualian khusus untuk proses logout (agar admin bisa logout dengan tenang)
+if ($request_uri === 'admin/logout') {
+    // Biarkan lewat, karena ini rute untuk menghancurkan sesi
+} 
+// Cek: Apakah URL yang mau diakses diawali kata 'admin/' ?
+elseif (strpos($request_uri, 'admin/') === 0) {
+    
+    // SESUAIKAN KUNCI: Cek apakah session 'admin' (yang dibuat di login.php) sudah ada isinya
+    if (!isset($_SESSION['admin']) || empty($_SESSION['admin'])) {
+        
+        // Kalau kunci tidak ada, TENDANG ke halaman login!
+        header("Location: /tancak-panti/login");
+        exit(); // Matikan proses agar rute di bawah tidak terbaca
+    }
+}
+// =======================================================
+
 // 2. DAFTAR ROUTES (Jalur Lalu Lintas)
 $routes = [
     ''          => 'pages/home.php',
     'home'      => 'pages/home.php',
     'login'     => 'pages/login.php',
-    'facility' => 'pages/facility.php',
+    'facility'  => 'pages/facility.php',
     'tiket'     => 'pages/tiket.php',
     'cek_tiket' => 'pages/cek_tiket.php',
     'rating'    => 'pages/rating.php',
-    'contact'    => 'pages/contact.php',
-    'profile'    => 'pages/profile.php',
+    'contact'   => 'pages/contact.php',
+    'profile'   => 'pages/profile.php',
     
     'admin/dashboard' => 'pages/admin/dashboard.php',
     'admin/cetak'     => 'pages/admin/cetak_rekap.php',

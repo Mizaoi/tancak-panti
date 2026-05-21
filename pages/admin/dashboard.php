@@ -2,8 +2,13 @@
 include 'config/koneksi.php';
 
 // Proteksi Halaman Admin
-if (!isset($_SESSION['admin'])) {
-    header("Location: /tancak-panti/admin/login");
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Cek kunci admin
+if (!isset($_SESSION['admin']) || empty($_SESSION['admin'])) {
+    header("Location: /tancak-panti/login");
     exit;
 }
 
@@ -136,10 +141,10 @@ $json_data_sampah = $json_data_hilang;
 <head>
     <meta charset="UTF-8">
     <title>Dashboard Admin - SI-TANCAK PANTI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="/tancak-panti/style/admin.css">
+    <link href="/tancak-panti/style/output.css" rel="stylesheet">
 </head>
 <body class="flex flex-col min-h-screen text-gray-800">
 
@@ -303,7 +308,14 @@ $json_data_sampah = $json_data_hilang;
                                 <td class="data-id px-3 py-3 text-[11.5px] font-extrabold text-[#1a3326]"><?= $kode_tampil; ?></td>
                                 <td class="data-nama px-3 py-3 text-[12px] font-bold text-gray-800 truncate-text" title="<?= $row['nama']; ?>"><?= $row['nama']; ?></td>
                                 <td class="data-alamat px-3 py-3 text-[12px] text-gray-500 truncate-text" title="<?= $row['alamat']; ?>"><?= $row['alamat']; ?></td>
-                                <td class="px-2 py-3 text-[12px] text-center font-bold text-gray-700"><?= $row['jumlah_orang']; ?></td>
+                                <td class="px-2 py-3 text-[12px] text-center font-bold text-gray-700">
+                                    <div class="flex items-center justify-center gap-1">
+                                        <span><?= $row['jumlah_orang']; ?></span>
+                                        <button class="btn-lihat-anggota bg-blue-50 text-blue-600 hover:bg-blue-100 p-1 rounded-md transition-colors" data-id="<?= $id_tk ?>" data-nama="<?= htmlspecialchars($row['nama']) ?>" data-kode="<?= $kode_tampil ?>" title="Lihat Anggota Rombongan">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                        </button>
+                                    </div>
+                                </td>
                                 
                                 <td class="px-3 py-3 text-[11.5px] font-bold">
                                     <?php if($telp1): ?>
@@ -400,7 +412,7 @@ $json_data_sampah = $json_data_hilang;
                     </div>
                     <!-- Tombol Cetak -->
                     <button onclick="cetakLaporan()" class="bg-[#1a3326] hover:bg-[#12241b] text-white px-5 py-2.5 rounded-[10px] text-[13px] font-bold flex items-center gap-2 transition-colors shadow-sm whitespace-nowrap">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 ２ 0 00-２ ２v４h１０z"></path></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                         Cetak Rekap
                     </button>
 
@@ -689,7 +701,6 @@ $json_data_sampah = $json_data_hilang;
         const valMasih = <?= (int)$count_1 ?>;
         const valPulang = <?= (int)$count_2 ?>;
     </script>
-    <script src="/tancak-panti/js/admin.js"></script>
 
     <!-- SEMUA MODAL DILETAKKAN DI LUAR AREA TAB -->
 
@@ -847,7 +858,50 @@ $json_data_sampah = $json_data_hilang;
         </div>
     </div>
     
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <div id="modal-anggota" class="overlay-modal">
+        <div class="modal-card bg-white rounded-[24px] w-full max-w-[400px] shadow-2xl overflow-hidden">
+            
+            <div class="bg-[#2563eb] p-6 text-center text-white relative">
+                <p class="text-[11px] font-medium text-blue-200 uppercase tracking-widest mb-1">Daftar Rombongan</p>
+                <h3 id="a-modal-kode" class="font-extrabold text-[22px] tracking-widest">TCK-XXXXXX</h3>
+                <button id="close-modal-anggota" class="absolute top-4 right-5 font-bold text-blue-200 hover:text-white transition-colors text-xl">✕</button>
+            </div>
+            
+            <div class="p-8">
+                
+                <div class="text-center mb-5">
+                    <p class="text-[11px] text-gray-400 font-bold uppercase tracking-widest mb-1">Kepala Rombongan</p>
+                    <h4 id="a-modal-ketua" class="text-[18px] font-extrabold text-[#1a3326] capitalize">Nama Ketua</h4>
+                </div>
+
+                <div class="border-t-2 border-dashed border-gray-200 my-5"></div>
+
+                <div>
+                    <p class="text-[11px] text-gray-400 font-bold uppercase tracking-widest mb-3 text-center">Anggota Rombongan</p>
+                    
+                    <div id="a-anggota-list" class="space-y-1.5 max-h-[180px] overflow-y-auto custom-scrollbar px-2 text-center text-[14.5px] font-medium text-gray-600">
+                        </div>
+                </div>
+
+                <button id="a-btn-tutup" class="w-full mt-8 bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100 py-3.5 rounded-[12px] text-[13px] font-bold transition-all">Tutup</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-3"></div>
+
+
+    <div id="confirm-modal" class="fixed inset-0 z-[9999] flex items-center justify-center" style="display: none; background: rgba(0,0,0,0.5);">
+        <div class="bg-white rounded-[24px] p-6 shadow-2xl w-[90%] max-w-[320px] text-center">
+            <h3 class="text-[16px] font-extrabold text-[#1a3326] mb-4">Konfirmasi Aksi</h3>
+            <p id="confirm-msg" class="text-[13px] text-gray-500 mb-6">...</p>
+            <div class="flex gap-3">
+                <button id="btn-confirm" class="flex-1 py-3 rounded-[12px] bg-[#1a3326] text-white font-bold text-[13px]">Ya</button>
+                <button id="btn-cancel" class="flex-1 py-3 rounded-[12px] bg-gray-200 text-gray-600 font-bold text-[13px]">Tidak</button>
+            </div>
+        </div>
+    </div>
+        </div> <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
         // Jembatan Data PHP ke JS
@@ -855,66 +909,8 @@ $json_data_sampah = $json_data_hilang;
         window.dataSampahBawa = <?= $json_data_bawa ?>;
         window.dataSampahHilang = <?= $json_data_hilang ?>;
         window.namaBulanPilih = "<?= $nama_bulan_pilih ?>";
-        
-        // Data untuk Grafik Status
-        const valBelum = <?= (int)$count_0 ?>;
-        const valMasih = <?= (int)$count_1 ?>;
-        const valPulang = <?= (int)$count_2 ?>;
     </script>
     <script src="/tancak-panti/js/admin.js"></script>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const tabButtons = document.querySelectorAll('.tab-btn');
-        
-        if(tabButtons.length > 0) {
-            tabButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault(); // Mencegah error bawaan tombol
-                    
-                    const targetId = this.getAttribute('data-target');
-                    
-                    // Ambil parameter bulan yang sedang aktif biar nggak ilang pas pindah tab
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const currentBulan = urlParams.get('bulan');
-                    
-                    // Susun URL pintar yang diarahkan ke sistem Router
-                    let newUrl = '/tancak-panti/admin/dashboard?tab=' + targetId;
-                    if (currentBulan) {
-                        newUrl += '&bulan=' + currentBulan;
-                    }
-                    
-                    window.location.href = newUrl;
-                });
-            });
-        }
-    });
-
-    // FUNGSI MODAL BUKTI ULASAN (Dipindah ke sini biar rapi)
-    function openBuktiUlasan(src) {
-        const modalBukti = document.getElementById('modal-bukti');
-        const imgFull = document.getElementById('img-bukti-full');
-        if (src && src !== "") {
-            imgFull.src = src;
-            modalBukti.classList.remove('hidden'); 
-            setTimeout(() => {
-                modalBukti.classList.add('active');
-                document.body.style.overflow = 'hidden'; 
-            }, 10);
-        }
-    }
-    
-    function closeBukti() {
-        const modalBukti = document.getElementById('modal-bukti');
-        if(modalBukti) {
-            modalBukti.classList.remove('active');
-            setTimeout(() => {
-                modalBukti.classList.add('hidden');
-                document.body.style.overflow = ''; 
-            }, 300);
-        }
-    }
-    </script>
 
 </body>
 </html>

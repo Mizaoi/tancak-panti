@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Facility - SI-TANCAK PANTI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="/tancak-panti/style/output.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/tancak-panti/style/navbar.css">
     <link rel="stylesheet" href="/tancak-panti/style/facility.css"> 
@@ -153,7 +153,7 @@
         <section class="max-w-7xl mx-auto px-6 lg:px-8 mb-16 relative">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 
-                <div class="facility-card bg-white rounded-[24px] border border-gray-100 reveal-up flex flex-col" style="transition-delay: 0.1s;">
+                <div class="facility-card bg-white rounded-[24px] border border-gray-100 reveal-up flex flex-col shadow-sm hover:shadow-md transition-shadow" style="transition-delay: 0.1s;">
                     <div class="facility-img-wrapper">
                         <img src="/tancak-panti/assets/images/parkir.jpeg" class="facility-img" alt="Area Parkir">
                         <div class="w-12 h-12 rounded-xl bg-[#e3efe8] text-[#2d6a4f] flex items-center justify-center shadow-lg">
@@ -166,7 +166,20 @@
                     </div>
                 </div>
 
-                <div class="facility-card bg-white rounded-[24px] border border-gray-100 reveal-up flex flex-col" style="transition-delay: 0.2s;">
+                <div class="facility-card bg-white rounded-[24px] border border-gray-100 reveal-up flex flex-col shadow-sm hover:shadow-md transition-shadow" style="transition-delay: 0.15s;">
+                    <div class="facility-img-wrapper">
+                        <img src="/tancak-panti/assets/images/loket.jpeg" class="facility-img" alt="Loket Tiket">
+                        <div class="w-12 h-12 rounded-xl bg-[#e3efe8] text-[#2d6a4f] flex items-center justify-center shadow-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </div>
+                    </div>
+                    <div class="facility-content">
+                        <h3 class="text-[#1a3326] text-[18px] font-bold mb-3">Loket Pembelian</h3>
+                        <p class="text-gray-500 text-[14px] leading-relaxed">Loket resmi untuk melayani pembayaran tiket masuk, dikelola oleh petugas ramah yang siap membantu proses administrasi Anda.</p>
+                    </div>
+                </div>
+
+                <div class="facility-card bg-white rounded-[24px] border border-gray-100 reveal-up flex flex-col shadow-sm hover:shadow-md transition-shadow" style="transition-delay: 0.2s;">
                     <div class="facility-img-wrapper">
                         <img src="/tancak-panti/assets/images/Taman.jpeg" class="facility-img" alt="taman">
                         <div class="w-12 h-12 rounded-xl bg-[#e3efe8] text-[#2d6a4f] flex items-center justify-center shadow-lg">
@@ -179,7 +192,7 @@
                     </div>
                 </div>
 
-                <div class="facility-card bg-white rounded-[24px] border border-gray-100 reveal-up flex flex-col" style="transition-delay: 0.3s;">
+                <div class="facility-card bg-white rounded-[24px] border border-gray-100 reveal-up flex flex-col shadow-sm hover:shadow-md transition-shadow" style="transition-delay: 0.25s;">
                     <div class="facility-img-wrapper">
                         <img src="/tancak-panti/assets/images/wc.jpeg" class="facility-img" alt="Toilet">
                         <div class="w-12 h-12 rounded-xl bg-[#e3efe8] text-[#2d6a4f] flex items-center justify-center shadow-lg">
@@ -192,7 +205,7 @@
                     </div>
                 </div>
 
-        </div>
+            </div>
         </section>
 
         <section class="max-w-7xl mx-auto px-6 lg:px-8 text-center reveal-up mb-10" style="transition-delay: 0.2s;">
