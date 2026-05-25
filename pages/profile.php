@@ -8,8 +8,8 @@
     <link href="/tancak-panti/style/output.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="style/navbar.css">
-    <link rel="stylesheet" href="style/profile.css"> <style>
+    <link rel="stylesheet" href="/tancak-panti/style/navbar.css">
+    <link rel="stylesheet" href="/tancak-panti/style/profile.css"> <style>
         body {
             font-family: 'Poppins', sans-serif;
             margin: 0;
@@ -67,7 +67,7 @@
                 <div class="carousel-track relative w-full h-full bg-[#1a3326]">
                     
                     <div class="carousel-slide absolute inset-0 w-full h-full">
-                        <img src="assets/images/slide1.jpeg" class="w-full h-full object-cover" alt="Air Terjun Tancak">
+                        <img src="/tancak-panti/assets/images/slide1.jpeg" class="w-full h-full object-cover" alt="Air Terjun Tancak">
                         <div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-10">
                             <h2 class="text-white text-3xl md:text-4xl font-bold mb-2">Air Terjun Tancak</h2>
                             <p class="text-white/80 flex items-center text-sm md:text-base">
@@ -78,7 +78,7 @@
                     </div>
                     
                     <div class="carousel-slide absolute inset-0 w-full h-full">
-                        <img src="assets/images/panorama2.jpeg" class="w-full h-full object-cover" alt="Suasana Tancak">
+                        <img src="/tancak-panti/assets/images/panorama2.jpeg" class="w-full h-full object-cover" alt="Suasana Tancak">
                         <div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-10">
                             <h2 class="text-white text-3xl md:text-4xl font-bold mb-2">Keindahan Alam Alami</h2>
                             <p class="text-white/80 text-sm md:text-base">Udara sejuk di kaki Gunung Argopuro</p>
@@ -86,7 +86,7 @@
                     </div>
 
                     <div class="carousel-slide absolute inset-0 w-full h-full">
-                        <img src="assets/images/slide3.jpeg" class="w-full h-full object-cover" alt="Air Jernih Tancak">
+                        <img src="/tancak-panti/assets/images/slide3.jpeg" class="w-full h-full object-cover" alt="Air Jernih Tancak">
                         <div class="absolute inset-0 bg-black/40 flex flex-col justify-end p-10">
                             <h2 class="text-white text-3xl md:text-4xl font-bold mb-2">Mata Air Pegunungan</h2>
                             <p class="text-white/80 text-sm md:text-base">Kesegaran air murni yang menenangkan jiwa</p>

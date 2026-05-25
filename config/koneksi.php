@@ -5,6 +5,7 @@ $user = "root";       // Username bawaan XAMPP
 $pass = "";           // Password bawaan XAMPP (dikosongkan saja)\
 $db   = "tancak_panti";  // Pastikan nama ini SAMA PERSIS dengan yang kamu buat di phpMyAdmin
 
+error_reporting(0); ini_set('display_errors', 0);
 // Membuat koneksi ke database
 $koneksi = mysqli_connect($host, $user, $pass, $db);
 

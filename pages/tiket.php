@@ -165,8 +165,8 @@ if (isset($_GET['sukses']) && $_GET['sukses'] == '1' && isset($_GET['id'])) {
     <title>Beli Tiket - SI-TANCAK PANTI</title>
     <link href="/tancak-panti/style/output.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style/navbar.css">
-    <link rel="stylesheet" href="style/tiket.css"> 
+    <link rel="stylesheet" href="/tancak-panti/style/navbar.css">
+    <link rel="stylesheet" href="/tancak-panti/style/tiket.css"> 
 </head>
 <body class="bg-[#eff3f0] font-[Poppins] flex flex-col min-h-screen">
 
@@ -485,7 +485,7 @@ if (isset($_GET['sukses']) && $_GET['sukses'] == '1' && isset($_GET['id'])) {
         </div>
     </main>
 
-    <script src="js/tiket.js"></script>
+    <script src="/tancak-panti/js/tiket.js"></script>
 
     <div id="modal-sukses-beli" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 hidden backdrop-blur-sm transition-all duration-300">
         <div class="bg-white rounded-[24px] p-8 max-w-[380px] w-full text-center shadow-2xl transform scale-95 transition-transform duration-300" id="modal-card">
