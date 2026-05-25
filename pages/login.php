@@ -1,4 +1,9 @@
 <?php
+// Pastikan session_start() ada jika belum dipanggil di file koneksi
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 include 'config/koneksi.php';
 
 // 2. LOGIKA PROSES LOGIN YANG BENAR
@@ -10,10 +15,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
     $data = mysqli_fetch_assoc($query);
 
     if ($data && $password == $data['password']) {
+        // --- [TAMBAHAN LOG] CATAT LOGIN BERHASIL ---
+        $kategori = "SISTEM & KEAMANAN";
+        // Kutip tunggal dihapus agar tidak bentrok dengan query SQL
+        $aksi = "Admin dengan username " . $username . " berhasil login."; 
+        $query_log = "INSERT INTO log_aktivitas (kategori, aksi) VALUES ('$kategori', '$aksi')";
+        
+        // Eksekusi dan cek error
+        $simpan_log = mysqli_query($koneksi, $query_log);
+        if (!$simpan_log) {
+            die("Error Log Login Berhasil: " . mysqli_error($koneksi));
+        }
+        // ------------------------------------------
+
         $_SESSION['admin'] = $data['username'];
         header("Location: /tancak-panti/admin/dashboard"); 
         exit;
     } else {
+        // --- [TAMBAHAN LOG] CATAT LOGIN GAGAL ---
+        $kategori = "SISTEM & KEAMANAN";
+        $aksi = "Percobaan login gagal untuk username: " . $username;
+        $query_log = "INSERT INTO log_aktivitas (kategori, aksi) VALUES ('$kategori', '$aksi')";
+        
+        // Eksekusi dan cek error
+        $simpan_log = mysqli_query($koneksi, $query_log);
+        if (!$simpan_log) {
+            die("Error Log Login Gagal: " . mysqli_error($koneksi));
+        }
+        // ----------------------------------------
+
         $_SESSION['alert'] = ['type' => 'error', 'msg' => '⚠️ Username atau password salah, coba lagi ya!'];
         header("Location: /tancak-panti/login");
         exit; 

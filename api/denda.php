@@ -1,8 +1,7 @@
 <?php
 session_start();
-include '../config/koneksi.php';
+include '/config/koneksi.php';
 
-error_reporting(0); ini_set('display_errors', 0);
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['admin'])) {

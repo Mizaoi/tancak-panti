@@ -39,8 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_ulasan'])) {
     <title>Ulasan - SI-TANCAK PANTI</title>
     <link href="/tancak-panti/style/output.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style/navbar.css">
-    <link rel="stylesheet" href="style/rating.css"> 
+    <link rel="stylesheet" href="/tancak-panti/style/navbar.css">
+    <link rel="stylesheet" href="/tancak-panti/style/rating.css"> 
     <style>body { font-family: 'Poppins', sans-serif; background-color: #eff3f0; overflow-x: hidden; }</style>
 </head>
 <body class="flex flex-col min-h-screen relative">
