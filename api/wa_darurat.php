@@ -85,7 +85,7 @@ if ($query) {
         'pesan' => $pesan_darurat
     ];
     // Simpan di folder config
-    file_put_contents('../config/status_darurat.json', json_encode($notif_data));
+    file_put_contents(dirname(__DIR__) . '/config/status_darurat.json', json_encode($notif_data));
 
     // Berikan respons ke Frontend bahwa sukses dikirim
     echo json_encode([

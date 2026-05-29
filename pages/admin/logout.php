@@ -1,5 +1,5 @@
 <?php
 session_destroy();
-header("Location: /tancak-panti/login");
+header("Location: /login");
 exit;
 ?>
