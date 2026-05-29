@@ -6,7 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     window.showToast = function(msg, type = 'success') {
         const toast = document.createElement('div');
-        const bgColor = type === 'error' ? 'bg-red-600' : 'bg-[#1a3326]';
+        // Gunakan bg-[#1a3326] (hijau tua) untuk semua toast agar tidak transparan (karena class safelist Tailwind)
+        const bgColor = type === 'error' ? 'bg-[#1a3326] border border-red-500' : 'bg-[#1a3326] border border-[#a8d5a2]';
         
         toast.className = `fixed left-1/2 -translate-x-1/2 z-[30000] px-6 py-3.5 rounded-[16px] shadow-2xl text-white font-bold text-[13px] transition-all duration-500 opacity-0 ${bgColor} w-max max-w-[90%] text-center`;
         
@@ -66,14 +67,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const confirmed = await showConfirm("Apakah sampeyan yakin ingin mematikan notifikasi?");
             if (!confirmed) return;
 
-            fetch('/tancak-panti/api/matikan_notif.php', {
-                method: 'POST'
+            fetch('/api/matikan_notif.php', {
+                method: 'POST',
+                headers: { 'Cache-Control': 'no-cache' }
             })
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
                     showToast("Notifikasi berhasil dimatikan");
-                    location.reload();
+                    setTimeout(() => { location.reload(); }, 500);
                 } else {
                     showToast("Gagal mematikan notif", "error");
                 }
@@ -98,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('id_ulasan', idUlasan);
             formData.append('action', 'Hapus');
 
-            fetch('/tancak-panti/api/proses_ulasan.php', {
+            fetch('/api/proses_ulasan.php', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                 body: formData.toString()
@@ -177,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const urlParams = new URLSearchParams(window.location.search);
                 const currentBulan = urlParams.get('bulan');
                 
-                let newUrl = '/tancak-panti/admin/dashboard?tab=' + targetId;
+                let newUrl = '/admin/dashboard?tab=' + targetId;
                 if (currentBulan) newUrl += '&bulan=' + currentBulan;
                 window.location.href = newUrl;
             });
@@ -198,13 +200,11 @@ document.addEventListener('DOMContentLoaded', () => {
         window.chartStatusObj = new Chart(canvasStatus, {
             type: 'bar',
             data: {
-                labels: ['Belum Check-in', 'Masih di Wisata', 'Sudah Pulang'],
+                labels: ['Belum Check-in', 'Masih di Wisata', 'Sudah Pulang', 'Hangus'],
                 datasets: [{
                     label: 'Total Tiket',
-                    data: [typeof valBelum !== 'undefined' ? valBelum : 0, 
-                           typeof valMasih !== 'undefined' ? valMasih : 0, 
-                           typeof valPulang !== 'undefined' ? valPulang : 0],
-                    backgroundColor: ['#ef4444', '#f59e0b', '#10b981'], 
+                    data: [0, 0, 0, 0],
+                    backgroundColor: ['#ef4444', '#f59e0b', '#10b981', '#9ca3af'], 
                     borderRadius: 8, barThickness: 35
                 }]
             },
@@ -321,7 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let filteredRows = [...allRows]; 
 
         function updateRealtimeCounts(rowsToCount) {
-            let c0 = 0, c1 = 0, c2 = 0;
+            let c0 = 0, c1 = 0, c2 = 0, c3 = 0;
             rowsToCount.forEach(row => {
                 const statusBtn = row.querySelector('.status-toggle');
                 if (statusBtn) {
@@ -329,19 +329,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (state === 0) c0++;
                     if (state === 1) c1++;
                     if (state === 2) c2++;
+                    if (state === 3) c3++;
                 }
             });
             
             const count0El = document.getElementById('count-0');
             const count1El = document.getElementById('count-1');
             const count2El = document.getElementById('count-2');
+            const count3El = document.getElementById('count-3');
             
             if (count0El) count0El.innerText = c0;
             if (count1El) count1El.innerText = c1;
             if (count2El) count2El.innerText = c2;
+            if (count3El) count3El.innerText = c3;
 
             if (window.chartStatusObj) {
-                window.chartStatusObj.data.datasets[0].data = [c0, c1, c2];
+                window.chartStatusObj.data.datasets[0].data = [c0, c1, c2, c3];
                 window.chartStatusObj.update(); 
             }
         }
@@ -422,7 +425,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const config = {
                 0: { class: 'bg-yellow-50 text-yellow-600 border-yellow-200', text: 'Masih di Wisata', enumText: 'Masih di Wisata', next: 1 },
                 1: { class: 'bg-green-50 text-green-600 border-green-200', text: 'Sudah Pulang', enumText: 'Sudah Pulang', next: 2 },
-                2: { class: 'bg-red-50 text-red-600 border-red-200', text: 'Belum Check-in', enumText: 'Belum Check-in', next: 0 }
+                2: { class: 'bg-gray-100 text-gray-800 border-gray-300', text: 'Hangus', enumText: 'Hangus', next: 3 },
+                3: { class: 'bg-red-50 text-red-600 border-red-200', text: 'Belum Check-in', enumText: 'Belum Check-in', next: 0 }
             };
 
             let currentState = parseInt(btn.getAttribute('data-state'));
@@ -442,6 +446,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 countLama.innerText = parseInt(countLama.innerText) - 1;
                 countBaru.innerText = parseInt(countBaru.innerText) + 1;
             }
+            if (window.chartStatusObj) {
+                window.chartStatusObj.data.datasets[0].data[currentState]--;
+                window.chartStatusObj.data.datasets[0].data[nextData.next]++;
+                window.chartStatusObj.update();
+            }
 
             prosesMenyimpan++;
             try {
@@ -449,7 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 formData.append('id_tiket', idTiket);
                 formData.append('status', nextData.enumText);
 
-                await fetch('/tancak-panti/api/proses_update_status.php', {
+                await fetch('/api/proses_update_status.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: formData.toString()
@@ -476,7 +485,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (modalTrash) modalTrash.classList.add('active');
             if (trashList) trashList.innerHTML = '<div class="text-center py-6 text-gray-400 text-[12px]">Memuat data dari database...</div>';
 
-            fetch(`/tancak-panti/api/sampah.php?action=get&id=${trashTiketId}`)
+            fetch(`/api/sampah.php?action=get&id=${trashTiketId}`)
                 .then(res => res.json())
                 .then(data => { trashData = data; renderTrashList(); })
                 .catch(() => { if (trashList) trashList.innerHTML = '<div class="text-center py-6 text-red-400 text-[12px]">Gagal memuat data!</div>'; });
@@ -547,7 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btnSave.innerHTML = 'Menyimpan...';
             btnSave.disabled = true;
 
-            fetch('/tancak-panti/api/sampah.php?action=save', {
+            fetch('/api/sampah.php?action=save', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id_tiket: trashTiketId, items: trashData })
             })
@@ -590,7 +599,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (modalDenda) modalDenda.classList.add('active');
             if (dendaList) dendaList.innerHTML = '<div class="text-center py-6 text-gray-400 text-[12px]">Memuat data dari database...</div>';
 
-            fetch(`/tancak-panti/api/denda.php?action=get&id=${dendaTiketId}`)
+            fetch(`/api/denda.php?action=get&id=${dendaTiketId}`)
                 .then(res => res.json())
                 .then(data => { dendaData = data; renderDendaList(); })
                 .catch(() => { if (dendaList) dendaList.innerHTML = '<div class="text-center py-6 text-red-400 text-[12px]">Gagal memuat data!</div>'; });
@@ -666,7 +675,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let grandTotalRp = 0;
             dendaData.forEach(item => { if (item.hilang > 0) grandTotalRp += (item.hilang * 10000); });
 
-            fetch('/tancak-panti/api/denda.php?action=save', {
+            fetch('/api/denda.php?action=save', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id_tiket: dendaTiketId, nama_wisatawan: namaSaja, items: dendaData })
             })
@@ -718,14 +727,29 @@ document.addEventListener('DOMContentLoaded', () => {
         btnNotifHeader.addEventListener('click', async function() {
             if (isNotifActive) {
                 if (await window.showConfirm("Matikan Notifikasi Darurat? Banner akan hilang.")) {
-                    fetch('/tancak-panti/api/matikan_notif.php')
+                    fetch('/api/matikan_notif.php', {
+                        method: 'POST',
+                        headers: { 'Cache-Control': 'no-cache' }
+                    })
                     .then(res => res.json())
                     .then(data => {
-                        if (data.status === 'success' && topBanner) {
-                            topBanner.classList.add('hidden');
+                        if (data.status === 'success') {
+                            isNotifActive = false;
+                            if (topBanner) topBanner.classList.add('hidden');
+                            
+                            // Kembalikan tombol ke mode mati (Notif Darurat) secara realtime
+                            btnNotifHeader.className = "flex items-center gap-2 px-5 py-2.5 border border-orange-200 text-orange-500 rounded-[14px] text-[13px] font-bold hover:bg-orange-50 transition-colors";
+                            if (textNotifHeader) textNotifHeader.innerText = "Notif Darurat";
+
                             window.showToast("Notifikasi Darurat berhasil dimatikan!", "success");
-                            setTimeout(() => { location.reload(); }, 100);
+                            // Dihapus location.reload() agar perubahannya realtime
+                        } else {
+                            window.showToast("Gagal mematikan: " + (data.msg || "Error server"), "error");
                         }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        window.showToast("Gagal terhubung ke server untuk mematikan notif.", "error");
                     });
                 }
             } else {
@@ -737,7 +761,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 listContainer.innerHTML = '<p class="text-center text-[11px] text-yellow-600 font-medium py-2">Memuat data dari database...</p>';
                 modalNotifSetup.classList.add('active');
 
-                fetch('/tancak-panti/api/notif_list.php')
+                fetch('/api/notif_list.php')
                     .then(response => response.json())
                     .then(res => {
                         const countSpan = document.getElementById('notif-target-count');
@@ -827,7 +851,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnAktif.innerHTML = 'Mengirim WA...';
                 btnAktif.disabled = true;
 
-                fetch('/tancak-panti/api/wa_darurat.php', {
+                fetch('/api/wa_darurat.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ pesan: pesanFinal })
@@ -1054,7 +1078,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 fd.append('id_ulasan', idUlasan);
                 fd.append('action', action);
 
-                fetch('/tancak-panti/api/proses_ulasan.php', {
+                fetch('/api/proses_ulasan.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: fd.toString()
@@ -1095,7 +1119,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterBulanRekap = document.getElementById('filter-bulan-rekap');
     if (filterBulanRekap) {
         filterBulanRekap.addEventListener('change', function() {
-            window.location.href = '/tancak-panti/admin/dashboard?tab=tab-rekap&bulan=' + this.value;
+            window.location.href = '/admin/dashboard?tab=tab-rekap&bulan=' + this.value;
         });
     }
 
@@ -1119,7 +1143,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (modalAnggota) modalAnggota.classList.add('active');
             if (anggotaList) anggotaList.innerHTML = '<div class="py-4 text-gray-400 text-[12px]">Memuat data...</div>';
 
-            fetch(`/tancak-panti/api/anggota.php?id=${idTiket}`)
+            fetch(`/api/anggota.php?id=${idTiket}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.status === 'success') {
@@ -1151,5 +1175,79 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const aBtnTutup = document.getElementById('a-btn-tutup');
     if (aBtnTutup) aBtnTutup.addEventListener('click', closeModalAnggota);
+
+    // ==========================================
+    // PAGINASI DAFTAR SAMPAH
+    // ==========================================
+    const tbodySampah = document.getElementById('tbody-rekap-sampah');
+    if (tbodySampah) {
+        const rowsSampah = Array.from(tbodySampah.querySelectorAll('.row-rekap-sampah'));
+        if (rowsSampah.length > 0) {
+            const rowsPerPageSampah = 5;
+            let currentSampahPage = 1;
+
+            function renderSampahPagination() {
+                let totalPages = Math.ceil(rowsSampah.length / rowsPerPageSampah);
+                if (totalPages === 0) totalPages = 1;
+                
+                const paginationControls = document.getElementById('pagination-controls-sampah');
+                const pageInfo = document.getElementById('page-info-sampah');
+                
+                if (!paginationControls || !pageInfo) return;
+                
+                rowsSampah.forEach(row => row.style.display = 'none');
+                
+                const startIndex = (currentSampahPage - 1) * rowsPerPageSampah;
+                const endIndex = Math.min(startIndex + rowsPerPageSampah, rowsSampah.length);
+                
+                for (let i = startIndex; i < endIndex; i++) {
+                    rowsSampah[i].style.display = '';
+                }
+
+                pageInfo.innerHTML = `Menampilkan <span class="font-extrabold text-gray-800">${startIndex + 1}-${endIndex}</span> dari <span class="font-extrabold text-gray-800">${rowsSampah.length}</span> jenis`;
+
+                let html = '';
+                const btnBase = "px-3 py-1.5 text-[12px] font-bold rounded-[8px] flex items-center transition-all duration-200 border";
+                const btnActive = "bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:text-gray-900 shadow-sm cursor-pointer";
+                const btnDisabled = "bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed opacity-60";
+                
+                const isPrevDisabled = currentSampahPage === 1;
+                html += `<button type="button" onclick="goToSampahPage(${currentSampahPage - 1})" class="${btnBase} ${isPrevDisabled ? btnDisabled : btnActive}" ${isPrevDisabled ? 'disabled' : ''}><svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg> Prev</button>`;
+                
+                html += `<div class="flex items-center justify-center px-3 py-1.5 text-[12px] font-extrabold text-[#1a3326] bg-[#f4f9f6] rounded-[8px] border border-[#d1f4e0] shadow-sm min-w-[70px]">${currentSampahPage} <span class="mx-1.5 text-[#1a3326] opacity-40 font-medium">/</span> ${totalPages}</div>`;
+                
+                const isNextDisabled = currentSampahPage === totalPages;
+                html += `<button type="button" onclick="goToSampahPage(${currentSampahPage + 1})" class="${btnBase} ${isNextDisabled ? btnDisabled : btnActive}" ${isNextDisabled ? 'disabled' : ''}>Next <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg></button>`;
+                
+                paginationControls.innerHTML = html;
+            }
+
+            window.goToSampahPage = function(page) {
+                const totalPages = Math.ceil(rowsSampah.length / rowsPerPageSampah);
+                if (page >= 1 && page <= totalPages) {
+                    currentSampahPage = page;
+                    renderSampahPagination();
+                }
+            };
+
+            renderSampahPagination();
+        }
+    }
+
+    // ==========================================
+    // FUNGSI ZOOM FOTO ULASAN
+    // ==========================================
+    window.openBuktiUlasan = function(src) {
+        const modalBukti = document.getElementById('modal-bukti');
+        const imgFull = document.getElementById('img-bukti-full');
+        if (modalBukti && imgFull && src) {
+            imgFull.src = src;
+            modalBukti.classList.remove('hidden');
+            setTimeout(() => {
+                modalBukti.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }, 10);
+        }
+    };  
 
 });

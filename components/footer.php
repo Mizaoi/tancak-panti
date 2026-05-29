@@ -21,6 +21,17 @@ if ($avg_rating == 0) {
 ?>
 
 <footer class="bg-[#14281e] text-white pt-20 pb-8 overflow-hidden relative">
+
+    <style>
+        @media (max-width: 768px) {
+            .spasi-hp {
+                margin-top: 1.5rem !important;
+                padding-top: 2rem !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+            }
+        }
+    </style>
+
     <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#2d6a4f] to-transparent opacity-50"></div>
 
     <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
@@ -28,8 +39,8 @@ if ($avg_rating == 0) {
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
             
             <div class="reveal-up" style="transition-delay: 0.1s; padding-right: 1.5rem;">
-             <a href="/tancak-panti/home" class="flex items-center gap-4 mb-5 hover:opacity-80 transition-opacity w-fit">
-                    <div class="border border-white/30 rounded-full p-2 mr-8">
+                <a href="/tancak-panti/home" class="flex items-center gap-4 mb-5 hover:opacity-80 transition-opacity w-fit">
+                    <div class="border border-white/30 rounded-full p-2 mr-3">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6.5 1.2 1 2.5 1C5.8 7 7 6 7 6s1.2-1 2.5-1c1.3 0 2.5 1 2.5 1s1.2 1 2.5 1c1.3 0 2.5-1 2.5-1s1.2-1 2.5-1 2.5 1 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 1.3 0 2.5-1 2.5-1s1.2-1 2.5-1c1.3 0 2.5 1 2.5 1s1.2 1 2.5 1c1.3 0 2.5-1 2.5-1s1.2-1 2.5-1 2.5 1 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 1.3 0 2.5-1 2.5-1s1.2-1 2.5-1c1.3 0 2.5 1 2.5 1s1.2 1 2.5 1c1.3 0 2.5-1 2.5-1s1.2-1 2.5-1 2.5 1 2.5 1"/></svg>
                     </div>
                     <div>
@@ -57,7 +68,7 @@ if ($avg_rating == 0) {
                 </a>
             </div>
 
-            <div class="reveal-up" style="transition-delay: 0.2s;">
+            <div class="reveal-up spasi-hp" style="transition-delay: 0.2s;">
                 <h4 class="font-bold mb-6 flex items-center text-[16px]">
                     <span class="w-[3px] h-4 bg-[#a8d5a2] rounded-full mr-3 block"></span>
                     Quick Links
@@ -90,7 +101,7 @@ if ($avg_rating == 0) {
                 </div>
             </div>
 
-            <div class="reveal-up lg:pr-8" style="transition-delay: 0.3s;">
+            <div class="reveal-up spasi-hp lg:pr-8" style="transition-delay: 0.3s;">
                 <h4 class="font-bold mb-5 flex items-center text-[16px]">
                     <span class="w-[3px] h-4 bg-[#a8d5a2] rounded-full mr-3 block"></span>
                     Informasi Kontak
@@ -113,7 +124,7 @@ if ($avg_rating == 0) {
                 </div>
             </div>
 
-            <div class="reveal-up" style="transition-delay: 0.4s;">
+            <div class="reveal-up spasi-hp" style="transition-delay: 0.4s;">
                 <h4 class="font-bold mb-6 flex items-center text-[16px]">
                     <span class="w-[3px] h-4 bg-[#a8d5a2] rounded-full mr-3 block"></span>
                     Jam Operasional
@@ -134,13 +145,13 @@ if ($avg_rating == 0) {
         </div>
 
         <div class="border-t border-white/5 pt-6 flex flex-col md:flex-row justify-between items-center text-[12px] text-white/30">
-            <p>© 2026 SI-TANCAK PANTI. Hak Cipta Dilindungi.</p>
+            <p>&copy; 2026 SI-TANCAK PANTI. Hak Cipta Dilindungi.</p>
             
             <div class="flex items-center flex-wrap justify-center gap-3 mt-4 md:mt-0">
-                <p>Dibuat dengan <span class="text-red-500/50">❤️</span> di Jember</p>
-                <span class="text-white/10 cursor-default">•</span>
+                <p>Dibuat dengan <span class="text-red-500/50">&#10084;</span> di Jember</p>
+                <span class="text-white/10 cursor-default hidden sm:inline">�</span>
                 <span class="cursor-default">Kebijakan Privasi</span>
-                <span class="text-white/10 cursor-default">•</span>
+                <span class="text-white/10 cursor-default hidden sm:inline">�</span>
                 <span class="cursor-default">Syarat & Ketentuan</span>
                 
                 <a href="/tancak-panti/login" class="text-white/5 hover:text-[#a8d5a2] transition-colors ml-2" title="Area Admin">
@@ -148,42 +159,5 @@ if ($avg_rating == 0) {
                 </a>
             </div>
         </div>
-        </div>
-
     </div>
 </footer>
-
-<style>
-.reveal-up {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.8s ease-out, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.reveal-up.active {
-    opacity: 1;
-    transform: translateY(0);
-}
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const observerOptions = {
-        root: null,
-        rootMargin: '0px',
-        threshold: 0.1
-    };
-
-    const observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('active');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, observerOptions);
-
-    document.querySelectorAll('.reveal-up').forEach(element => {
-        observer.observe(element);
-    });
-});
-</script>

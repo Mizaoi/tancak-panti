@@ -1,0 +1,42 @@
+[26-May-2026 17:19:52 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:19:53 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:19:53 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:19:53 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:20:22 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:20:23 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:20:25 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:20:25 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:20:25 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:20:25 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:20:26 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:20:26 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:20:27 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:20:27 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:20:27 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:20:34 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:20:35 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:20:36 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:20:36 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:20:36 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:20:36 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:20:37 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:20:37 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[26-May-2026 17:20:50 UTC] PHP Parse error:  Unclosed '{' on line 49 in /home/mifmyho2/tancak-panti.mif.myhost.id/index.php on line 151
+[28-May-2026 05:44:05 UTC] PHP Warning:  Undefined variable $avg_rating in /home/mifmyho2/tancak-panti.mif.myhost.id/components/footer.php on line 25
+[28-May-2026 05:44:06 UTC] PHP Warning:  Undefined variable $avg_rating in /home/mifmyho2/tancak-panti.mif.myhost.id/components/footer.php on line 34
+[28-May-2026 05:44:06 UTC] PHP Warning:  Undefined variable $total_ulasan in /home/mifmyho2/tancak-panti.mif.myhost.id/components/footer.php on line 34
+[28-May-2026 05:45:50 UTC] PHP Warning:  Undefined variable $avg_rating in /home/mifmyho2/tancak-panti.mif.myhost.id/components/footer.php on line 36
+[28-May-2026 05:45:50 UTC] PHP Warning:  Undefined variable $avg_rating in /home/mifmyho2/tancak-panti.mif.myhost.id/components/footer.php on line 45
+[28-May-2026 05:45:50 UTC] PHP Warning:  Undefined variable $total_ulasan in /home/mifmyho2/tancak-panti.mif.myhost.id/components/footer.php on line 45
+[28-May-2026 05:55:11 UTC] PHP Warning:  Undefined variable $avg_rating in /home/mifmyho2/tancak-panti.mif.myhost.id/components/footer.php on line 36
+[28-May-2026 05:55:11 UTC] PHP Warning:  Undefined variable $avg_rating in /home/mifmyho2/tancak-panti.mif.myhost.id/components/footer.php on line 45
+[28-May-2026 05:55:11 UTC] PHP Warning:  Undefined variable $total_ulasan in /home/mifmyho2/tancak-panti.mif.myhost.id/components/footer.php on line 45
+[28-May-2026 05:55:43 UTC] PHP Warning:  Undefined variable $avg_rating in /home/mifmyho2/tancak-panti.mif.myhost.id/components/footer.php on line 36
+[28-May-2026 05:55:43 UTC] PHP Warning:  Undefined variable $avg_rating in /home/mifmyho2/tancak-panti.mif.myhost.id/components/footer.php on line 45
+[28-May-2026 05:55:43 UTC] PHP Warning:  Undefined variable $total_ulasan in /home/mifmyho2/tancak-panti.mif.myhost.id/components/footer.php on line 45
+[28-May-2026 05:56:34 UTC] PHP Warning:  Undefined variable $avg_rating in /home/mifmyho2/tancak-panti.mif.myhost.id/components/footer.php on line 36
+[28-May-2026 05:56:34 UTC] PHP Warning:  Undefined variable $avg_rating in /home/mifmyho2/tancak-panti.mif.myhost.id/components/footer.php on line 45
+[28-May-2026 05:56:34 UTC] PHP Warning:  Undefined variable $total_ulasan in /home/mifmyho2/tancak-panti.mif.myhost.id/components/footer.php on line 45
+[28-May-2026 05:56:51 UTC] PHP Warning:  Undefined variable $avg_rating in /home/mifmyho2/tancak-panti.mif.myhost.id/components/footer.php on line 36
+[28-May-2026 05:56:51 UTC] PHP Warning:  Undefined variable $avg_rating in /home/mifmyho2/tancak-panti.mif.myhost.id/components/footer.php on line 45
+[28-May-2026 05:56:51 UTC] PHP Warning:  Undefined variable $total_ulasan in /home/mifmyho2/tancak-panti.mif.myhost.id/components/footer.php on line 45
