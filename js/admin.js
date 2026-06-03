@@ -1,16 +1,76 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
 
     // ==========================================
-    // 0. DEKLARASI SEMUA VARIABEL GLOBAL
+    // 1. SEMUA FUNGSI PEMBANTU GLOBAL
     // ==========================================
-    let prosesMenyimpan = 0; 
-    const tbody = document.getElementById('wisatawan-tbody'); 
+    
+    window.showToast = function(msg, type = 'success') {
+        const toast = document.createElement('div');
+        const bgColor = type === 'error' ? 'bg-red-600' : 'bg-[#1a3326]';
+        
+        toast.className = `fixed left-1/2 -translate-x-1/2 z-[30000] px-6 py-3.5 rounded-[16px] shadow-2xl text-white font-bold text-[13px] transition-all duration-500 opacity-0 ${bgColor} w-max max-w-[90%] text-center`;
+        
+        const topBannerCheck = document.getElementById('top-banner-notif');
+        const isBannerVisible = topBannerCheck && !topBannerCheck.classList.contains('hidden');
+        toast.style.top = isBannerVisible ? "140px" : "80px";
+        
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => toast.style.opacity = '1', 10);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 500);
+        }, 3000);
+    };
+
+    // ==========================================
+    // 2. FUNGSI MODAL KONFIRMASI (DEFENSIVE)
+    // ==========================================
+window.showConfirm = function(msg) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('confirm-modal');
+        const msgEl = document.getElementById('confirm-msg');
+        
+        if (!modal) return resolve(false);
+        
+        // Isi pesan
+        if (msgEl) msgEl.innerText = msg;
+        
+        // Tampilkan modal dengan cara halus
+        modal.classList.remove('hidden');
+        modal.classList.add('flex'); // Ini akan memicu CSS Tailwind/Bootstrap kamu
+        
+        // Event Listener untuk tombol
+        const btnConfirm = document.getElementById('btn-confirm');
+        const btnCancel = document.getElementById('btn-cancel');
+
+        btnConfirm.onclick = () => { 
+            modal.classList.add('hidden'); // Sembunyikan lagi
+            modal.classList.remove('flex');
+            resolve(true); 
+        };
+        
+        btnCancel.onclick = () => { 
+            modal.classList.remove('hidden'); // Tambahkan ini
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            resolve(false); 
+        };
+    });
+};
+    
+    // ==========================================
+    // 3. DEKLARASI SEMUA VARIABEL GLOBAL
+    // ==========================================
+    let prosesMenyimpan = 0;
+    const tbody = document.getElementById('wisatawan-tbody');
     
     // Variabel Modal Zoom
     const modalBukti = document.getElementById('modal-bukti');
     const imgFull = document.getElementById('img-bukti-full');
 
-    // Variabel Filter Search (HANYA SEARCH, TANGGAL DIHAPUS)
+    // Variabel Filter Search
     const searchInput = document.getElementById('main-search');
 
     // Variabel Modal Sampah
@@ -41,15 +101,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const textAreaPesan = document.getElementById('notif-pesan-teks');
 
     // ==========================================
-    // 1. LOGIKA PINDAH TABS PINTAR
+    // 4. LOGIKA PINDAH TABS PINTAR
     // ==========================================
     const tabButtons = document.querySelectorAll('.tab-btn');
-    if(tabButtons.length > 0) {
+    if (tabButtons.length > 0) {
         tabButtons.forEach(button => {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
                 if (prosesMenyimpan > 0) {
-                    alert(`⏳ Tunggu sebentar Cak! Masih ada data yang sedang dikirim ke database.`);
+                    window.showToast("⏳ Tunggu sebentar Cak! Masih ada data yang sedang dikirim ke database.");
                     return; 
                 }
                 const targetId = this.getAttribute('data-target');
@@ -64,12 +124,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // 2. RENDER GRAFIK STATUS WISATAWAN 
+    // 5. RENDER GRAFIK STATUS WISATAWAN 
     // ==========================================
     const canvasStatus = document.getElementById('chartStatusWisatawan');
     if (canvasStatus && typeof Chart !== 'undefined') {
         
-        // --- SAKTI: HANCURKAN GRAFIK LAMA SEBELUM BIKIN BARU ---
         let chartStatusExist = Chart.getChart(canvasStatus);
         if (chartStatusExist) {
             chartStatusExist.destroy();
@@ -111,12 +170,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // 3. RENDER GRAFIK TREN SAMPAH HARIAN
+    // 6. RENDER GRAFIK TREN SAMPAH HARIAN
     // ==========================================
     const canvasLine = document.getElementById('lineChartSampah');
     if (canvasLine && typeof Chart !== 'undefined') {
         
-        // --- SAKTI: HANCURKAN GRAFIK LAMA SEBELUM BIKIN BARU ---
         let chartLineExist = Chart.getChart(canvasLine);
         if (chartLineExist) {
             chartLineExist.destroy();
@@ -192,17 +250,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
     // ==========================================
-    // 4. FILTER SEARCH & PAGINATION (25 BARIS)
+    // 7. FILTER SEARCH & PAGINATION (25 BARIS)
     // ==========================================
-    if(tbody && searchInput) {
+    if (tbody && searchInput) {
         const allRows = Array.from(tbody.querySelectorAll('.row-tiket'));
         const rowsPerPage = 25; 
         let currentPage = 1;
         let filteredRows = [...allRows]; 
 
-        // Hitung ulang 3 kotak besar (Belum Check-in, dll) sesuai pencarian
         function updateRealtimeCounts(rowsToCount) {
             let c0 = 0, c1 = 0, c2 = 0;
             rowsToCount.forEach(row => {
@@ -215,97 +271,92 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            if(document.getElementById('count-0')) document.getElementById('count-0').innerText = c0;
-            if(document.getElementById('count-1')) document.getElementById('count-1').innerText = c1;
-            if(document.getElementById('count-2')) document.getElementById('count-2').innerText = c2;
+            const count0El = document.getElementById('count-0');
+            const count1El = document.getElementById('count-1');
+            const count2El = document.getElementById('count-2');
+            
+            if (count0El) count0El.innerText = c0;
+            if (count1El) count1El.innerText = c1;
+            if (count2El) count2El.innerText = c2;
 
-            if(window.chartStatusObj) {
+            if (window.chartStatusObj) {
                 window.chartStatusObj.data.datasets[0].data = [c0, c1, c2];
                 window.chartStatusObj.update(); 
             }
         }
 
-        // Tampilkan tabel & Pagination (Batas 25 Baris)
         function renderPagination() {
             let totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-            if (totalPages === 0) totalPages = 1; // PAKSA MINIMAL 1 HALAMAN BIAR PAGINATION SELALU MUNCUL!
+            if (totalPages === 0) totalPages = 1;
             
             const paginationControls = document.getElementById('pagination-controls');
             const pageInfo = document.getElementById('page-info');
             
-            allRows.forEach(row => row.style.display = 'none'); // Sembunyikan semua dulu
+            if (!paginationControls || !pageInfo) return;
+            
+            allRows.forEach(row => row.style.display = 'none');
             
             if (filteredRows.length === 0) {
-                if(pageInfo) pageInfo.innerHTML = 'Menampilkan <span class="font-extrabold text-gray-800">0</span> tiket';
+                pageInfo.innerHTML = 'Menampilkan <span class="font-extrabold text-gray-800">0</span> tiket';
             } else {
                 const startIndex = (currentPage - 1) * rowsPerPage;
                 const endIndex = Math.min(startIndex + rowsPerPage, filteredRows.length);
                 
-                // Munculkan hanya 25 baris di halaman ini
-                for(let i = startIndex; i < endIndex; i++) {
+                for (let i = startIndex; i < endIndex; i++) {
                     filteredRows[i].style.display = '';
                 }
 
-                if(pageInfo) {
-                    pageInfo.innerHTML = `Menampilkan <span class="font-extrabold text-gray-800">${startIndex + 1} - ${endIndex}</span> dari <span class="font-extrabold text-gray-800">${filteredRows.length}</span> tiket`;
-                }
+                pageInfo.innerHTML = `Menampilkan <span class="font-extrabold text-gray-800">${startIndex + 1} - ${endIndex}</span> dari <span class="font-extrabold text-gray-800">${filteredRows.length}</span> tiket`;
             }
 
-            // Bikin Tombol Prev & Next UI Elegan
-            if(paginationControls) {
-                let html = '';
-                const btnBase = "flex items-center justify-center px-3.5 py-1.5 rounded-[8px] text-[13px] font-bold transition-all duration-200 border outline-none";
-                const btnDisabled = "text-gray-400 border-gray-100 bg-gray-50 cursor-not-allowed opacity-70";
-                const btnActive = "text-gray-600 border-gray-200 bg-white hover:bg-gray-50 hover:text-[#1a3326] hover:border-[#1a3326] shadow-sm cursor-pointer";
-                
-                const isPrevDisabled = currentPage === 1;
-                html += `<button type="button" onclick="goToPage(${currentPage - 1})" class="${btnBase} ${isPrevDisabled ? btnDisabled : btnActive}" ${isPrevDisabled ? 'disabled' : ''}><svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg> Prev</button>`;
-                
-                html += `<div class="flex items-center justify-center px-4 py-1.5 text-[13px] font-extrabold text-[#1a3326] bg-[#f4f9f6] rounded-[8px] border border-[#d1f4e0] shadow-sm min-w-[80px]">${currentPage} <span class="mx-1.5 text-[#1a3326] opacity-40 font-medium">/</span> ${totalPages}</div>`;
-                
-                const isNextDisabled = currentPage === totalPages;
-                html += `<button type="button" onclick="goToPage(${currentPage + 1})" class="${btnBase} ${isNextDisabled ? btnDisabled : btnActive}" ${isNextDisabled ? 'disabled' : ''}>Next <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg></button>`;
-                
-                paginationControls.innerHTML = html;
-            }
+            let html = '';
+            const btnBase = "flex items-center justify-center px-3.5 py-1.5 rounded-[8px] text-[13px] font-bold transition-all duration-200 border outline-none";
+            const btnDisabled = "text-gray-400 border-gray-100 bg-gray-50 cursor-not-allowed opacity-70";
+            const btnActive = "text-gray-600 border-gray-200 bg-white hover:bg-gray-50 hover:text-[#1a3326] hover:border-[#1a3326] shadow-sm cursor-pointer";
+            
+            const isPrevDisabled = currentPage === 1;
+            html += `<button type="button" onclick="goToPage(${currentPage - 1})" class="${btnBase} ${isPrevDisabled ? btnDisabled : btnActive}" ${isPrevDisabled ? 'disabled' : ''}><svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg> Prev</button>`;
+            
+            html += `<div class="flex items-center justify-center px-4 py-1.5 text-[13px] font-extrabold text-[#1a3326] bg-[#f4f9f6] rounded-[8px] border border-[#d1f4e0] shadow-sm min-w-[80px]">${currentPage} <span class="mx-1.5 text-[#1a3326] opacity-40 font-medium">/</span> ${totalPages}</div>`;
+            
+            const isNextDisabled = currentPage === totalPages;
+            html += `<button type="button" onclick="goToPage(${currentPage + 1})" class="${btnBase} ${isNextDisabled ? btnDisabled : btnActive}" ${isNextDisabled ? 'disabled' : ''}>Next <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg></button>`;
+            
+            paginationControls.innerHTML = html;
         }
 
         window.goToPage = function(page) {
             const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-            if(page >= 1 && page <= totalPages) {
+            if (page >= 1 && page <= totalPages) {
                 currentPage = page;
                 renderPagination();
             }
         };
 
-        // Fungsi Otak Filter Lintas Pagination
         function applyFilters() {
             const keyword = searchInput.value.toLowerCase();
 
-            // Saring SEMUA data, bukan cuma yang ada di layar
             filteredRows = allRows.filter(row => {
                 const rowText = row.innerText.toLowerCase(); 
                 return rowText.includes(keyword);
             });
             
-            currentPage = 1; // Balik ke halaman 1 kalau abis nyari
+            currentPage = 1;
             updateRealtimeCounts(filteredRows); 
             renderPagination();
         }
 
         searchInput.addEventListener('input', applyFilters);
-        
-        // JALANKAN OTOMATIS SAAT HALAMAN DIBUKA!
         applyFilters();
     }
 
     // ==========================================
-    // 5. LOGIKA KLIK STATUS TIKET (AJAX)
+    // 8. LOGIKA KLIK STATUS TIKET (AJAX)
     // ==========================================
-    if(tbody) {
+    if (tbody) {
         tbody.addEventListener('click', async function(e) {
             const btn = e.target.closest('.status-toggle');
-            if(!btn || btn.classList.contains('is-processing')) return;
+            if (!btn || btn.classList.contains('is-processing')) return;
 
             const config = {
                 0: { class: 'bg-yellow-50 text-yellow-600 border-yellow-200', text: 'Masih di Wisata', enumText: 'Masih di Wisata', next: 1 },
@@ -322,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.setAttribute('data-state', nextData.next);
             
             const txtStatus = btn.closest('.data-status-text');
-            if(txtStatus) txtStatus.setAttribute('data-text-status', nextData.text.toLowerCase());
+            if (txtStatus) txtStatus.setAttribute('data-text-status', nextData.text.toLowerCase());
             
             const countLama = document.getElementById('count-' + currentState);
             const countBaru = document.getElementById('count-' + nextData.next);
@@ -350,9 +401,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
     // ==========================================
-    // 6. LOGIKA MODAL SAMPAH (AJAX)
+    // 9. LOGIKA MODAL SAMPAH (AJAX)
     // ==========================================
     document.querySelectorAll('.btn-kelola-sampah').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -361,19 +411,19 @@ document.addEventListener('DOMContentLoaded', function() {
             const nama = this.getAttribute('data-nama');
             const kode = this.getAttribute('data-kode');
             
-            if(visitorInfo) visitorInfo.innerText = `${nama} • ${kode}`;
-            if(modalTrash) modalTrash.classList.add('active');
-            if(trashList) trashList.innerHTML = '<div class="text-center py-6 text-gray-400 text-[12px]">Memuat data dari database...</div>';
+            if (visitorInfo) visitorInfo.innerText = `${nama} • ${kode}`;
+            if (modalTrash) modalTrash.classList.add('active');
+            if (trashList) trashList.innerHTML = '<div class="text-center py-6 text-gray-400 text-[12px]">Memuat data dari database...</div>';
 
             fetch(`/tancak-panti/api/sampah.php?action=get&id=${trashTiketId}`)
                 .then(res => res.json())
                 .then(data => { trashData = data; renderTrashList(); })
-                .catch(() => { if(trashList) trashList.innerHTML = '<div class="text-center py-6 text-red-400 text-[12px]">Gagal memuat data!</div>'; });
+                .catch(() => { if (trashList) trashList.innerHTML = '<div class="text-center py-6 text-red-400 text-[12px]">Gagal memuat data!</div>'; });
         });
     });
 
     window.renderTrashList = function() {
-        if(!trashList) return;
+        if (!trashList) return;
         trashList.innerHTML = '';
         if (trashData.length === 0) {
             trashList.innerHTML = '<div class="text-center py-6 text-gray-400 text-[12px] bg-gray-50 rounded-xl border border-dashed border-gray-200">Tidak ada sampah tercatat.</div>';
@@ -401,32 +451,37 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     window.updateQtySampah = function(index, change) {
-        if (trashData[index].jumlah + change >= 1) {
+        if (trashData[index] && trashData[index].jumlah + change >= 1) {
             trashData[index].jumlah += change;
             renderTrashList();
         }
     };
 
     window.deleteItemSampah = function(index) {
-        trashData.splice(index, 1);
-        renderTrashList();
+        if (trashData[index]) {
+            trashData.splice(index, 1);
+            renderTrashList();
+        }
     };
 
-    if(document.getElementById('m-btn-add')) {
-        document.getElementById('m-btn-add').addEventListener('click', function() {
+    const mBtnAdd = document.getElementById('m-btn-add');
+    if (mBtnAdd) {
+        mBtnAdd.addEventListener('click', function() {
+            if (!inputNew) return;
             let namaBaru = inputNew.value.trim();
             if (namaBaru !== '') {
                 namaBaru = namaBaru.toLowerCase().split(' ').map(kata => kata.charAt(0).toUpperCase() + kata.slice(1)).join(' ');
                 trashData.push({ nama_sampah: namaBaru, jumlah: 1 });
                 inputNew.value = '';
                 renderTrashList();
-                setTimeout(() => { trashList.scrollTop = trashList.scrollHeight; }, 100);
+                setTimeout(() => { if (trashList) trashList.scrollTop = trashList.scrollHeight; }, 100);
             }
         });
     }
 
-    if(document.getElementById('m-btn-save')) {
-        document.getElementById('m-btn-save').addEventListener('click', function() {
+    const mBtnSave = document.getElementById('m-btn-save');
+    if (mBtnSave) {
+        mBtnSave.addEventListener('click', function() {
             const btnSave = this;
             btnSave.innerHTML = 'Menyimpan...';
             btnSave.disabled = true;
@@ -437,10 +492,11 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(res => res.json())
             .then(res => {
-                if(res.status === 'success') {
-                    if(currentTrashBtn) { currentTrashBtn.querySelector('.total-item-teks').innerText = res.total_baru; }
+                if (res.status === 'success') {
                     closeModalSampah();
-                } else { alert('Gagal menyimpan sampah!'); }
+                    window.showToast("Berhasil menyimpan data sampah!", "success");
+                    setTimeout(() => { location.reload(); }, 1000);
+                } else { window.showToast("Gagal menyimpan sampah!", "error"); }
             })
             .finally(() => {
                 btnSave.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> Simpan Daftar';
@@ -450,14 +506,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function closeModalSampah() {
-        if(modalTrash) modalTrash.classList.remove('active');
-        if(inputNew) inputNew.value = '';
+        if (modalTrash) modalTrash.classList.remove('active');
+        if (inputNew) inputNew.value = '';
     }
-    if(document.getElementById('close-modal-trash')) document.getElementById('close-modal-trash').addEventListener('click', closeModalSampah);
-    if(document.getElementById('m-btn-batal')) document.getElementById('m-btn-batal').addEventListener('click', closeModalSampah);
+    
+    const closeModalTrashBtn = document.getElementById('close-modal-trash');
+    if (closeModalTrashBtn) closeModalTrashBtn.addEventListener('click', closeModalSampah);
+    
+    const mBtnBatal = document.getElementById('m-btn-batal');
+    if (mBtnBatal) mBtnBatal.addEventListener('click', closeModalSampah);
 
     // ==========================================
-    // 7. LOGIKA MODAL DENDA (AJAX)
+    // 10. LOGIKA MODAL DENDA (AJAX)
     // ==========================================
     document.querySelectorAll('.btn-kelola-denda').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -465,19 +525,19 @@ document.addEventListener('DOMContentLoaded', function() {
             const nama = this.getAttribute('data-nama');
             const kode = this.getAttribute('data-kode');
             
-            if(dendaVisitorInfo) dendaVisitorInfo.innerText = `${nama} • ${kode}`;
-            if(modalDenda) modalDenda.classList.add('active');
-            if(dendaList) dendaList.innerHTML = '<div class="text-center py-6 text-gray-400 text-[12px]">Memuat data dari database...</div>';
+            if (dendaVisitorInfo) dendaVisitorInfo.innerText = `${nama} • ${kode}`;
+            if (modalDenda) modalDenda.classList.add('active');
+            if (dendaList) dendaList.innerHTML = '<div class="text-center py-6 text-gray-400 text-[12px]">Memuat data dari database...</div>';
 
             fetch(`/tancak-panti/api/denda.php?action=get&id=${dendaTiketId}`)
                 .then(res => res.json())
                 .then(data => { dendaData = data; renderDendaList(); })
-                .catch(() => { if(dendaList) dendaList.innerHTML = '<div class="text-center py-6 text-red-400 text-[12px]">Gagal memuat data!</div>'; });
+                .catch(() => { if (dendaList) dendaList.innerHTML = '<div class="text-center py-6 text-red-400 text-[12px]">Gagal memuat data!</div>'; });
         });
     });
 
     window.renderDendaList = function() {
-        if(!dendaList) return;
+        if (!dendaList) return;
         dendaList.innerHTML = '';
         let totalItemHilang = 0; let totalDendaRp = 0;
 
@@ -512,12 +572,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>`;
         });
 
-        if(elTotalRp) elTotalRp.innerText = `Rp ${totalDendaRp.toLocaleString('id-ID')}`;
-        if(elTotalHilang) elTotalHilang.innerText = `${totalItemHilang} item hilang`;
-        if(elTotalCalc) elTotalCalc.innerText = `${totalItemHilang} × Rp 10.000`;
+        if (elTotalRp) elTotalRp.innerText = `Rp ${totalDendaRp.toLocaleString('id-ID')}`;
+        if (elTotalHilang) elTotalHilang.innerText = `${totalItemHilang} item hilang`;
+        if (elTotalCalc) elTotalCalc.innerText = `${totalItemHilang} × Rp 10.000`;
     };
 
     window.updateHilang = function(index, change) {
+        if (!dendaData[index]) return;
         let newHilang = dendaData[index].hilang + change;
         if (newHilang >= 0 && newHilang <= dendaData[index].bawa) {
             dendaData[index].hilang = newHilang;
@@ -526,17 +587,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    if(document.getElementById('d-btn-save')) {
-        document.getElementById('d-btn-save').addEventListener('click', function() {
+    const dBtnSave = document.getElementById('d-btn-save');
+    if (dBtnSave) {
+        dBtnSave.addEventListener('click', function() {
             const btnSave = this;
             btnSave.innerHTML = 'Menyimpan...';
             btnSave.disabled = true;
+
+            if (!dendaVisitorInfo) {
+                btnSave.disabled = false;
+                return;
+            }
 
             const infoTeks = dendaVisitorInfo.innerText; 
             const namaSaja = infoTeks.split(' • ')[0]; 
             
             let grandTotalRp = 0;
-            dendaData.forEach(item => { if(item.hilang > 0) grandTotalRp += (item.hilang * 10000); });
+            dendaData.forEach(item => { if (item.hilang > 0) grandTotalRp += (item.hilang * 10000); });
 
             fetch('/tancak-panti/api/denda.php?action=save', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -544,10 +611,10 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(res => res.json())
             .then(res => {
-                if(res.status === 'success') {
+                if (res.status === 'success') {
                     const currentDendaBtn = document.querySelector(`.btn-kelola-denda[data-id="${dendaTiketId}"]`);
-                    if(currentDendaBtn) {
-                        if(grandTotalRp > 0) {
+                    if (currentDendaBtn) {
+                        if (grandTotalRp > 0) {
                             currentDendaBtn.className = "btn-kelola-denda bg-red-100 text-red-600 hover:bg-red-200 border-red-200 border px-3 py-1.5 rounded-md font-bold text-[10.5px] transition-colors whitespace-nowrap w-full max-w-[100px] overflow-hidden text-ellipsis block mx-auto";
                         } else {
                             currentDendaBtn.className = "btn-kelola-denda bg-gray-50 text-gray-600 hover:bg-gray-200 border-gray-200 border px-3 py-1.5 rounded-md font-bold text-[10.5px] transition-colors whitespace-nowrap w-full max-w-[100px] overflow-hidden text-ellipsis block mx-auto";
@@ -555,7 +622,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         currentDendaBtn.innerText = "+ Denda";
                     }
                     closeModalDenda();
-                } else { alert('Gagal menyimpan denda!'); }
+                    window.showToast("Berhasil menyimpan data denda!");
+                    setTimeout(() => { location.reload(); }, 1000);
+                } else { window.showToast("Gagal menyimpan denda!", "error"); }
             })
             .finally(() => {
                 btnSave.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> Simpan Denda';
@@ -564,14 +633,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function closeModalDenda() { if(modalDenda) modalDenda.classList.remove('active'); }
-    if(document.getElementById('close-modal-denda')) document.getElementById('close-modal-denda').addEventListener('click', closeModalDenda);
-    if(document.getElementById('d-btn-batal')) document.getElementById('d-btn-batal').addEventListener('click', closeModalDenda);
+    function closeModalDenda() { if (modalDenda) modalDenda.classList.remove('active'); }
+    
+    const closeModalDendaBtn = document.getElementById('close-modal-denda');
+    if (closeModalDendaBtn) closeModalDendaBtn.addEventListener('click', closeModalDenda);
+    
+    const dBtnBatal = document.getElementById('d-btn-batal');
+    if (dBtnBatal) dBtnBatal.addEventListener('click', closeModalDenda);
 
     // ==========================================
-    // 8. LOGIKA NOTIFIKASI DARURAT & WHATSAPP
+    // 11. LOGIKA NOTIFIKASI DARURAT & WHATSAPP
     // ==========================================
-    if(btnNotifHeader) {
+    if (btnNotifHeader) {
         let isNotifActive = topBanner && !topBanner.classList.contains('hidden');
 
         const pesanTemplates = {
@@ -581,24 +654,24 @@ document.addEventListener('DOMContentLoaded', function() {
             kustom: ""
         };
 
-        btnNotifHeader.addEventListener('click', function() {
+        btnNotifHeader.addEventListener('click', async function() {
             if (isNotifActive) {
-                if(confirm("Matikan Notifikasi Darurat? Banner akan hilang dari semua halaman pengunjung.")) {
+                if (await window.showConfirm("Matikan Notifikasi Darurat? Banner akan hilang.")) {
                     fetch('/tancak-panti/api/matikan_notif.php')
                     .then(res => res.json())
                     .then(data => {
-                        if(data.status === 'success') {
-                            isNotifActive = false;
+                        if (data.status === 'success' && topBanner) {
                             topBanner.classList.add('hidden');
-                            btnNotifHeader.className = "flex items-center gap-2 px-5 py-2.5 border border-orange-200 text-orange-500 rounded-[14px] text-[13px] font-bold hover:bg-orange-50 transition-colors";
-                            textNotifHeader.innerText = "Notif Darurat";
-                            alert("Notifikasi Darurat telah dimatikan!");
+                            window.showToast("Notifikasi Darurat berhasil dimatikan!", "success");
+                            setTimeout(() => { location.reload(); }, 100);
                         }
                     });
                 }
             } else {
                 const listContainer = document.getElementById('notif-target-list');
                 const btnAktifkan = document.getElementById('btn-notif-aktifkan');
+                
+                if (!listContainer || !modalNotifSetup) return;
                 
                 listContainer.innerHTML = '<p class="text-center text-[11px] text-yellow-600 font-medium py-2">Memuat data dari database...</p>';
                 modalNotifSetup.classList.add('active');
@@ -608,7 +681,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     .then(res => {
                         const countSpan = document.getElementById('notif-target-count');
                         if (res.status === 'success') {
-                            countSpan.textContent = res.count;
+                            if (countSpan) countSpan.textContent = res.count;
                             if (res.count > 0) {
                                 let html = '';
                                 res.data.forEach(item => {
@@ -627,9 +700,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                     </div>`;
                                 });
                                 listContainer.innerHTML = html;
-                                btnAktifkan.disabled = false;
-                                btnAktifkan.style.opacity = '1';
-                                btnAktifkan.style.cursor = 'pointer';
+                                if (btnAktifkan) {
+                                    btnAktifkan.disabled = false;
+                                    btnAktifkan.style.opacity = '1';
+                                    btnAktifkan.style.cursor = 'pointer';
+                                }
                             } else {
                                 listContainer.innerHTML = '<div class="text-center text-gray-500 py-4 font-medium">Tidak ada wisatawan di area.</div>';
                             }
@@ -654,25 +729,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 const tipe = this.getAttribute('data-type');
                 if (tipe === 'kustom') {
-                    textAreaPesan.value = "";
-                    textAreaPesan.removeAttribute('readonly');
-                    textAreaPesan.focus();
-                    textAreaPesan.placeholder = "Ketik pesan peringatan darurat Anda di sini...";
+                    if (textAreaPesan) {
+                        textAreaPesan.value = "";
+                        textAreaPesan.removeAttribute('readonly');
+                        textAreaPesan.focus();
+                        textAreaPesan.placeholder = "Ketik pesan peringatan darurat Anda di sini...";
+                    }
                 } else {
-                    textAreaPesan.value = pesanTemplates[tipe];
-                    textAreaPesan.setAttribute('readonly', 'true');
+                    if (textAreaPesan) {
+                        textAreaPesan.value = pesanTemplates[tipe];
+                        textAreaPesan.setAttribute('readonly', 'true');
+                    }
                 }
             });
         });
 
-        function closeNotifSetup() { modalNotifSetup.classList.remove('active'); }
-        if(document.getElementById('btn-notif-batal')) document.getElementById('btn-notif-batal').addEventListener('click', closeNotifSetup);
-        if(document.getElementById('close-notif-setup')) document.getElementById('close-notif-setup').addEventListener('click', closeNotifSetup);
+        function closeNotifSetup() { if (modalNotifSetup) modalNotifSetup.classList.remove('active'); }
+        const btnNotifBatal = document.getElementById('btn-notif-batal');
+        if (btnNotifBatal) btnNotifBatal.addEventListener('click', closeNotifSetup);
+        const closeNotifSetupBtn = document.getElementById('close-notif-setup');
+        if (closeNotifSetupBtn) closeNotifSetupBtn.addEventListener('click', closeNotifSetup);
 
-        if(document.getElementById('btn-notif-aktifkan')) {
-            document.getElementById('btn-notif-aktifkan').addEventListener('click', function() {
+        const btnNotifAktifkan = document.getElementById('btn-notif-aktifkan');
+        if (btnNotifAktifkan) {
+            btnNotifAktifkan.addEventListener('click', function() {
+                if (!textAreaPesan) return;
                 const pesanFinal = textAreaPesan.value.trim();
-                if(pesanFinal === "") { alert("Pesan tidak boleh kosong!"); return; }
+                if (pesanFinal === "") { window.showToast("Pesan tidak boleh kosong!", "error"); return; }
 
                 const btnAktif = this;
                 btnAktif.innerHTML = 'Mengirim WA...';
@@ -685,31 +768,41 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
                 .then(res => res.json())
                 .then(data => {
-                    if(data.status === 'success') {
+                    if (data.status === 'success') {
                         isNotifActive = true;
                         const now = new Date();
                         const activeTime = String(now.getHours()).padStart(2, '0') + "." + String(now.getMinutes()).padStart(2, '0');
                             
-                        document.getElementById('banner-time').innerText = activeTime;
-                        document.getElementById('banner-count').innerText = data.dikirim_ke;
-                        document.getElementById('banner-text').innerText = pesanFinal;
+                        const bannerTime = document.getElementById('banner-time');
+                        const bannerCount = document.getElementById('banner-count');
+                        const bannerText = document.getElementById('banner-text');
+                        
+                        if (bannerTime) bannerTime.innerText = activeTime;
+                        if (bannerCount) bannerCount.innerText = data.dikirim_ke;
+                        if (bannerText) bannerText.innerText = pesanFinal;
                             
-                        topBanner.classList.remove('hidden');
-                        btnNotifHeader.className = "flex items-center gap-2 px-5 py-2.5 bg-[#ef4444] text-white rounded-[14px] text-[13px] font-bold shadow-md hover:bg-[#dc2626] transition-colors";
-                        textNotifHeader.innerText = "Notif Aktif";
+                        if (topBanner) {
+                            topBanner.classList.remove('hidden');
+                            btnNotifHeader.className = "flex items-center gap-2 px-5 py-2.5 bg-[#ef4444] text-white rounded-[14px] text-[13px] font-bold shadow-md hover:bg-[#dc2626] transition-colors";
+                            if (textNotifHeader) textNotifHeader.innerText = "Notif Aktif";
+                        }
 
-                        document.getElementById('detail-time').innerText = activeTime;
-                        document.getElementById('detail-count').innerText = data.dikirim_ke;
-                        document.getElementById('detail-pesan-teks').innerText = pesanFinal;
+                        const detailTime = document.getElementById('detail-time');
+                        const detailCount = document.getElementById('detail-count');
+                        const detailPesanTeks = document.getElementById('detail-pesan-teks');
+                        
+                        if (detailTime) detailTime.innerText = activeTime;
+                        if (detailCount) detailCount.innerText = data.dikirim_ke;
+                        if (detailPesanTeks) detailPesanTeks.innerText = pesanFinal;
 
                         closeNotifSetup();
-                        alert(`Notif aktif! Berhasil mengirim pesan WA darurat ke ${data.dikirim_ke} wisatawan.`);
+                        window.showToast(`Notif aktif! Berhasil mengirim pesan WA darurat ke ${data.dikirim_ke} wisatawan.`, "success");
                     } else {
-                        alert("Gagal mengaktifkan notif: " + data.msg);
+                        window.showToast("Gagal mengaktifkan notif: " + data.msg, "error");
                     }
                 })
                 .catch(err => {
-                    alert("Terjadi kesalahan jaringan saat mengirim WA API.");
+                    window.showToast("Terjadi kesalahan jaringan saat mengirim WA API.", "error");
                     console.error(err);
                 })
                 .finally(() => {
@@ -719,24 +812,26 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        if(document.getElementById('btn-baca-selengkapnya')) {
-            document.getElementById('btn-baca-selengkapnya').addEventListener('click', function() {
-                modalNotifDetail.classList.add('active');
+        const btnBacaSelengkapnya = document.getElementById('btn-baca-selengkapnya');
+        if (btnBacaSelengkapnya) {
+            btnBacaSelengkapnya.addEventListener('click', function() {
+                if (modalNotifDetail) modalNotifDetail.classList.add('active');
             });
         }
 
-        function closeNotifDetail() { modalNotifDetail.classList.remove('active'); }
-        if(document.getElementById('btn-detail-keluar')) document.getElementById('btn-detail-keluar').addEventListener('click', closeNotifDetail);
-        if(document.getElementById('close-notif-detail')) document.getElementById('close-notif-detail').addEventListener('click', closeNotifDetail);
+        function closeNotifDetail() { if (modalNotifDetail) modalNotifDetail.classList.remove('active'); }
+        const btnDetailKeluar = document.getElementById('btn-detail-keluar');
+        if (btnDetailKeluar) btnDetailKeluar.addEventListener('click', closeNotifDetail);
+        const closeNotifDetailBtn = document.getElementById('close-notif-detail');
+        if (closeNotifDetailBtn) closeNotifDetailBtn.addEventListener('click', closeNotifDetail);
     }
-    
     // ==========================================
-    // 9. LOGIKA ZOOM FOTO BUKTI TRANSFER/ULASAN
+    // 12. LOGIKA ZOOM FOTO BUKTI TRANSFER/ULASAN
     // ==========================================
     if (tbody && modalBukti) {
         tbody.addEventListener('click', function(e) {
             const btn = e.target.closest('.btn-zoom-bukti');
-            if (btn) {
+            if (btn && imgFull) {
                 const src = btn.getAttribute('data-src');
                 if (src && src !== "") {
                     imgFull.src = src;
@@ -751,7 +846,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     window.closeBukti = function() {
-        if (modalBukti) {
+        if (modalBukti && imgFull) {
             modalBukti.classList.remove('active');
             document.body.style.overflow = 'auto'; 
             setTimeout(() => {
@@ -762,7 +857,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // 10. LOGIKA MODERASI ULASAN (ANTI-DUPLIKAT)
+    // 13. LOGIKA MODERASI ULASAN (ANTI-DUPLIKAT)
     // ==========================================
     const containerUlasan = document.getElementById('ulasan-container');
     const emptyUlasan = document.getElementById('ulasan-empty');
@@ -783,6 +878,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateCardUI(card, status, isInitialLoad = false) {
+        if (!card) return;
+        
         const oldStatus = card.getAttribute('data-status');
         card.setAttribute('data-status', status);
         
@@ -790,12 +887,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const actionContainer = card.querySelector('.action-buttons');
         const avatarCircle = card.querySelector('.avatar-circle');
 
+        if (!ribbon || !actionContainer) return;
+
         ribbon.className = "status-ribbon px-4 py-2.5 flex items-center justify-between text-[11px] font-extrabold uppercase tracking-widest border-b transition-colors duration-300";
 
         if (status === 'pending') {
             ribbon.classList.add('bg-amber-50', 'text-amber-700', 'border-amber-100');
             ribbon.innerHTML = `<span class="flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Menunggu</span>`;
-            if(avatarCircle) avatarCircle.className = "avatar-circle w-9 h-9 rounded-full bg-[#1a3326] text-white flex items-center justify-center font-extrabold text-[13px] shrink-0 transition-colors duration-300";
+            if (avatarCircle) avatarCircle.className = "avatar-circle w-9 h-9 rounded-full bg-[#1a3326] text-white flex items-center justify-center font-extrabold text-[13px] shrink-0 transition-colors duration-300";
 
             actionContainer.innerHTML = `
                 <button class="btn-aksi-ulasan flex-1 flex items-center justify-center gap-1.5 bg-green-50 hover:bg-green-100 text-green-700 text-[12px] py-2.5 rounded-xl font-extrabold transition-colors" data-action="Setuju">
@@ -811,28 +910,28 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (status === 'setuju') {
             ribbon.classList.add('bg-green-50', 'text-green-700', 'border-green-100');
             ribbon.innerHTML = `<span class="flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> Disetujui</span>`;
-            if(avatarCircle) avatarCircle.className = "avatar-circle w-9 h-9 rounded-full bg-[#10b981] text-white flex items-center justify-center font-extrabold text-[13px] shrink-0 transition-colors duration-300";
+            if (avatarCircle) avatarCircle.className = "avatar-circle w-9 h-9 rounded-full bg-[#10b981] text-white flex items-center justify-center font-extrabold text-[13px] shrink-0 transition-colors duration-300";
 
             actionContainer.innerHTML = `
                 <button class="btn-aksi-ulasan flex-1 flex items-center justify-center gap-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-[12px] py-2.5 rounded-xl font-extrabold transition-colors" data-action="Tolak">
                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="m4.9 4.9 14.2 14.2"></path></svg> Tolak
                 </button>
             `;
-            if(!isInitialLoad && oldStatus === 'pending') updatePendingBadge(-1);
+            if (!isInitialLoad && oldStatus === 'pending') updatePendingBadge(-1);
         } else if (status === 'tolak') {
             ribbon.classList.add('bg-red-50', 'text-red-700', 'border-red-100');
             ribbon.innerHTML = `<span class="flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> Ditolak</span>`;
-            if(avatarCircle) avatarCircle.className = "avatar-circle w-9 h-9 rounded-full bg-gray-400 text-white flex items-center justify-center font-extrabold text-[13px] shrink-0 transition-colors duration-300";
+            if (avatarCircle) avatarCircle.className = "avatar-circle w-9 h-9 rounded-full bg-gray-400 text-white flex items-center justify-center font-extrabold text-[13px] shrink-0 transition-colors duration-300";
 
             actionContainer.innerHTML = `
                 <button class="btn-aksi-ulasan flex-1 flex items-center justify-center gap-1.5 bg-green-50 hover:bg-green-100 text-green-700 text-[12px] py-2.5 rounded-xl font-extrabold transition-colors" data-action="Setuju">
                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg> Setujui
                 </button>
-                    <button class="btn-aksi-ulasan w-10 flex items-center justify-center bg-gray-50 border border-gray-100 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-xl transition-colors" data-action="Hapus" title="Hapus Permanen">
+                <button class="btn-aksi-ulasan w-10 flex items-center justify-center bg-gray-50 border border-gray-100 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-xl transition-colors" data-action="Hapus" title="Hapus Permanen">
                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg>
                 </button>
             `;
-            if(!isInitialLoad && oldStatus === 'pending') updatePendingBadge(-1);
+            if (!isInitialLoad && oldStatus === 'pending') updatePendingBadge(-1);
         }
     }
 
@@ -871,7 +970,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (containerUlasan) {
-        containerUlasan.addEventListener('click', function(e) {
+        containerUlasan.addEventListener('click', async function(e) {
             const btn = e.target.closest('.btn-aksi-ulasan');
             if (btn) {
                 const action = btn.getAttribute('data-action');
@@ -879,7 +978,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const idUlasan = card.getAttribute('data-id');
                 const currentStatus = card.getAttribute('data-status');
 
-                if (action === 'Hapus' && !confirm("Yakin hapus ulasan ini permanen?")) return;
+                if (action === 'Hapus' && !(await window.showConfirm("Yakin hapus ulasan ini permanen?"))) return;
 
                 const teksAsli = btn.innerText;
                 btn.innerText = "⏳...";
@@ -896,13 +995,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }).then(() => {
                     if (action === 'Hapus') {
                         card.remove(); 
-                        if(currentStatus === 'pending') updatePendingBadge(-1);
+                        if (currentStatus === 'pending') updatePendingBadge(-1);
                     } else {
                         updateCardUI(card, action.toLowerCase(), false); 
                     }
                     
                     const activeFilterBtn = document.querySelector('#filter-ulasan .text-white');
-                    if(activeFilterBtn) filterUlasanCards(activeFilterBtn.getAttribute('data-status'));
+                    if (activeFilterBtn) filterUlasanCards(activeFilterBtn.getAttribute('data-status'));
                 }).catch(err => {
                     console.error(err);
                     btn.innerText = teksAsli;
@@ -913,18 +1012,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // 11. LOGIKA FILTER BULAN REKAP & GRAFIK (ANTI 404)
+    // 14. LOGIKA FILTER BULAN REKAP & GRAFIK
     // ==========================================
     const filterBulanRekap = document.getElementById('filter-bulan-rekap');
-    if(filterBulanRekap) {
+    if (filterBulanRekap) {
         filterBulanRekap.addEventListener('change', function() {
-            // Tembak lurus ke Router tanpa ekstensi .php!
             window.location.href = '/tancak-panti/admin/dashboard?tab=tab-rekap&bulan=' + this.value;
         });
     }
 
-// ==========================================
-    // 12. LOGIKA MODAL ANGGOTA ROMBONGAN (AJAX)
+    // ==========================================
+    // 15. LOGIKA MODAL ANGGOTA ROMBONGAN (AJAX)
     // ==========================================
     const modalAnggota = document.getElementById('modal-anggota');
     const anggotaList = document.getElementById('a-anggota-list');
@@ -937,42 +1035,43 @@ document.addEventListener('DOMContentLoaded', function() {
             const namaKetua = this.getAttribute('data-nama');
             const kode = this.getAttribute('data-kode');
 
-            // Set tulisan header dan ketua
-            if(modalKode) modalKode.innerText = kode;
-            if(modalKetua) modalKetua.innerText = namaKetua;
+            if (modalKode) modalKode.innerText = kode;
+            if (modalKetua) modalKetua.innerText = namaKetua;
             
-            if(modalAnggota) modalAnggota.classList.add('active');
-            if(anggotaList) anggotaList.innerHTML = '<div class="py-4 text-gray-400 text-[12px]">Memuat data...</div>';
+            if (modalAnggota) modalAnggota.classList.add('active');
+            if (anggotaList) anggotaList.innerHTML = '<div class="py-4 text-gray-400 text-[12px]">Memuat data...</div>';
 
-            // Ambil data anggota dari database
             fetch(`/tancak-panti/api/anggota.php?id=${idTiket}`)
                 .then(res => res.json())
                 .then(data => {
-                    if(data.status === 'success') {
-                        if(data.data.length > 0) {
+                    if (data.status === 'success') {
+                        if (data.data && data.data.length > 0) {
                             let html = '';
-                            // Nampilin nama polos berjejer ke bawah rata tengah
                             data.data.forEach((nama) => {
                                 html += `<div class="py-1 capitalize text-gray-700">${nama}</div>`;
                             });
-                            anggotaList.innerHTML = html;
+                            if (anggotaList) anggotaList.innerHTML = html;
                         } else {
-                            anggotaList.innerHTML = '<div class="py-2 text-gray-400 text-[13px] italic">Tidak ada anggota tambahan</div>';
+                            if (anggotaList) anggotaList.innerHTML = '<div class="py-2 text-gray-400 text-[13px] italic">Tidak ada anggota tambahan</div>';
                         }
                     } else {
-                        anggotaList.innerHTML = '<div class="py-2 text-red-500 text-[12px]">Data tidak ditemukan.</div>';
+                        if (anggotaList) anggotaList.innerHTML = '<div class="py-2 text-red-500 text-[12px]">Data tidak ditemukan.</div>';
                     }
                 })
                 .catch(() => {
-                    if(anggotaList) anggotaList.innerHTML = '<div class="py-2 text-red-400 text-[12px]">Gagal memuat data jaringan!</div>';
+                    if (anggotaList) anggotaList.innerHTML = '<div class="py-2 text-red-400 text-[12px]">Gagal memuat data jaringan!</div>';
                 });
         });
     });
 
     function closeModalAnggota() {
-        if(modalAnggota) modalAnggota.classList.remove('active');
+        if (modalAnggota) modalAnggota.classList.remove('active');
     }
     
-    if(document.getElementById('close-modal-anggota')) document.getElementById('close-modal-anggota').addEventListener('click', closeModalAnggota);
-    if(document.getElementById('a-btn-tutup')) document.getElementById('a-btn-tutup').addEventListener('click', closeModalAnggota);
+    const closeModalAnggotaBtn = document.getElementById('close-modal-anggota');
+    if (closeModalAnggotaBtn) closeModalAnggotaBtn.addEventListener('click', closeModalAnggota);
+    
+    const aBtnTutup = document.getElementById('a-btn-tutup');
+    if (aBtnTutup) aBtnTutup.addEventListener('click', closeModalAnggota);
+
 });

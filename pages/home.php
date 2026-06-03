@@ -28,7 +28,7 @@
 
     <?php
         // Cek Status Darurat dari file JSON
-        $notif_file = '/tancak-panti/config/status_darurat.json'; // Sesuaikan path folder config-nya jika file index ini ada di luar
+        $notif_file = 'config/status_darurat.json'; // Sesuaikan path folder config-nya jika file index ini ada di luar
         $darurat_aktif = false;
         $pesan_darurat = '';
         

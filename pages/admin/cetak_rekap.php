@@ -1,8 +1,13 @@
 <?php
 include 'config/koneksi.php';
 
-if (!isset($_SESSION['admin'])) {
-    header("Location: /tancak-panti/admin/login");
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Cek kunci admin
+if (!isset($_SESSION['admin']) || empty($_SESSION['admin'])) {
+    header("Location: /tancak-panti/login");
     exit;
 }
 

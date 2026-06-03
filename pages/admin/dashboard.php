@@ -2,8 +2,13 @@
 include 'config/koneksi.php';
 
 // Proteksi Halaman Admin
-if (!isset($_SESSION['admin'])) {
-    header("Location: /tancak-panti/admin/login");
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Cek kunci admin
+if (!isset($_SESSION['admin']) || empty($_SESSION['admin'])) {
+    header("Location: /tancak-panti/login");
     exit;
 }
 
@@ -696,7 +701,6 @@ $json_data_sampah = $json_data_hilang;
         const valMasih = <?= (int)$count_1 ?>;
         const valPulang = <?= (int)$count_2 ?>;
     </script>
-    <script src="/tancak-panti/js/admin.js"></script>
 
     <!-- SEMUA MODAL DILETAKKAN DI LUAR AREA TAB -->
 
@@ -883,8 +887,21 @@ $json_data_sampah = $json_data_hilang;
             </div>
         </div>
     </div>
+    
+    <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-3"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <div id="confirm-modal" class="fixed inset-0 z-[9999] flex items-center justify-center" style="display: none; background: rgba(0,0,0,0.5);">
+        <div class="bg-white rounded-[24px] p-6 shadow-2xl w-[90%] max-w-[320px] text-center">
+            <h3 class="text-[16px] font-extrabold text-[#1a3326] mb-4">Konfirmasi Aksi</h3>
+            <p id="confirm-msg" class="text-[13px] text-gray-500 mb-6">...</p>
+            <div class="flex gap-3">
+                <button id="btn-confirm" class="flex-1 py-3 rounded-[12px] bg-[#1a3326] text-white font-bold text-[13px]">Ya</button>
+                <button id="btn-cancel" class="flex-1 py-3 rounded-[12px] bg-gray-200 text-gray-600 font-bold text-[13px]">Tidak</button>
+            </div>
+        </div>
+    </div>
+        </div> <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
         // Jembatan Data PHP ke JS
@@ -894,59 +911,6 @@ $json_data_sampah = $json_data_hilang;
         window.namaBulanPilih = "<?= $nama_bulan_pilih ?>";
     </script>
     <script src="/tancak-panti/js/admin.js"></script>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const tabButtons = document.querySelectorAll('.tab-btn');
-        
-        if(tabButtons.length > 0) {
-            tabButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault(); // Mencegah error bawaan tombol
-                    
-                    const targetId = this.getAttribute('data-target');
-                    
-                    // Ambil parameter bulan yang sedang aktif biar nggak ilang pas pindah tab
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const currentBulan = urlParams.get('bulan');
-                    
-                    // Susun URL pintar yang diarahkan ke sistem Router
-                    let newUrl = '/tancak-panti/admin/dashboard?tab=' + targetId;
-                    if (currentBulan) {
-                        newUrl += '&bulan=' + currentBulan;
-                    }
-                    
-                    window.location.href = newUrl;
-                });
-            });
-        }
-    });
-
-    // FUNGSI MODAL BUKTI ULASAN (Dipindah ke sini biar rapi)
-    function openBuktiUlasan(src) {
-        const modalBukti = document.getElementById('modal-bukti');
-        const imgFull = document.getElementById('img-bukti-full');
-        if (src && src !== "") {
-            imgFull.src = src;
-            modalBukti.classList.remove('hidden'); 
-            setTimeout(() => {
-                modalBukti.classList.add('active');
-                document.body.style.overflow = 'hidden'; 
-            }, 10);
-        }
-    }
-    
-    function closeBukti() {
-        const modalBukti = document.getElementById('modal-bukti');
-        if(modalBukti) {
-            modalBukti.classList.remove('active');
-            setTimeout(() => {
-                modalBukti.classList.add('hidden');
-                document.body.style.overflow = ''; 
-            }, 300);
-        }
-    }
-    </script>
 
 </body>
 </html>

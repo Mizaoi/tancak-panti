@@ -60,9 +60,6 @@
         <div class="flex-1 flex flex-col justify-center w-full">
             
             <section class="max-w-3xl mx-auto px-6 lg:px-8 text-center mb-8 reveal-up" style="transition-delay: 0.1s;">
-                <span class="inline-block bg-[#dbe7dd] text-[#2d6a4f] text-[13px] font-semibold px-5 py-2 rounded-full mb-4">
-                    Hubungi Kami
-                </span>
                 <h1 class="text-4xl md:text-5xl font-bold text-[#1a3326] mb-3">Narahubung</h1>
                 <p class="text-gray-500 text-[15px] md:text-[16px]">
                     Butuh informasi lebih lanjut? Jangan ragu untuk menghubungi kami

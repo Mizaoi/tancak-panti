@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_tiket'])) {
     $alamat = mysqli_real_escape_string($koneksi, $_POST['alamat']);
     
     $orang = 1; 
-    $list_wa_anggota = "1. *" . $nama . "* (Kepala Rombongan)\n"; 
+    $list_wa_anggota = "1. *" . $nama . "* (Ketua Rombongan)\n"; 
 
     if (isset($_POST['nama_anggota']) && is_array($_POST['nama_anggota'])) {
         $no_urut = 2;
@@ -124,7 +124,7 @@ if (isset($_GET['sukses']) && $_GET['sukses'] == '1') {
         
         $q_anggota = mysqli_query($koneksi, "SELECT * FROM anggota WHERE id_tiket = $id_tk");
         $data_anggota = [];
-        while($ang = mysqli_fetch_assoc($q_anggota)){
+        while($ang = mysqli_fetch_assoc($q_anggota)){ 
             $data_anggota[] = $ang['nama_anggota'];
         }
         $data_tiket['data_anggota'] = $data_anggota;
@@ -227,7 +227,7 @@ if (isset($_GET['sukses']) && $_GET['sukses'] == '1') {
                         <div class="p-6">
                             <div class="grid grid-cols-2 gap-y-6 gap-x-4 mb-6">
                                 <div>
-                                    <p class="text-[11px] text-gray-400 font-medium mb-0.5">Kepala Rombongan</p>
+                                    <p class="text-[11px] text-gray-400 font-medium mb-0.5">Ketua Rombongan</p>
                                     <p class="text-[14px] font-bold text-[#1a3326] capitalize"><?= $data_tiket['nama'] ?></p>
                                 </div>
                                 <div>
@@ -247,7 +247,7 @@ if (isset($_GET['sukses']) && $_GET['sukses'] == '1') {
                             <div class="mb-8">
                                 <p class="text-[12px] font-bold text-[#1a3326] uppercase mb-2">Daftar Rombongan (<?= $data_tiket['jumlah_orang'] ?> Orang)</p>
                                 <div class="bg-gray-50 border border-gray-200 rounded-[12px] p-3 text-[13.5px] text-[#1a3326]">
-                                    <div class="font-bold mb-1 border-b border-gray-200 pb-1">1. <?= $data_tiket['nama'] ?> <span class="text-gray-400 text-[11px] font-normal">(Kepala Rombongan)</span></div>
+                                    <div class="font-bold mb-1 border-b border-gray-200 pb-1">1. <?= $data_tiket['nama'] ?> <span class="text-gray-400 text-[11px] font-normal">(Ketua Rombongan)</span></div>
                                     <?php 
                                     if(isset($data_tiket['data_anggota']) && is_array($data_tiket['data_anggota'])) {
                                         $no = 2;
@@ -307,8 +307,8 @@ if (isset($_GET['sukses']) && $_GET['sukses'] == '1') {
                 <form action="" method="POST" enctype="multipart/form-data" id="form-beli-tiket">
                     <div class="space-y-5 mb-10">
                         <div class="grid grid-cols-3 items-center gap-4">
-                            <label class="font-bold text-[#1a3326] text-[14px]">Kepala Rombongan <span class="text-red-500 font-bold">*</span></label>
-                            <input type="text" name="nama" required placeholder="Nama Kepala Rombongan" class="col-span-2 bg-[#f8faf9] border border-gray-200 rounded-[12px] px-4 py-3 text-[14px] outline-none focus:border-[#2d6a4f] transition-all capitalize">
+                            <label class="font-bold text-[#1a3326] text-[14px]">Ketua Rombongan <span class="text-red-500 font-bold">*</span></label>
+                            <input type="text" name="nama" required placeholder="Nama Ketua Rombongan" class="col-span-2 bg-[#f8faf9] border border-gray-200 rounded-[12px] px-4 py-3 text-[14px] outline-none focus:border-[#2d6a4f] transition-all capitalize">
                         </div>
                         <div class="grid grid-cols-3 items-center gap-4">
                             <label class="font-bold text-[#1a3326] text-[14px]">Email <span class="text-red-500 font-bold">*</span></label>
