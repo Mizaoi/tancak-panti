@@ -182,59 +182,22 @@ document.addEventListener('DOMContentLoaded', function() {
     // 3. FITUR UI LAINNYA (Preview, Counter, Modal)
     // ==========================================
     
-    // Preview & Validasi File Bukti
+    // Preview File Bukti
     const buktiInput = document.getElementById('bukti-input');
-    const errorBuktiContainer = document.getElementById('error-bukti-container');
-    const errorBuktiText = document.getElementById('error-bukti-text');
-    const preview = document.getElementById('upload-preview');
-    const placeholder = document.getElementById('upload-placeholder');
-
-    if (buktiInput) {
-        // 1. Logic Reset: Memastikan event 'change' selalu terpicu 
-        // meskipun user memilih file yang sama berulang kali setelah error
-        buktiInput.addEventListener('click', function() {
-            this.value = null; 
-        });
-
-        // 2. Logic Validasi & Preview
+    if(buktiInput) {
         buktiInput.addEventListener('change', function() {
-            // Reset Error & Sembunyikan pesan error sebelumnya
-            errorBuktiContainer.classList.add('hidden');
-            
-            const file = this.files[0];
-            if (!file) return; // Jika user membatalkan pilihan file
-
-            let errorMessage = '';
-
-            // Validasi Ukuran (2MB = 2.097.152 bytes)
-            if (file.size > 2 * 1024 * 1024) {
-                errorMessage = 'Ukuran file terlalu besar! Maksimal 2MB.';
-            } 
-            // Validasi Tipe File
-            else if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
-                errorMessage = 'Format tidak didukung! Gunakan JPG, JPEG, atau PNG.';
-            }
-
-            if (errorMessage !== '') {
-                // Jika ada error, kosongkan input dan tampilkan pesan
-                this.value = ''; 
-                preview.classList.add('hidden');
-                placeholder.classList.remove('hidden');
-                
-                errorBuktiText.innerText = errorMessage;
-                errorBuktiContainer.classList.remove('hidden');
-            } else {
-                // Jika valid, jalankan preview
+            if (this.files && this.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    preview.classList.remove('hidden');
-                    placeholder.classList.add('hidden');
+                    document.getElementById('upload-preview').src = e.target.result;
+                    document.getElementById('upload-preview').classList.remove('hidden');
+                    document.getElementById('upload-placeholder').classList.add('hidden');
                 }
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(this.files[0]);
             }
         });
     }
+
     // Counter Nomor Telepon
     function setupTelp(idInput, idCounter) {
         const input = document.getElementById(idInput);
@@ -252,21 +215,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Loading Tombol Submit
     const formTiket = document.getElementById('form-beli-tiket');
     const btnSubmit = document.getElementById('btn-submit-tiket');
-
     if (formTiket && btnSubmit) {
         formTiket.addEventListener('submit', function(e) {
-            
-            // --- TAMBAHKAN VALIDASI TELP DI SINI ---
-            const telp1 = document.getElementById('input-telp1').value;
-            const telp2 = document.getElementById('input-telp2').value;
-
-            if (telp1.length < 11 || telp2.length < 11) {
-                e.preventDefault(); // Batalkan pengiriman form
-                alert('Nomor telepon harus minimal 11 digit!');
-                return; // Berhenti di sini, jangan lanjut ke animasi loading
-            }
-
-            // Animasi Loading (Ini kode lama kamu)
             if (formTiket.checkValidity()) {
                 btnSubmit.innerHTML = `
                     <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

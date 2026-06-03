@@ -1,9 +1,4 @@
 <?php
-// Pastikan session_start() ada jika belum dipanggil di file koneksi
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 include 'config/koneksi.php';
 
 // 2. LOGIKA PROSES LOGIN YANG BENAR
@@ -15,37 +10,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
     $data = mysqli_fetch_assoc($query);
 
     if ($data && $password == $data['password']) {
-        // --- [TAMBAHAN LOG] CATAT LOGIN BERHASIL ---
-        $kategori = "SISTEM & KEAMANAN";
-        // Kutip tunggal dihapus agar tidak bentrok dengan query SQL
-        $aksi = "Admin dengan username " . $username . " berhasil login."; 
-        $query_log = "INSERT INTO log_aktivitas (kategori, aksi) VALUES ('$kategori', '$aksi')";
-        
-        // Eksekusi dan cek error
-        $simpan_log = mysqli_query($koneksi, $query_log);
-        if (!$simpan_log) {
-            die("Error Log Login Berhasil: " . mysqli_error($koneksi));
-        }
-        // ------------------------------------------
-
         $_SESSION['admin'] = $data['username'];
-        header("Location: /admin/dashboard"); 
+        header("Location: /tancak-panti/admin/dashboard"); 
         exit;
     } else {
-        // --- [TAMBAHAN LOG] CATAT LOGIN GAGAL ---
-        $kategori = "SISTEM & KEAMANAN";
-        $aksi = "Percobaan login gagal untuk username: " . $username;
-        $query_log = "INSERT INTO log_aktivitas (kategori, aksi) VALUES ('$kategori', '$aksi')";
-        
-        // Eksekusi dan cek error
-        $simpan_log = mysqli_query($koneksi, $query_log);
-        if (!$simpan_log) {
-            die("Error Log Login Gagal: " . mysqli_error($koneksi));
-        }
-        // ----------------------------------------
-
         $_SESSION['alert'] = ['type' => 'error', 'msg' => '⚠️ Username atau password salah, coba lagi ya!'];
-        header("Location: /login");
+        header("Location: /tancak-panti/login");
         exit; 
     }
 }
@@ -58,10 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Admin - SI-TANCAK PANTI</title>
     
-    <link href="/style/output.css" rel="stylesheet">
+    <link href="/tancak-panti/style/output.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/style/navbar.css">
-    <link rel="stylesheet" href="/style/login.css">
+    <link rel="stylesheet" href="/tancak-panti/style/navbar.css">
+    <link rel="stylesheet" href="/tancak-panti/style/login.css">
     
     <style>
         body { font-family: 'Poppins', sans-serif; overflow-x: hidden; }
@@ -70,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
 <body class="flex flex-col min-h-screen relative bg-gray-900">
 
     <div class="absolute inset-0 z-0">
-        <img src="/assets/images/login.jpeg" alt="Background" class="w-full h-full object-cover">
+        <img src="/tancak-panti/assets/images/login.jpeg" alt="Background" class="w-full h-full object-cover">
         <div class="absolute inset-0 bg-black/60"></div>
     </div>
 
@@ -79,7 +49,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
         <!-- Kode Navbar Kamu Berakhir di Sini -->
     </nav> 
 
+    <?php
+        // Cek Status Darurat dari file JSON
+        $notif_file = 'config/status_darurat.json'; // Sesuaikan path folder config-nya jika file index ini ada di luar
+        $darurat_aktif = false;
+        $pesan_darurat = '';
+        
+        if (file_exists($notif_file)) {
+            $data_json = json_decode(file_get_contents($notif_file), true);
+            if (isset($data_json['aktif']) && $data_json['aktif'] === true) {
+                $darurat_aktif = true;
+                $pesan_darurat = $data_json['pesan'];
+            }
+        }
+    ?>
 
+    <!-- BANNER DARURAT PUBLIK (Hanya muncul jika $darurat_aktif = true) -->
+    <?php if ($darurat_aktif): ?>
+    <div class="bg-[#ef4444] text-white w-full px-6 py-3 shadow-md z-40 relative">
+        <div class="max-w-[1440px] mx-auto flex flex-col md:flex-row items-center justify-center gap-3 text-center md:text-left">
+            <div class="flex items-center gap-2 font-extrabold text-[13px] md:text-[14px] tracking-wide shrink-0">
+                <span class="w-3 h-3 rounded-full bg-red-200 animate-pulse"></span>
+                ⚠️ PERINGATAN DARURAT: 
+            </div>
+            <div class="text-[13px] md:text-[13.5px] font-medium leading-snug">
+                <?= htmlspecialchars($pesan_darurat); ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
     </div>
 
     <!-- TOAST ALERT MELAYANG (OVAL) -->
@@ -100,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
         <?php unset($_SESSION['alert']); ?>
     <?php endif; ?>
 
-    <main class="flex-1 flex items-center justify-center relative z-10 px-6 pb-12" style="padding-top: var(--header-height);">
+    <main class="flex-1 flex items-center justify-center relative z-10 px-6 pt-20 pb-12">
        <div class="w-full max-w-[420px] rounded-[24px] overflow-hidden shadow-2xl auto-zoom" id="login-card">
             <div class="bg-[#1a3326] p-8 text-center flex flex-col items-center">
                 <div class="w-14 h-14 rounded-[14px] bg-white/10 flex items-center justify-center text-white mb-4">
@@ -150,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
         </div>
     </main>
 
-    <script src="/js/navbar.js"></script>
+    <script src="/tancak-panti/js/navbar.js"></script>
 
     <!-- SCRIPT KHUSUS UNTUK TOGGLE MATA (ANTI CACHE) -->
     <script>
