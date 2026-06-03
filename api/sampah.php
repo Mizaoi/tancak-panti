@@ -34,22 +34,28 @@ if ($action == 'save') {
     $json = file_get_contents('php://input');
     $data = json_decode($json, true);
     
+    if (!$data) {
+        echo json_encode(['status' => 'error', 'msg' => 'Data JSON tidak valid']); exit;
+    }
+
     $id_tiket = (int)$data['id_tiket'];
     $items = $data['items'];
     
-    // Hapus data lama yang terkait tiket ini
-    mysqli_query($koneksi, "DELETE FROM sampah WHERE id_tiket = $id_tiket");
+    // Hapus data lama
+    if (!mysqli_query($koneksi, "DELETE FROM sampah WHERE id_tiket = $id_tiket")) {
+        echo json_encode(['status' => 'error', 'msg' => 'Gagal hapus data lama: ' . mysqli_error($koneksi)]); exit;
+    }
     
-    // Insert ulang data yang sudah di-update
-    // Insert ulang data yang sudah di-update
     $total_baru = 0;
     foreach ($items as $item) {
-        // FITUR BARU: ucwords() untuk huruf awal kapital, strtolower() biar seragam
         $nama = mysqli_real_escape_string($koneksi, ucwords(strtolower(trim($item['nama_sampah']))));
         $jumlah = (int)$item['jumlah'];
         
         if (!empty($nama) && $jumlah > 0) {
-            mysqli_query($koneksi, "INSERT INTO sampah (id_tiket, nama_sampah, jumlah) VALUES ($id_tiket, '$nama', $jumlah)");
+            // Kita kasih error check di sini
+            if (!mysqli_query($koneksi, "INSERT INTO sampah (id_tiket, nama_sampah, jumlah) VALUES ($id_tiket, '$nama', $jumlah)")) {
+                echo json_encode(['status' => 'error', 'msg' => 'Gagal insert: ' . mysqli_error($koneksi)]); exit;
+            }
             $total_baru += $jumlah;
         }
     }

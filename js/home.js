@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('scroll', function() {
         const scrolled = window.pageYOffset;
         const bg = document.querySelector('.absolute.inset-0.w-full.h-full.object-cover');
-        // Pastikan elemen ada dan scroll belum melewati hero section (untuk optimasi performa)
         if(bg && scrolled < window.innerHeight) {
             bg.style.transform = `translateY(${scrolled * 0.3}px)`;
         }
@@ -14,27 +13,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const observerOptions = {
         root: null,
         rootMargin: '0px',
-        threshold: 0.10 // Animasi mulai saat 10% bagian elemen sudah terlihat di layar
+        threshold: 0.10
     };
 
     const observer = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                // Menambahkan class 'active' yang akan memicu CSS transition di home.css
                 entry.target.classList.add('active');
-                // Setelah animasi jalan, berhenti mengamati elemen tersebut agar tidak mengulang
                 observer.unobserve(entry.target); 
             }
         });
     }, observerOptions);
 
-    // Ambil semua elemen dengan class 'reveal-up' (mencakup Section 2, Section 4, dan Footer)
+    // Ambil semua elemen dengan class 'reveal-up' dan jalankan observer
     const revealElements = document.querySelectorAll('.reveal-up');
     revealElements.forEach(el => {
         observer.observe(el);
     });
 
-    // 3. Observer terpisah untuk animasi ZOOM di Galeri (Section 3)
+    // 3. Observer terpisah untuk animasi ZOOM di Galeri
     const observerZoomOptions = {
         root: null,
         rootMargin: '0px',

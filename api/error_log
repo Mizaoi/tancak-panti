@@ -1,0 +1,9 @@
+[28-May-2026 09:27:53 UTC] PHP Warning:  include(/config/koneksi.php): Failed to open stream: No such file or directory in /home/mifmyho2/tancak-panti.mif.myhost.id/api/denda.php on line 3
+[28-May-2026 09:27:53 UTC] PHP Warning:  include(/config/koneksi.php): Failed to open stream: No such file or directory in /home/mifmyho2/tancak-panti.mif.myhost.id/api/denda.php on line 3
+[28-May-2026 09:27:53 UTC] PHP Warning:  include(): Failed opening '/config/koneksi.php' for inclusion (include_path='.:/opt/alt/php82/usr/share/pear:/opt/alt/php82/usr/share/php:/usr/share/pear:/usr/share/php') in /home/mifmyho2/tancak-panti.mif.myhost.id/api/denda.php on line 3
+[28-May-2026 09:27:53 UTC] PHP Warning:  Undefined variable $koneksi in /home/mifmyho2/tancak-panti.mif.myhost.id/api/denda.php on line 19
+[28-May-2026 09:27:53 UTC] PHP Fatal error:  Uncaught TypeError: mysqli_query(): Argument #1 ($mysql) must be of type mysqli, null given in /home/mifmyho2/tancak-panti.mif.myhost.id/api/denda.php:19
+Stack trace:
+#0 /home/mifmyho2/tancak-panti.mif.myhost.id/api/denda.php(19): mysqli_query()
+#1 {main}
+  thrown in /home/mifmyho2/tancak-panti.mif.myhost.id/api/denda.php on line 19

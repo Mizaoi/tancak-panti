@@ -1,0 +1,17 @@
+components/footer.php
+components/navbar.php
+config/koneksi.php
+config/status_darurat.json
+js/admin.js
+js/tiket.js
+pages/admin/cetak_rekap.php
+pages/admin/dashboard.php
+pages/cek_tiket.php
+pages/contact.php
+pages/facility.php
+pages/home.php
+pages/login.php
+pages/profile.php
+pages/rating.php
+pages/tiket.php
+style/output.css
